@@ -1126,8 +1126,23 @@ body {
   }
 
   .painel-jogos-filtrados {
-    width: min(92vw, 520px);
+    left: 0;
+    width: min(calc(100vw - 40px), 520px);
     max-height: 68vh;
+    transform: translateY(-10px) scale(0.98);
+    animation-name: abrirPainelMobile;
+  }
+
+  @keyframes abrirPainelMobile {
+    from {
+      opacity: 0;
+      transform: translateY(-10px) scale(0.98);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
 
   .item-jogo-busca {
@@ -1201,7 +1216,7 @@ body {
   }
 
   .painel-jogos-filtrados {
-    width: calc(100vw - 20px);
+    width: calc(100vw - 40px);
     max-height: 64vh;
   }
 
