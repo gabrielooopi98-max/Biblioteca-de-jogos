@@ -6,7 +6,7 @@ const jogos = [
         plataforma: "PC, PS4, PS5, Xbox Series X/S, Xbox One, Nintendo Switch",
         nota: 9.5,
         preco: 79.99,
-        desconto: 30
+        descricao: "The Witcher 3: Wild Hunt é um RPG de ação em mundo aberto, onde você joga como Geralt de Rívia, um caçador de monstros. Explore um vasto mundo cheio de missões, monstros e escolhas morais que afetam o destino do continente.",
     },
     {
         id: 3,
@@ -16,7 +16,8 @@ const jogos = [
         genero: "RPG, Ação, Aventura, Mundo Aberto, Futurista",
         nota: 8.5,
         preco: 199.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Cyberpunk 2077 é um RPG de ação em mundo aberto ambientado na distópica Night City. Você joga como V, um mercenário em busca de um implante único que concede a imortalidade. Explore a cidade, faça escolhas morais e enfrente gangues e corporações poderosas.",
     },
     {
         id: 4,
@@ -26,7 +27,7 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Super-herói",
         nota: 8.0,
         preco: 49.99,
-        desconto: 30
+        descricao: "Batman: Arkham Knight é um jogo de ação e aventura em mundo aberto, onde você assume o papel do Cavaleiro das Trevas. Explore Gotham City, enfrente vilões icônicos e utilize gadgets para combater o crime nesta emocionante história.",
     },
     {
         id: 5,
@@ -36,7 +37,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Faroeste",
         nota: 9.0,
         preco: 149.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Red Dead Redemption 2 é um jogo de ação e aventura em mundo aberto ambientado no Velho Oeste. Você joga como Arthur Morgan, um fora da lei, enquanto explora vastas paisagens, enfrenta gangues rivais e toma decisões que moldam a história.",
     },
     {
         id: 6,
@@ -46,7 +48,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Crime",
         nota: 9.0,
         preco: 99.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Grand Theft Auto V é um jogo de ação e aventura em mundo aberto, onde você pode explorar a cidade fictícia de Los Santos. Assuma o controle de três protagonistas, participe de missões emocionantes, conduza veículos e mergulhe em uma narrativa envolvente cheia de crime e intriga.",
     },
     {
         id: 7,
@@ -56,7 +59,8 @@ const jogos = [
         genero: "RPG, Ação, Aventura, Fantasia, Mundo Aberto",
         nota: 9.0,
         preco: 59.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "The Elder Scrolls V: Skyrim é um RPG de ação em mundo aberto, onde você explora a província de Skyrim. Personalize seu personagem, complete missões, enfrente dragões e mergulhe em uma rica história cheia de magia, intriga e aventura.",
     },
     {
         id: 8,
@@ -66,7 +70,7 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, História, Fantasia",
         nota: 8.5,
         preco: 199.99,
-        desconto: 30
+        descricao: "Assassin's Creed Valhalla é um jogo de ação e aventura em mundo aberto ambientado na era dos vikings. Você joga como Eivor, um guerreiro viking, enquanto explora a Inglaterra do século IX, participa de batalhas épicas, constrói assentamentos e descobre segredos históricos.",
     },
     {
         id: 9,
@@ -76,7 +80,8 @@ const jogos = [
         genero: "Ação, Aventura, Super-herói, Mundo Aberto",
         nota: 8.5,
         preco: 249.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Spider-Man: Miles Morales é um jogo de ação e aventura em mundo aberto, onde você assume o papel de Miles Morales, o novo Homem-Aranha. Explore a cidade de Nova York, use habilidades únicas de combate e acrobacias para enfrentar vilões e proteger a cidade.",
     },
     {
         id: 11,
@@ -86,7 +91,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Futurista, Fantasia",
         nota: 8.0,
         preco: 99.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Death Stranding é um jogo de ação e aventura em mundo aberto, onde você joga como Sam Porter Bridges, um entregador em um mundo pós-apocalíptico. Explore paisagens desoladas, conecte comunidades isoladas e enfrente criaturas sobrenaturais enquanto desvenda os mistérios do mundo.",
     },
     {
         id: 12,
@@ -96,7 +102,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Sobrevivência, Fantasia",
         nota: 8.5,
         preco: 59.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Subnautica é um jogo de ação e aventura em mundo aberto, onde você explora um planeta oceânico alienígena. Sobreviva em um ambiente subaquático, construa bases, colete recursos e descubra a história por trás do planeta enquanto enfrenta criaturas marinhas perigosas.",
     },
     {
         id: 14,
@@ -106,7 +113,7 @@ const jogos = [
         genero: "RPG, Ação, Aventura, Fantasia, Mundo Aberto",
         nota: 9.0,
         preco: 79.99,
-        desconto: 30
+        descricao: "Dark Souls III é um RPG de ação em mundo aberto, conhecido por sua dificuldade desafiadora e combate estratégico. Explore um mundo sombrio e interconectado, enfrente inimigos formidáveis e descubra segredos enquanto busca a verdade por trás da maldição que assola o reino.",
     },
     {
         id: 15,
@@ -116,7 +123,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Fantasia, História",
         nota: 9.0,
         preco: 99.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Sekiro: Shadows Die Twice é um jogo de ação e aventura em mundo aberto, ambientado no Japão feudal. Você joga como um shinobi chamado Sekiro, em uma missão para resgatar seu mestre e enfrentar inimigos formidáveis. O jogo é conhecido por seu combate desafiador e mecânicas de furtividade.",
     },
     {
         id: 16,
@@ -126,7 +134,7 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Terror, Fantasia",
         nota: 6.5,
         preco: 199.99,
-        desconto: 30
+        descricao: "Resident Evil Village é um jogo de ação e aventura em mundo aberto, ambientado em uma vila misteriosa. Você joga como Ethan Winters, enquanto enfrenta criaturas aterrorizantes e desvenda os segredos sombrios da vila. O jogo combina elementos de terror, exploração e combate intenso.",
     },
     {
         id: 17,
@@ -136,7 +144,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Fantasia, História",
         nota: 8.0,
         preco: 79.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Far Cry 5 é um jogo de ação e aventura em mundo aberto, ambientado em Hope County, Montana. Você joga como um xerife local, enquanto enfrenta uma seita religiosa perigosa. Explore vastas paisagens, participe de missões emocionantes e enfrente inimigos em combates intensos.",
     },
     {
         id: 18,
@@ -146,7 +155,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Sobrevivência, Fantasia",
         nota: 8.0,
         preco: 99.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Dying Light é um jogo de ação e aventura em mundo aberto, ambientado em uma cidade infestada por zumbis. Você joga como um sobrevivente, enquanto explora a cidade, coleta recursos e enfrenta hordas de mortos-vivos. O jogo combina parkour, combate intenso e elementos de sobrevivência.",
     },
     {
         id: 21,
@@ -156,7 +166,8 @@ const jogos = [
         genero: "RPG, Ação, Aventura, Fantasia, Mundo Aberto",
         nota: 7.0,
         preco: 79.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Dark Souls II é um RPG de ação em mundo aberto, conhecido por sua dificuldade desafiadora e combate estratégico. Explore um mundo sombrio e interconectado, enfrente inimigos formidáveis e descubra segredos enquanto busca a verdade por trás da maldição que assola o reino.",
     },
     {
         id: 22,
@@ -166,7 +177,8 @@ const jogos = [
         genero: "RPG, Ação, Aventura, Fantasia, Mundo Aberto",
         nota: 9.0,
         preco: 99.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Cuphead é um jogo de ação e aventura em mundo aberto, conhecido por seu estilo visual inspirado em desenhos animados dos anos 1930. Você joga como Cuphead, enfrentando chefes desafiadores em batalhas intensas. O jogo combina plataformas, tiro e elementos de RPG, oferecendo uma experiência única e desafiadora.",
     },
     {
         id: 23,
@@ -176,7 +188,8 @@ const jogos = [
         genero: "RPG, Ação, Aventura, Fantasia, Mundo Aberto",
         nota: 8.5,
         preco: 79.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Dark Souls Remastered é uma versão aprimorada do aclamado RPG de ação em mundo aberto. Explore um mundo sombrio e interconectado, enfrente inimigos formidáveis e descubra segredos enquanto busca a verdade por trás da maldição que assola o reino. Com gráficos melhorados e jogabilidade refinada, esta versão oferece uma experiência ainda mais imersiva.",
     },
     {
         id: 25,
@@ -186,7 +199,7 @@ const jogos = [
         genero: "RPG, Ação, Aventura, Fantasia, Mundo Aberto",
         nota: 9.5,
         preco: 199.99,
-        desconto: 30
+        descricao: "Elden Ring é um RPG de ação em mundo aberto, desenvolvido pela FromSoftware. Explore um vasto mundo repleto de segredos, monstros e desafios. Com uma narrativa envolvente e combate estratégico, Elden Ring oferece uma experiência épica para os fãs de jogos desafiadores e imersivos.",
     },
     {
         id: 26,
@@ -196,7 +209,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Fantasia, Indie",
         nota: 9.0,
         preco: 39.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Hollow Knight é um jogo de ação e aventura em mundo aberto, ambientado em um reino subterrâneo chamado Hallownest. Explore cavernas, enfrente inimigos desafiadores e descubra segredos enquanto desvenda a história do reino. Com uma atmosfera sombria e uma jogabilidade precisa, Hollow Knight oferece uma experiência envolvente para os fãs de jogos de plataforma e exploração.",
     },
     {
         id: 27,
@@ -206,7 +220,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Super-herói",
         nota: 7.0,
         preco: 49.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Batman: Arkham Asylum é um jogo de ação e aventura em mundo aberto, onde você assume o papel do Cavaleiro das Trevas. Explore o asilo Arkham, enfrente vilões icônicos e utilize gadgets para combater o crime nesta emocionante história.",
     },
     {
         id: 28,
@@ -216,7 +231,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Super-herói",
         nota: 8.5,
         preco: 49.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Batman: Arkham City é um jogo de ação e aventura em mundo aberto, onde você assume o papel do Cavaleiro das Trevas. Explore a cidade de Arkham, enfrente vilões icônicos e utilize gadgets para combater o crime nesta emocionante história.",
     },
     {
         id: 30,
@@ -226,7 +242,7 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Sobrevivência, Fantasia",
         nota: 5.7,
         preco: 59.99,
-        desconto: 30
+        descricao: "Subnautica: Below Zero é um jogo de ação e aventura em mundo aberto, ambientado em um planeta oceânico alienígena. Explore ambientes subaquáticos congelados, colete recursos e descubra a história por trás do planeta enquanto enfrenta criaturas perigosas.",
     },
     {
         id: 37,
@@ -236,7 +252,8 @@ const jogos = [
         genero: "RPG, Ação, Aventura, Fantasia, Mundo Aberto",
         nota: 8.5,
         preco: 199.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Lies of P é um RPG de ação em mundo aberto, ambientado em um universo sombrio e fantástico. Explore um mundo cheio de segredos, enfrente inimigos desafiadores e descubra a verdade por trás de uma história envolvente. Com combate estratégico e uma narrativa intrigante, Lies of P oferece uma experiência única para os fãs de jogos de aventura e fantasia.",
     },
     {
         id: 38,
@@ -246,7 +263,8 @@ const jogos = [
         genero: "RPG, Ação, Aventura, Fantasia, Mundo Aberto",
         nota: 7.2,
         preco: 199.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Hogwarts Legacy é um RPG de ação em mundo aberto ambientado no universo de Harry Potter. Explore a famosa escola de magia, participe de aulas, aprenda feitiços e enfrente criaturas mágicas enquanto descobre segredos ocultos e molda o destino do mundo bruxo.",
     },
     {
         id: 39,
@@ -256,7 +274,7 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Terror, Fantasia",
         nota: 8.5,
         preco: 199.99,
-        desconto: 30
+        descricao: "Resident Evil 4 Remake é um jogo de ação e aventura em mundo aberto, onde você joga como Leon S. Kennedy em uma missão para resgatar a filha do presidente dos Estados Unidos. Explore ambientes assustadores, enfrente inimigos perigosos e descubra os segredos por trás de uma conspiração sinistra.",
     },
     {
         id: 40,
@@ -266,7 +284,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Terror, Fantasia",
         nota: 8.5,
         preco: 199.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Resident Evil 2 Remake é um jogo de ação e aventura em mundo aberto, onde você joga como Leon S. Kennedy e Claire Redfield em uma missão para sobreviver a um surto viral em Raccoon City. Explore ambientes assustadores, enfrente inimigos perigosos e descubra os segredos por trás de uma conspiração sinistra.",
     },
     {
         id: 41,
@@ -276,7 +295,7 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Terror, Fantasia",
         nota: 5.5,
         preco: 199.99,
-        desconto: 30
+        descricao: "Resident Evil 3 Remake é um jogo de ação e aventura em mundo aberto, onde você joga como Jill Valentine em uma missão para escapar de Raccoon City durante um surto viral. Explore ambientes assustadores, enfrente inimigos perigosos e descubra os segredos por trás de uma conspiração sinistra.",
     },
     {
         id: 42,
@@ -286,7 +305,7 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Terror, Fantasia",
         nota: 8.0,
         preco: 199.99,
-        desconto: 30
+        descricao: "Resident Evil 5 é um jogo de ação e aventura em mundo aberto, onde você joga como Chris Redfield em uma missão para investigar um surto viral na África. Explore ambientes perigosos, enfrente inimigos mutantes e descubra os segredos por trás de uma conspiração sinistra.",
     },
     {
         id: 43,
@@ -296,7 +315,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Terror, Fantasia",
         nota: 6.7,
         preco: 199.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Resident Evil 6 é um jogo de ação e aventura em mundo aberto, onde você joga como Leon S. Kennedy, Chris Redfield e Jake Muller em uma missão para combater um surto viral global. Explore ambientes perigosos, enfrente inimigos mutantes e descubra os segredos por trás de uma conspiração sinistra.",
     },
     {
         id: 44,
@@ -306,7 +326,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Terror, Fantasia",
         nota: 8.0,
         preco: 199.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Resident Evil Revelations é um jogo de ação e aventura em mundo aberto, onde você joga como Jill Valentine e Chris Redfield em uma missão para investigar uma ameaça bioterrorista. Explore ambientes assustadores, enfrente inimigos perigosos e descubra os segredos por trás de uma conspiração sinistra.",
     },
     {
         id: 45,
@@ -316,7 +337,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Terror, Fantasia",
         nota: 8.0,
         preco: 199.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Resident Evil Revelations 2 é um jogo de ação e aventura em mundo aberto, onde você joga como Claire Redfield e Barry Burton em uma missão para sobreviver a um surto viral em uma ilha remota. Explore ambientes assustadores, enfrente inimigos perigosos e descubra os segredos por trás de uma conspiração sinistra.",
     },
     {
         id: 46,
@@ -326,7 +348,7 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Terror, Fantasia",
         nota: 8.0,
         preco: 199.99,
-        desconto: 30
+        descricao: "Resident Evil 0 é um jogo de ação e aventura em mundo aberto, onde você joga como Rebecca Chambers e Billy Coen em uma missão para investigar um surto viral em uma cidade infestada por zumbis. Explore ambientes assustadores, enfrente inimigos perigosos e descubra os segredos por trás de uma conspiração sinistra.",
     },
     {
         id: 48,
@@ -336,7 +358,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Terror, Fantasia",
         nota: 8.5,
         preco: 199.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Resident Evil 7: Biohazard é um jogo de ação e aventura em mundo aberto, onde você joga como Ethan Winters em uma missão para encontrar sua esposa desaparecida em uma plantação abandonada. Explore ambientes assustadores, enfrente inimigos perigosos e descubra os segredos por trás de uma conspiração sinistra."
     },
     {
         id: 49,
@@ -346,7 +369,7 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Terror, Fantasia",
         nota: 8.5,
         preco: 199.99,
-        desconto: 30
+        descricao: "Resident Evil 8: Village é um jogo de ação e aventura em mundo aberto, onde você joga como Ethan Winters em uma missão para resgatar sua filha sequestrada em uma vila misteriosa. Explore ambientes assustadores, enfrente inimigos perigosos e descubra os segredos por trás de uma conspiração sinistra."
     },
     {
         id: 51,
@@ -356,7 +379,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Terror, Fantasia",
         nota: 8.0,
         preco: 199.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Resident Evil é um jogo de ação e aventura em mundo aberto, onde você joga como membros da equipe S.T.A.R.S. em uma missão para investigar uma mansão infestada por zumbis. Explore ambientes assustadores, enfrente inimigos perigosos e descubra os segredos por trás de uma conspiração sinistra."
     },
     {
         id: 53,
@@ -366,7 +390,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Fantasia, Indie",
         nota: 9.0,
         preco: 199.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Silksong é um jogo de ação e aventura em mundo aberto, ambientado em um reino sombrio e fantástico. Explore ambientes desafiadores, enfrente inimigos formidáveis e descubra a história por trás de uma narrativa envolvente. Com combate estratégico e mecânicas de exploração, Silksong oferece uma experiência única para os fãs de jogos de aventura e fantasia."
     },
     {
         id: 54,
@@ -376,7 +401,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Fantasia, Indie",
         nota: 8.5,
         preco: 199.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Palword é um jogo de ação e aventura em mundo aberto, onde você explora um mundo vibrante cheio de criaturas chamadas 'Pals'. Capture, treine e lute ao lado de seus Pals enquanto enfrenta desafios, resolve quebra-cabeças e descobre os segredos de um mundo mágico e colorido."
     },
     {
         id: 55,
@@ -386,7 +412,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Sobrevivência, Indie",
         nota: 8.0,
         preco: 199.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Rust é um jogo de ação e aventura em mundo aberto, onde você deve sobreviver em um ambiente hostil. Colete recursos, construa abrigos, enfrente outros jogadores e criaturas perigosas enquanto luta para se manter vivo em um mundo implacável."
     },
     {
         id: 56,
@@ -396,7 +423,7 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Sobrevivência, Indie",
         nota: 8.0,
         preco: 199.99,
-        desconto: 30
+        descricao: "The Forest é um jogo de ação e aventura em mundo aberto, onde você deve sobreviver em uma ilha misteriosa após um acidente de avião. Explore a floresta, colete recursos, construa abrigos e enfrente criaturas perigosas enquanto desvenda os segredos sombrios da ilha."
     },
     {
         id: 57,
@@ -406,7 +433,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Sobrevivência, Indie",
         nota: 8.0,
         preco: 199.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Green Hell é um jogo de ação e aventura em mundo aberto, onde você deve sobreviver na selva amazônica. Explore o ambiente hostil, colete recursos, construa abrigos e enfrente desafios enquanto luta para se manter vivo em um ecossistema perigoso e imprevisível."
     },
     {
         id: 58,
@@ -416,7 +444,8 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Sobrevivência, Indie",
         nota: 8.0,
         preco: 199.99,
-        desconto: 30
+        desconto: 30,
+        descricao: "Raft é um jogo de ação e aventura em mundo aberto, onde você deve sobreviver em um oceano vasto e perigoso. Construa e expanda sua jangada, colete recursos do mar, enfrente tubarões e explore ilhas enquanto luta para se manter vivo em um ambiente aquático desafiador."
     },
     {
         id: 59,
@@ -426,7 +455,7 @@ const jogos = [
         genero: "Ação, Aventura, Mundo Aberto, Sobrevivência, Indie",
         nota: 8.0,
         preco: 199.99,
-        desconto: 30
+        descricao: "Sons of The Forest é um jogo de ação e aventura em mundo aberto, onde você deve sobreviver em uma ilha misteriosa cheia de perigos. Explore a floresta, colete recursos, construa abrigos e enfrente criaturas aterrorizantes enquanto desvenda os segredos sombrios da ilha."
     },
 ];
 
