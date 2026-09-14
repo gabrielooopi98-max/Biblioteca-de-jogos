@@ -1,4 +1,4 @@
-function Header({ busca, setBusca, jogosFiltrados, painelAberto, setPainelAberto, totalItensCarrinho, adicionarAoCarrinho, carrinhoAberto, setCarrinhoAberto }) {
+function Header({ busca, setBusca, jogosFiltrados, painelAberto, setPainelAberto, totalItensCarrinho, adicionarAoCarrinho, carrinhoAberto, carrinho, setCarrinhoAberto }) {
     const mostrarPainel = painelAberto && busca.trim().length > 0;
 
     return (
@@ -39,6 +39,7 @@ function Header({ busca, setBusca, jogosFiltrados, painelAberto, setPainelAberto
                         {jogosFiltrados.length > 0 ? (
                             jogosFiltrados.slice(0, 6).map((jogo) => {
                                 const precoFinal = calcularPrecoComDesconto(jogo.preco, jogo.desconto);
+                                const jaNoCarrinho = carrinho.some((item) => item.id === jogo.id);
 
                                 return (
                                     <div
@@ -70,18 +71,17 @@ function Header({ busca, setBusca, jogosFiltrados, painelAberto, setPainelAberto
                                         </div>
 
                                         <div className="area-interativa-busca">
-                                            <button className="btn-carrinho-busca"
-                                                onClick={(evento) => {
-                                                    evento.stopPropagation();
-                                                    adicionarAoCarrinho(jogo);
-                                                }}
+
+                                            <button
+                                                className={jaNoCarrinho ? "btn-carrinho-busca ativo" : "btn-carrinho-busca"}
+                                                onClick={() => adicionarAoCarrinho(jogo)}
+                                                disabled={jaNoCarrinho}
                                             >
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                                                     <circle cx="9" cy="20" r="1" />
                                                     <circle cx="19" cy="20" r="1" />
                                                     <path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 8H6" />
                                                 </svg>
-
                                             </button>
                                         </div>
                                     </div>

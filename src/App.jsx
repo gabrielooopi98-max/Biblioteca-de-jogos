@@ -85,6 +85,7 @@ function App() {
         carrinhoAberto={carrinhoAberto}
         setCarrinhoAberto={setCarrinhoAberto}
         adicionarAoCarrinho={adicionarAoCarrinho}
+        carrinho={carrinho}
       />
 
       <nav className="submenu-filtros">
