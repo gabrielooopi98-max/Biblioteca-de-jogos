@@ -43,12 +43,12 @@ function Comparar({ jogos }) {
 
     const linhas = [
         ["Preço", (j) => <span className={`mono${destaque(j.id, melhorPreco)}`}>{formatarPreco(calcularPrecoFinal(j))}</span>],
-        ["Desconto", (j) => <span className={`mono${destaque(j.id, maiorDesconto)}`}>{j.desconto ? `-${j.desconto}%` : "—"}</span>],
+        ["Desconto", (j) => <span className={`mono${destaque(j.id, maiorDesconto)}`}>{j.desconto ? `-${j.desconto}%` : "Sem desconto"}</span>],
         ["Nota", (j) => <span className={destaque(j.id, melhorNota).trim()}><Avaliacao nota={j.nota} /></span>],
         ["Lançamento", (j) => j.lancamento],
         ["Desenvolvedora", (j) => j.desenvolvedora],
         ["Gêneros", (j) => j.generos.join(", ")],
-        ...PLATAFORMAS.map((p) => [p, (j) => (j.plataformas.includes(p) ? <IconeCheck tamanho={16} className="sim" /> : <span className="nao">—</span>)]),
+        ...PLATAFORMAS.map((p) => [p, (j) => (j.plataformas.includes(p) ? <IconeCheck tamanho={16} className="sim" /> : <span className="nao">Não</span>)]),
     ];
 
     return (

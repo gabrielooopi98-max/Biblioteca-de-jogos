@@ -24,7 +24,7 @@ function Header({ pagina, qtdCarrinho, qtdDesejos, qtdBiblioteca, alertas, abrir
                             e.preventDefault();
                             navegar("/");
                         }}
-                        aria-label="Biblioteca — página inicial"
+                        aria-label="Biblioteca.jogos, página inicial"
                     >
                         <LogoMarca />
                         <span className="logo-texto">
@@ -56,7 +56,11 @@ function Header({ pagina, qtdCarrinho, qtdDesejos, qtdBiblioteca, alertas, abrir
                         </button>
                         <a href="#/desejos" className={pagina === "desejos" ? "icone-botao ativo" : "icone-botao"} aria-label={`Lista de desejos (${qtdDesejos})`} data-dica="Lista de desejos">
                             <IconeCoracao tamanho={18} />
-                            {qtdDesejos > 0 && <span className="contagem">{qtdDesejos}</span>}
+                            {qtdDesejos > 0 && (
+                                <span key={qtdDesejos} className="contagem">
+                                    {qtdDesejos}
+                                </span>
+                            )}
                             {alertas > 0 && <span className="ponto-alerta" title={`${alertas} alerta(s) de preço atingido(s)`} />}
                         </a>
                         <button type="button" className="carrinho-botao" onClick={abrirCarrinho} aria-label={`Carrinho (${qtdCarrinho})`}>

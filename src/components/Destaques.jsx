@@ -2,23 +2,34 @@ import { useEffect, useState } from "react";
 import { useLoja } from "../LojaContext.js";
 import { capturasDoJogo, imagensDoJogo, resumoAvaliacoes } from "../utils.js";
 import { AcoesRapidas, Imagem, Plataformas, Preco } from "./CardJogo.jsx";
-import { IconeBiblioteca, IconeCarrinho, IconeCheck, IconeSetaDireita, IconeSetaEsquerda } from "./Icones.jsx";
+import { IconeBiblioteca, IconeCarrinho, IconeCheck, IconePlay, IconeSetaDireita, IconeSetaEsquerda } from "./Icones.jsx";
+import { usePreviaTrailer } from "../hooks.js";
+import Trailer from "./Trailer.jsx";
 
 const INTERVALO = 7000;
 
-function Slide({ jogo, ativo, primeiro, aoClicarVizinho }) {
+function Slide({ jogo, ativo, perto, primeiro, aoClicarVizinho }) {
     const { abrirJogo, adicionarAoCarrinho, estaNoCarrinho, possui } = useLoja();
     const [previa, setPrevia] = useState(null);
     const imagens = imagensDoJogo(jogo);
     const capturas = capturasDoJogo(jogo).slice(0, 4);
     const noCarrinho = estaNoCarrinho(jogo.id);
     const jaPossui = possui(jogo.id);
+    const [trailer, eventosTrailer] = usePreviaTrailer(450);
 
     return (
         <div className={ativo ? "slide ativo" : "slide"} aria-hidden={!ativo} inert={!ativo}>
-            <button type="button" className="slide-midia" onClick={() => abrirJogo(jogo.id)} aria-label={`Ver ${jogo.nome}`}>
-                <Imagem src={imagens.destaque} alternativa={imagens.horizontal} alt="" className={previa ? "oculta" : ""} loading="eager" fetchPriority={primeiro ? "high" : "auto"} />
+            <button type="button" className="slide-midia" onClick={() => abrirJogo(jogo.id)} aria-label={`Ver ${jogo.nome}`} {...eventosTrailer}>
+                {/* A arte aparece inteira; a mesma imagem desfocada preenche as sobras. */}
+                <Imagem src={imagens.destaque} alternativa={imagens.horizontal} alt="" className="arte-fundo" aria-hidden="true" loading={perto ? "eager" : "lazy"} />
+                <Imagem src={imagens.destaque} alternativa={imagens.horizontal} alt="" className={previa ? "arte oculta" : "arte"} loading={perto ? "eager" : "lazy"} fetchPriority={primeiro ? "high" : "auto"} />
                 {previa && <img src={previa} alt="" className="slide-previa" />}
+                {ativo && trailer && !previa && <Trailer jogo={jogo} className="slide-trailer" />}
+                {jogo.trailer && (
+                    <span className="slide-selo-trailer" aria-hidden="true">
+                        <IconePlay tamanho={11} /> Trailer
+                    </span>
+                )}
             </button>
 
             <div className="slide-info">
@@ -39,7 +50,7 @@ function Slide({ jogo, ativo, primeiro, aoClicarVizinho }) {
                             onClick={() => abrirJogo(jogo.id)}
                             aria-label={`Captura de tela de ${jogo.nome}`}
                         >
-                            <Imagem src={captura.mini} alt="" loading="eager" />
+                            {ativo && <Imagem src={captura.mini} alt="" />}
                         </button>
                     ))}
                 </div>
@@ -127,7 +138,7 @@ function Destaques({ jogos }) {
                 >
                     <div className={animar ? "destaques-trilho" : "destaques-trilho sem-transicao"} style={{ "--posicao": posicao }} onTransitionEnd={aoTerminar}>
                         {itens.map((jogo, indice) => (
-                            <Slide key={`${jogo.id}-${indice}`} jogo={jogo} ativo={indice === posicao} primeiro={indice === 1} aoClicarVizinho={() => irPara(indice)} />
+                            <Slide key={`${jogo.id}-${indice}`} jogo={jogo} ativo={indice === posicao} perto={Math.abs(indice - posicao) <= 1} primeiro={indice === 1} aoClicarVizinho={() => irPara(indice)} />
                         ))}
                     </div>
                 </div>

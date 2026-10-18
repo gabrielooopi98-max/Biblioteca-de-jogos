@@ -56,6 +56,26 @@ export const IconeSetaDireita = (p) => (
     </Icone>
 );
 
+export const IconePlay = (p) => (
+    <Icone {...p} preenchido>
+        <path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z" />
+    </Icone>
+);
+
+export const IconeSom = (p) => (
+    <Icone {...p}>
+        <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5Z" />
+        <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />
+    </Icone>
+);
+
+export const IconeMudo = (p) => (
+    <Icone {...p}>
+        <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5Z" />
+        <path d="m16 9.5 5 5M21 9.5l-5 5" />
+    </Icone>
+);
+
 export const IconeSeta = (p) => (
     <Icone {...p}>
         <path d="M5 12h14M13 6l6 6-6 6" />

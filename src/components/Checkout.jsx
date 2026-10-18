@@ -123,7 +123,7 @@ function Checkout({ aberto, fechar, itens, cupom, presenteInicial, perfil, concl
                                     </label>
                                     {presenteObrigatorio && (
                                         <p className="nota-rodape">
-                                            Você já possui {possuidos.map((j) => j.nome).join(", ")} — {possuidos.length > 1 ? "esses itens só podem" : "esse item só pode"} ser comprado{possuidos.length > 1 ? "s" : ""} como presente.
+                                            Você já possui {possuidos.map((j) => j.nome).join(", ")}: {possuidos.length > 1 ? "esses itens só podem" : "esse item só pode"} ser comprado{possuidos.length > 1 ? "s" : ""} como presente.
                                         </p>
                                     )}
                                     {ehPresente && (

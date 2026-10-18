@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import jogos from "./dadosJogos.js";
-import { navegar, useArmazenamento, useAtalho, useEfeitosPonteiro, useRota, useTravarRolagem } from "./hooks.js";
+import { flushSync } from "react-dom";
+import { navegar, useArmazenamento, useAtalho, useEfeitosPonteiro, useRevelar, useRota, useTravarRolagem } from "./hooks.js";
 import { LojaContext } from "./LojaContext.js";
 import { calcularPrecoFinal, FILTROS_INICIAIS, imagensDoJogo, LIMITE_COMPARAR, recomendar } from "./utils.js";
 import Abas from "./components/Abas.jsx";
@@ -10,9 +11,11 @@ import Destaques from "./components/Destaques.jsx";
 import { GavetaCarrinho } from "./components/Gavetas.jsx";
 import Header from "./components/Header.jsx";
 import { IconeBiblioteca, IconeBussola, IconeCarrinho, IconeCasa, IconeComparar, IconeCoracao, IconeEtiqueta, IconeLua, IconeRecibo } from "./components/Icones.jsx";
+import NaoEncontrada from "./components/NaoEncontrada.jsx";
 import Notificacoes from "./components/Notificacoes.jsx";
 import PaletaComandos from "./components/PaletaComandos.jsx";
-import { BannerColecao, BannerPromocao, Categorias, ChamadaCatalogo, Garantias, Ofertas, Prateleira, Rodape } from "./components/Secoes.jsx";
+import { BannerPromocao, Categorias, ChamadaCatalogo, Garantias, Ofertas, Prateleira, Rodape } from "./components/Secoes.jsx";
+import { UniversoResidentEvil, UniversoSouls } from "./components/Universos.jsx";
 import "./App.css";
 
 // Páginas secundárias carregadas sob demanda: a loja abre mais rápido.
@@ -25,13 +28,34 @@ const Comparar = lazy(() => import("./components/Comparar.jsx"));
 const Checkout = lazy(() => import("./components/Checkout.jsx"));
 
 const TITULOS = {
-    loja: "Biblioteca.jogos — loja de jogos digitais",
+    loja: "Biblioteca.jogos: loja de jogos digitais",
     explorar: "Explorar · Biblioteca.jogos",
     biblioteca: "Biblioteca · Biblioteca.jogos",
     pedidos: "Pedidos · Biblioteca.jogos",
     desejos: "Lista de desejos · Biblioteca.jogos",
     comparar: "Comparar · Biblioteca.jogos",
+    404: "Página não encontrada · Biblioteca.jogos",
 };
+
+// Descrição de cada página para buscadores e para o preview de links compartilhados.
+const DESCRICOES = {
+    loja: `Loja de jogos digitais para PC e consoles: ${jogos.length} jogos com entrega instantânea, reembolso em até 7 dias, alertas de preço e comparador.`,
+    explorar: `Explore os ${jogos.length} jogos do catálogo com filtros por gênero, plataforma, preço e avaliação.`,
+    biblioteca: "Sua biblioteca de jogos com as chaves de ativação de cada compra.",
+    pedidos: "Histórico de pedidos, comprovantes e reembolsos em até 7 dias.",
+    desejos: "Sua lista de desejos com alertas de preço para cada jogo.",
+    comparar: "Compare jogos lado a lado: preço, avaliação, plataformas e gêneros.",
+    404: "Página não encontrada na Biblioteca.jogos.",
+};
+
+function resumir(texto, limite = 155) {
+    if (texto.length <= limite) return texto;
+    return texto.slice(0, texto.lastIndexOf(" ", limite - 1)) + "…";
+}
+
+function definirMeta(seletor, valor) {
+    document.querySelector(seletor)?.setAttribute("content", valor);
+}
 
 const porId = new Map(jogos.map((jogo) => [jogo.id, jogo]));
 const buscarJogos = (ids) => ids.map((id) => porId.get(id)).filter(Boolean);
@@ -54,8 +78,9 @@ const vitrine = {
     lancamentos: [...jogos].filter((jogo) => jogo.lancamento >= 2021).sort((a, b) => b.lancamento - a.lancamento),
     categorias: CATEGORIAS.map(([nome, idJogo]) => ({ nome, jogo: porId.get(idJogo), quantidade: jogos.filter((j) => j.generos.includes(nome)).length })),
     residentEvil: jogos.filter((jogo) => jogo.nome.startsWith("Resident Evil")),
+    soulslike: jogos.filter((jogo) => jogo.generos.includes("Soulslike")).sort((a, b) => b.nota - a.nota),
     // Jogos publicados pela Warner Bros. Games presentes no catálogo.
-    warner: [38, 4, 28, 27].map((id) => porId.get(id)),
+    warner: [38, 92, 4, 93, 28, 27, 94, 95].map((id) => porId.get(id)),
 };
 
 const ABAS = [
@@ -96,6 +121,7 @@ function App() {
 
     const rota = useRota();
     useEfeitosPonteiro();
+    useRevelar();
     const jogoAberto = rota.pagina === "jogo" ? porId.get(rota.id) : null;
 
     const carrinho = useMemo(() => buscarJogos(idsCarrinho), [idsCarrinho]);
@@ -127,11 +153,37 @@ function App() {
 
     useEffect(() => {
         window.scrollTo({ top: 0 });
-        document.title = jogoAberto ? `${jogoAberto.nome} · Biblioteca.jogos` : TITULOS[rota.pagina] || TITULOS.loja;
+        // jogo inexistente também é 404
+        const pagina = rota.pagina === "jogo" && !jogoAberto ? "404" : rota.pagina;
+        const titulo = jogoAberto ? `${jogoAberto.nome} · Biblioteca.jogos` : TITULOS[pagina] || TITULOS.loja;
+        const descricao = jogoAberto ? resumir(`${jogoAberto.nome}: ${jogoAberto.descricao}`) : DESCRICOES[pagina] || DESCRICOES.loja;
+        document.title = titulo;
+        definirMeta('meta[name="description"]', descricao);
+        definirMeta('meta[property="og:title"]', titulo);
+        definirMeta('meta[property="og:description"]', descricao);
+        definirMeta('meta[name="robots"]', pagina === "404" ? "noindex" : "index, follow");
         if (jogoAberto) setIdsVistos((ids) => [jogoAberto.id, ...ids.filter((id) => id !== jogoAberto.id)].slice(0, 12));
     }, [rota.pagina, jogoAberto, setIdsVistos]);
 
-    const removerNotificacao = useCallback((id) => setNotificacoes((atuais) => atuais.filter((n) => n.id !== id)), []);
+    // Com a loja aberta e o navegador ocioso, já baixa as páginas mais visitadas: a navegação fica instantânea.
+    useEffect(() => {
+        const preCarregar = () => {
+            import("./components/Catalogo.jsx");
+            import("./components/PaginaJogo.jsx");
+        };
+        if ("requestIdleCallback" in window) {
+            const id = requestIdleCallback(preCarregar, { timeout: 4000 });
+            return () => cancelIdleCallback(id);
+        }
+        const tempo = setTimeout(preCarregar, 2500);
+        return () => clearTimeout(tempo);
+    }, []);
+
+    // Marca como "saindo" para a animação de saída rodar antes de remover.
+    const removerNotificacao = useCallback((id) => {
+        setNotificacoes((atuais) => atuais.map((n) => (n.id === id ? { ...n, saindo: true } : n)));
+        setTimeout(() => setNotificacoes((atuais) => atuais.filter((n) => n.id !== id)), 240);
+    }, []);
 
     const notificar = useCallback(
         (mensagem, opcoes = {}) => {
@@ -259,7 +311,30 @@ function App() {
         navegar("/explorar");
     }
 
-    const alternarTema = useCallback(() => setTema((t) => (t === "escuro" ? "claro" : "escuro")), [setTema]);
+    // O novo tema se espalha em círculo a partir do botão (View Transitions, quando houver suporte).
+    const alternarTema = useCallback(
+        (evento) => {
+            const novo = tema === "escuro" ? "claro" : "escuro";
+            const trocar = () => {
+                document.documentElement.dataset.tema = novo;
+                flushSync(() => setTema(novo));
+            };
+            if (!document.startViewTransition || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return trocar();
+
+            const botao = evento?.currentTarget instanceof Element ? evento.currentTarget.getBoundingClientRect() : null;
+            const x = botao ? botao.left + botao.width / 2 : window.innerWidth / 2;
+            const y = botao ? botao.top + botao.height / 2 : 0;
+            const raio = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+
+            document.startViewTransition(trocar).ready.then(() => {
+                document.documentElement.animate(
+                    { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${raio}px at ${x}px ${y}px)`] },
+                    { duration: 600, easing: "cubic-bezier(0.22, 1, 0.36, 1)", pseudoElement: "::view-transition-new(root)" },
+                );
+            });
+        },
+        [tema, setTema],
+    );
     const abrirPaleta = useCallback(() => setPaletaAberta(true), []);
     const comCtrlK = useCallback((e) => (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k", []);
     const comBarra = useCallback((e) => e.key === "/" && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName), []);
@@ -286,7 +361,10 @@ function App() {
         switch (rota.pagina) {
             case "explorar":
                 return <Catalogo jogos={jogos} filtros={filtros} setFiltros={setFiltros} />;
+            case "404":
+                return <NaoEncontrada sugestoes={vitrine.melhores.slice(0, 4)} abrirPaleta={abrirPaleta} />;
             case "jogo":
+                if (!jogoAberto) return <NaoEncontrada tipo="jogo" sugestoes={vitrine.melhores.slice(0, 4)} abrirPaleta={abrirPaleta} />;
                 return <PaginaJogo jogo={jogoAberto} jogos={jogos} comprarAgora={comprarAgora} presentear={presentear} aoEscolherGenero={(genero) => aplicarFiltros({ generos: [genero] })} />;
             case "biblioteca":
                 return <Biblioteca itens={biblioteca} />;
@@ -299,6 +377,7 @@ function App() {
             default:
                 return (
                     <>
+                        <h1 className="so-leitor">Biblioteca.jogos: loja de jogos digitais para PC e consoles</h1>
                         <BannerDistribuidora
                             distribuidora="Warner Bros."
                             subtitulo="Games"
@@ -316,10 +395,11 @@ function App() {
                         <Ofertas jogos={vitrine.ofertas.slice(0, 5)} aoVerMais={ofertasPromo} />
                         <Abas abas={ABAS} aoVerMais={(aba) => aplicarFiltros(aba.filtros)} />
                         <Categorias categorias={vitrine.categorias} aoEscolher={(genero) => aplicarFiltros({ generos: [genero] })} />
+                        <UniversoSouls jogos={vitrine.soulslike} aoVerTodos={() => aplicarFiltros({ generos: ["Soulslike"], ordenar: "melhor-avaliados" })} />
                         <BannerPromocao jogos={vitrine.ofertas.slice(0, 5)} fundo={porId.get(38)} aoClicar={ofertasPromo} />
                         {vistos.length > 0 && <Prateleira id="vistos" titulo="Vistos recentemente" jogos={vistos} />}
-                        <BannerColecao jogo={porId.get(16)} jogos={vitrine.residentEvil} titulo="Resident Evil" aoClicar={() => aplicarFiltros({ termo: "Resident Evil", ordenar: "mais-recentes" })} />
-                        <Prateleira id="lancamentos" titulo="Lançamentos" jogos={vitrine.lancamentos} aoVerMais={() => aplicarFiltros({ ordenar: "mais-recentes" })} />
+                        <UniversoResidentEvil jogos={vitrine.residentEvil} aoVerTodos={() => aplicarFiltros({ termo: "Resident Evil", ordenar: "mais-recentes" })} />
+                        <Prateleira id="lancamentos" titulo="Lançamentos" jogos={vitrine.lancamentos.slice(0, 15)} aoVerMais={() => aplicarFiltros({ ordenar: "mais-recentes" })} />
                         <ChamadaCatalogo total={jogos.length} />
                     </>
                 );

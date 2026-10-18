@@ -8,10 +8,10 @@ const ICONES = {
 function Notificacoes({ itens, remover }) {
     return (
         <div className="notificacoes" role="status" aria-live="polite">
-            {itens.map(({ id, mensagem, tipo = "sucesso", imagem, acao }) => {
+            {itens.map(({ id, mensagem, tipo = "sucesso", imagem, acao, saindo }) => {
                 const Icone = ICONES[tipo] || IconeCheck;
                 return (
-                    <div key={id} className={`notificacao notificacao-${tipo}`}>
+                    <div key={id} className={`notificacao notificacao-${tipo}${saindo ? " saindo" : ""}`}>
                         {imagem ? (
                             <img src={imagem} alt="" />
                         ) : (

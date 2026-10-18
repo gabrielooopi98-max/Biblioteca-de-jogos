@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Biblioteca.jogos — sistema de design
+   Biblioteca.jogos: sistema de design
    Identidade monocromática: preto, branco e cinza. A cor fica por conta das artes dos jogos.
    ========================================================================== */
 
@@ -51,7 +51,8 @@
 }
 
 :root {
-  --fonte: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --fonte: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --fonte-titulo: "Sora", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --fonte-mono: "Geist Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
   --raio-p: 6px;
   --raio: 8px;
@@ -60,7 +61,10 @@
   --margem: clamp(16px, 3vw, 32px);
   --altura-barra: 64px;
   --curva: cubic-bezier(0.22, 1, 0.36, 1);
-  --zoom: cubic-bezier(0.45, 0, 0.25, 1);
+  /* zoom das artes: responde na hora e desacelera devagar */
+  --zoom: cubic-bezier(0.16, 1, 0.3, 1);
+  /* leve ultrapassagem, para respostas táteis */
+  --mola: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* ==========================================================================
@@ -92,7 +96,9 @@ body {
   font-family: var(--fonte);
   font-size: 16px;
   line-height: 1.55;
-  word-spacing: 0.04em;
+  font-optical-sizing: auto;
+  /* l com cauda e dígitos mais legíveis */
+  font-feature-settings: "cv05", "cv08";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -135,10 +141,24 @@ ol {
 
 h1,
 h2,
+h3,
+.slide-nome,
+.logo-texto,
+.preco-grande .preco-final,
+.estatisticas strong,
+.oferta-grande .oferta-nome,
+.categoria-texto strong {
+  font-family: var(--fonte-titulo);
+  font-feature-settings: normal;
+}
+
+h1,
+h2,
 h3 {
   font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  text-wrap: balance;
 }
 
 fieldset {
@@ -192,6 +212,17 @@ kbd {
   font-variant-numeric: tabular-nums;
 }
 
+/* visível só para leitores de tela e buscadores */
+.so-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .pular-conteudo {
   position: fixed;
   top: 8px;
@@ -238,39 +269,76 @@ kbd {
   font-size: 15.5px;
   font-weight: 500;
   white-space: nowrap;
-  transition: background-color 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+  transition:
+    background-color 0.25s var(--curva),
+    border-color 0.25s var(--curva),
+    color 0.35s var(--curva),
+    box-shadow 0.45s var(--curva),
+    translate 0.35s var(--curva),
+    scale 0.45s var(--mola);
 }
 
 .botao:active:not(:disabled) {
-  transform: scale(0.98);
+  scale: 0.96;
+  transition-duration: 0.08s;
 }
 
 .botao:disabled {
   opacity: 0.45;
 }
 
-.botao-primario {
-  background: var(--inverso);
-  color: var(--inverso-texto);
-}
-
-.botao-primario:hover:not(:disabled) {
-  background: var(--inverso-hover);
-}
-
-.botao-secundario {
-  border-color: var(--borda-2);
-  background: var(--sup-1);
+/* Botões de contorno: fundo transparente e borda clara. No hover a cor da borda
+   se espalha a partir do ponto onde o cursor entrou (--bx/--by, ver useEfeitosPonteiro)
+   e recolhe na direção em que ele sai. */
+.botao-primario,
+.botao-secundario,
+.botao-vidro,
+.carrinho-botao {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid var(--inverso);
+  background: none;
   color: var(--texto);
 }
 
-.botao-secundario:hover:not(:disabled) {
-  border-color: var(--texto-3);
-  background: var(--sup-2);
+.botao-secundario {
+  border-color: color-mix(in srgb, var(--inverso) 55%, transparent);
 }
 
-.botao-secundario.ativo {
-  border-color: var(--texto-3);
+.botao-primario::before,
+.botao-secundario::before,
+.botao-vidro::before,
+.carrinho-botao::before {
+  content: "";
+  position: absolute;
+  top: var(--by, 50%);
+  left: var(--bx, 50%);
+  z-index: -1;
+  width: 260%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--inverso);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.65s var(--curva);
+  pointer-events: none;
+}
+
+.botao-primario:hover:not(:disabled),
+.botao-secundario:hover:not(:disabled),
+.botao-vidro:hover:not(:disabled),
+.botao-secundario.ativo,
+.carrinho-botao:hover {
+  border-color: var(--inverso);
+  color: var(--inverso-texto);
+}
+
+.botao-primario:hover:not(:disabled)::before,
+.botao-secundario:hover:not(:disabled)::before,
+.botao-vidro:hover:not(:disabled)::before,
+.botao-secundario.ativo::before,
+.carrinho-botao:hover::before {
+  transform: translate(-50%, -50%) scale(1);
 }
 
 .botao-fantasma {
@@ -312,7 +380,12 @@ kbd {
   flex-shrink: 0;
   border-radius: var(--raio);
   color: var(--texto-2);
-  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+  transition: background-color 0.2s var(--curva), color 0.2s ease, border-color 0.2s ease, scale 0.45s var(--mola);
+}
+
+.icone-botao:active {
+  scale: 0.9;
+  transition-duration: 0.08s;
 }
 
 .icone-botao:hover,
@@ -332,6 +405,8 @@ kbd {
 }
 
 .link-mais {
+  min-height: 32px;
+  padding-block: 6px;
   color: var(--texto-2);
   font-size: 14.5px;
   font-weight: 500;
@@ -452,12 +527,18 @@ textarea.campo {
   color: var(--texto-2);
   font-size: 13.5px;
   white-space: nowrap;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease, translate 0.35s var(--curva);
 }
 
 button.tag:hover {
   border-color: var(--texto-2);
+  background: var(--sup-2);
   color: var(--texto);
+  translate: 0 -1px;
+}
+
+button.tag:active {
+  translate: 0 0;
 }
 
 .plataformas {
@@ -678,6 +759,7 @@ button.tag:hover {
   align-items: center;
   gap: 10px;
   flex: 1;
+  min-width: 0;
   max-width: 420px;
   height: 38px;
   margin-left: auto;
@@ -705,6 +787,39 @@ button.tag:hover {
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
+}
+
+/* telas médias: menos texto no topo para tudo caber */
+@media (max-width: 1180px) {
+  .busca-gatilho kbd {
+    display: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .barra-conteudo {
+    gap: 16px;
+  }
+
+  .carrinho-rotulo {
+    display: none;
+  }
+}
+
+/* tablet estreito: menu compacto para caber junto com as ações */
+@media (max-width: 860px) {
+  .barra-conteudo {
+    gap: 10px;
+  }
+
+  .logo-texto small {
+    display: none;
+  }
+
+  .nav a {
+    padding: 0 9px;
+  }
 }
 
 .busca-movel {
@@ -753,14 +868,13 @@ button.tag:hover {
   margin-left: 6px;
   padding: 0 6px 0 12px;
   border-radius: var(--raio);
-  background: var(--inverso);
-  color: var(--inverso-texto);
   font-weight: 500;
-  transition: background-color 0.15s;
+  transition: color 0.35s var(--curva), box-shadow 0.45s var(--curva), translate 0.35s var(--curva), scale 0.45s var(--mola);
 }
 
-.carrinho-botao:hover {
-  background: var(--inverso-hover);
+.carrinho-botao:active {
+  scale: 0.96;
+  transition-duration: 0.08s;
 }
 
 .carrinho-contagem {
@@ -773,7 +887,7 @@ button.tag:hover {
   font-size: 13.5px;
   line-height: 24px;
   text-align: center;
-  animation: aparecer 0.3s ease;
+  animation: contagem-pulo 0.45s var(--mola);
 }
 
 .abas-moveis {
@@ -792,25 +906,44 @@ button.tag:hover {
 }
 
 .pagina {
-  animation: subir 0.3s var(--curva);
+  animation: pagina-entrar 0.55s var(--curva) both;
+}
+
+@keyframes pagina-entrar {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
 }
 
 .pagina-cabecalho {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 16px;
-  margin: 12px 0 28px;
+  gap: 16px 24px;
+  margin: 28px 0 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--borda);
 }
 
-.pagina-cabecalho h1 {
-  font-size: clamp(30px, 3.4vw, 40px);
-  letter-spacing: -0.02em;
+.pagina-cabecalho h1,
+.jogo-cabecalho h1,
+.nao-encontrada h1 {
+  font-size: clamp(32px, 4.4vw, 52px);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
 }
 
 .pagina-cabecalho p {
-  margin-top: 4px;
+  max-width: 60ch;
+  margin-top: 10px;
   color: var(--texto-2);
+  font-size: 16.5px;
+  line-height: 1.5;
+  text-wrap: pretty;
 }
 
 .carregando {
@@ -835,8 +968,10 @@ button.tag:hover {
 
 .secao-acoes {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 
 .secao-acoes .link-mais {
@@ -917,203 +1052,1010 @@ button.tag:hover {
 }
 
 /* ==========================================================================
-   Promoção da distribuidora (banner de largura total)
+   Vitrine de abertura: promoção da distribuidora
+   Sempre escura: a arte e o trailer do jogo em foco são o fundo.
+   --cx/--cy (-0.5…0.5) vêm do cursor e inclinam o baralho e o fundo.
    ========================================================================== */
 
-.distribuidora {
+.hero {
   --texto: #fafafa;
   --texto-2: rgba(250, 250, 250, 0.78);
-  --texto-3: rgba(250, 250, 250, 0.55);
+  --texto-3: rgba(250, 250, 250, 0.52);
   --inverso: #fafafa;
   --inverso-texto: #0a0a0a;
+  --inverso-hover: #e5e5e5;
+  --halo: rgba(250, 250, 250, 0.18);
+  --brilho-botao: rgba(250, 250, 250, 0.35);
+  --cx: 0;
+  --cy: 0;
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 31%) minmax(0, 1fr);
-  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+  min-height: clamp(580px, 46vw, 720px);
   margin: -24px calc(50% - 50vw) 0;
   overflow: hidden;
   border-bottom: 1px solid var(--borda);
-  background: #0a0a0a;
+  background: #050505;
   color: #fafafa;
   isolation: isolate;
 }
 
-.distribuidora-ambiente {
+/* --- Fundo: artes empilhadas que se cruzam + trailer --- */
+
+.hero-fundo {
   position: absolute;
-  inset: -60px;
+  inset: -3%;
   z-index: -2;
-  width: calc(100% + 120px);
-  height: calc(100% + 120px);
-  object-fit: cover;
-  filter: blur(42px) saturate(1.35) brightness(0.55);
+  transform: translate(calc(var(--cx) * -22px), calc(var(--cy) * -14px));
+  transition: transform 1.4s var(--curva);
+  animation: aparecer 1.4s ease backwards;
 }
 
-.distribuidora::after {
+.hero-fundo .imagem,
+.hero-trailer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 70% 28%;
+}
+
+.hero-fundo .imagem.carregada {
+  opacity: 0;
+  transform: scale(1.14);
+  transition: opacity 1.3s ease, transform 12s cubic-bezier(0.1, 0.6, 0.2, 1);
+}
+
+.hero-fundo .imagem.carregada.ativa {
+  opacity: 1;
+  transform: scale(1.03);
+}
+
+.hero-trailer {
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+
+.hero-trailer.pronto {
+  opacity: 1;
+}
+
+/* escurece onde fica o texto, abre luz atrás do baralho e funde na página embaixo */
+.hero-fundo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(110% 95% at 72% 42%, transparent 25%, rgba(5, 5, 5, 0.5) 70%, rgba(5, 5, 5, 0.92) 100%),
+    linear-gradient(90deg, rgba(5, 5, 5, 0.96) 0%, rgba(5, 5, 5, 0.78) 32%, rgba(5, 5, 5, 0.12) 66%, rgba(5, 5, 5, 0.4) 100%),
+    linear-gradient(0deg, #050505 0%, rgba(5, 5, 5, 0) 36%);
+}
+
+/* granulação de filme, quase imperceptível */
+.hero-grao {
+  position: absolute;
+  inset: -50%;
+  z-index: -1;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  animation: grao 0.9s steps(5) infinite;
+}
+
+@keyframes grao {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(-4%, 3%);
+  }
+  40% {
+    transform: translate(3%, -5%);
+  }
+  60% {
+    transform: translate(-2%, 4%);
+  }
+  80% {
+    transform: translate(5%, 1%);
+  }
+}
+
+/* --- Conteúdo --- */
+
+.hero-conteudo {
+  position: relative;
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 40px;
+  width: 100%;
+  max-width: var(--largura);
+  margin: 0 auto;
+  padding: 56px var(--margem) 12px;
+}
+
+.hero-texto {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  min-width: 0;
+}
+
+.hero-selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+  padding: 4px 14px 4px 12px;
+  border: 1px solid rgba(250, 250, 250, 0.16);
+  border-radius: 99px;
+  background: rgba(10, 10, 10, 0.45);
+  font-size: 13.5px;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: subir-suave 0.8s var(--curva) 0.05s backwards;
+}
+
+.hero-ponto {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #fafafa;
+  animation: ponto-vivo 2s ease-out infinite;
+}
+
+@keyframes ponto-vivo {
+  0% {
+    box-shadow: 0 0 0 0 rgba(250, 250, 250, 0.5);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 8px rgba(250, 250, 250, 0);
+  }
+}
+
+.hero-tempo {
+  padding-left: 10px;
+  border-left: 1px solid rgba(250, 250, 250, 0.2);
+  color: var(--texto-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Marca: linha sólida + linha só no contorno, reveladas por máscara */
+.hero-marca {
+  display: flex;
+  flex-direction: column;
+  font-size: clamp(46px, 5.8vw, 88px);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  text-wrap: nowrap;
+}
+
+.hero-linha {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  padding-bottom: 0.08em;
+  overflow: hidden;
+}
+
+.hero-linha > span {
+  display: block;
+  animation: linha-subir 1.15s var(--curva) 0.1s backwards;
+}
+
+.hero-linha:nth-child(2) > span {
+  animation-delay: 0.22s;
+}
+
+@keyframes linha-subir {
+  from {
+    translate: 0 108%;
+  }
+}
+
+.hero-contorno {
+  /* traço pintado por baixo de um preenchimento escuro: esconde as sobreposições
+     internas da fonte variável e deixa só o contorno externo */
+  color: #060606;
+  -webkit-text-stroke: 3px rgba(250, 250, 250, 0.85);
+  paint-order: stroke fill;
+}
+
+.hero-marca small {
+  padding-bottom: 0.35em;
+  color: var(--texto-3);
+  font-family: var(--fonte);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: 0;
+  animation: subir-suave 0.8s var(--curva) 0.55s backwards;
+}
+
+.hero-marca small strong {
+  color: #fafafa;
+  font-family: var(--fonte-titulo);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+/* Jogo em foco: troca com uma linha que se desenha e o texto subindo em cascata */
+.hero-jogo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: min(100%, 480px);
+  padding-top: 22px;
+  border-top: 1px solid rgba(250, 250, 250, 0.12);
+}
+
+.hero-jogo::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 88px;
+  height: 1px;
+  background: #fafafa;
+  transform-origin: left;
+  animation: linha-desenhar 0.9s var(--curva) backwards;
+}
+
+@keyframes linha-desenhar {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.hero-jogo > * {
+  animation: subir-suave 0.75s var(--curva) backwards;
+}
+
+.hero-jogo > :nth-child(2) {
+  animation-delay: 0.06s;
+}
+
+.hero-jogo > :nth-child(3) {
+  animation-delay: 0.12s;
+}
+
+.hero-jogo > :nth-child(4) {
+  animation-delay: 0.18s;
+}
+
+.hero-rotulo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--texto-3);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-nome {
+  font-size: clamp(26px, 2.5vw, 36px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.hero-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.botao-vidro {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* --- Baralho 3D de capas --- */
+
+.hero-baralho {
+  position: relative;
+  height: clamp(380px, 33vw, 480px);
+  perspective: 1600px;
+}
+
+.hero-cena {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(calc(var(--cx) * 16deg)) rotateX(calc(var(--cy) * -10deg));
+  transform-style: preserve-3d;
+  transition: transform 0.9s var(--curva);
+}
+
+/* Posição de cada carta: --d (lado, inteiro) menos --arrasto (fração ao vivo enquanto se arrasta)
+   dá --dv; --absv é a distância. A ativa parada fica em 1:1, nítida.
+   A mesma lista de funções em todas as cartas faz o navegador interpolar função a função,
+   sem atalhos por matriz que entortariam o caminho. As mais distantes andam um pouco depois (onda). */
+.hero-carta {
+  --largura-carta: clamp(184px, 16.5vw, 256px);
+  --dv: calc(var(--d) - var(--arrasto, 0));
+  --absv: max(var(--dv), calc(var(--dv) * -1));
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--largura-carta);
+  aspect-ratio: 2 / 3;
+  margin: calc(var(--largura-carta) * -0.75) 0 0 calc(var(--largura-carta) * -0.5);
+  /* some suavemente a partir da terceira carta, também no meio de um arraste */
+  opacity: clamp(0, min(calc(1 - var(--absv) * 0.24), calc((2.75 - var(--absv)) * 2.2)), 1);
+  transform:
+    translateX(calc(var(--dv) * 54%))
+    translateZ(calc(var(--absv) * -200px))
+    rotateY(calc(var(--dv) * -24deg));
+  transition:
+    transform 1.15s cubic-bezier(0.22, 1, 0.3, 1) calc(var(--absv) * 40ms),
+    opacity 0.8s ease calc(var(--absv) * 40ms),
+    filter 0.8s ease;
+  animation: carta-entrar 1.3s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: calc(0.3s + var(--ordem) * 0.07s);
+}
+
+.hero-carta[aria-hidden="true"] {
+  pointer-events: none;
+}
+
+/* O palco 3D não recebe ponteiro: o plano dele empataria em profundidade com a capa da frente
+   e roubaria o hover. Só as cartas visíveis recebem; o arraste é tratado no .hero-baralho (2D). */
+.hero-cena {
+  pointer-events: none;
+}
+
+.hero-carta {
+  pointer-events: auto;
+}
+
+.hero-baralho {
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* arrastando: as cartas seguem o dedo sem atraso */
+.hero-baralho.arrastando {
+  cursor: grabbing;
+}
+
+.hero-baralho.arrastando .hero-carta {
+  transition: none;
+}
+
+/* escurecimento só nas de trás: filtro na capa da frente baixaria a resolução dela */
+.hero-carta:not(.ativa) {
+  filter: brightness(calc(1 - var(--absv) * 0.3));
+}
+
+.hero-carta:not(.ativa):hover {
+  filter: brightness(calc(1.25 - var(--absv) * 0.3));
+}
+
+.hero-capa img {
+  backface-visibility: hidden;
+}
+
+@keyframes carta-entrar {
+  from {
+    opacity: 0;
+    translate: 220px 40px;
+    rotate: y -40deg;
+  }
+}
+
+/* corpo: recebe a coreografia da troca (transform via Web Animations) e o hover (translate) */
+.hero-carta-corpo {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transition: translate 0.6s var(--curva);
+}
+
+.hero-carta:not(.ativa):hover .hero-carta-corpo {
+  translate: 0 -10px;
+}
+
+.hero-carta.ativa .hero-carta-corpo {
+  animation: carta-flutuar 6s ease-in-out 1.2s infinite;
+}
+
+.hero-capa {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(250, 250, 250, 0.16);
+  border-radius: 14px;
+  background: #151515;
+  box-shadow: 0 44px 80px -30px rgba(0, 0, 0, 0.95);
+  transition: border-color 0.6s ease, box-shadow 0.8s var(--curva);
+  -webkit-box-reflect: below 12px linear-gradient(transparent 72%, rgba(255, 255, 255, 0.16));
+}
+
+.hero-capa img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* capa holográfica: inclina seguindo o cursor (--tx/--ty, -0.5…0.5) e a sombra vai para o lado oposto */
+.hero-carta.ativa .hero-capa {
+  border-color: rgba(250, 250, 250, 0.6);
+  box-shadow:
+    calc(var(--tx, 0) * -44px) calc(50px - var(--ty, 0) * 34px) 90px -30px rgba(0, 0, 0, 1),
+    0 0 70px -12px rgba(250, 250, 250, 0.22);
+  transform: perspective(900px) rotateX(calc(var(--ty, 0) * -16deg)) rotateY(calc(var(--tx, 0) * 20deg));
+  transition: transform 0.7s var(--curva), border-color 0.6s ease, box-shadow 0.7s var(--curva);
+}
+
+.hero-carta.ativa .hero-capa:hover {
+  transition: transform 0.16s ease-out, border-color 0.6s ease, box-shadow 0.16s ease-out;
+}
+
+@keyframes carta-flutuar {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -9px;
+  }
+}
+
+/* luz holográfica que acompanha o cursor */
+.hero-capa::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(circle at calc(50% + var(--tx, var(--cx)) * 120%) calc(45% + var(--ty, var(--cy)) * 120%), rgba(255, 255, 255, 0.34), transparent 55%);
+  opacity: 0;
+  mix-blend-mode: overlay;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+
+.hero-carta.ativa .hero-capa::before {
+  opacity: 0.7;
+}
+
+.hero-carta.ativa .hero-capa:hover::before {
+  opacity: 1;
+}
+
+/* reflexo que atravessa a capa em foco de tempos em tempos */
+.hero-carta.ativa .hero-capa::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.26) 50%, transparent 62%);
+  translate: -120% 0;
+  animation: carta-brilho 6s ease-in-out 1.4s infinite;
+  pointer-events: none;
+}
+
+@keyframes carta-brilho {
+  0% {
+    translate: -120% 0;
+  }
+  28%,
+  100% {
+    translate: 120% 0;
+  }
+}
+
+.hero-carta-desconto {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 3;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #fafafa;
+  color: #0a0a0a;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  opacity: calc(1 - var(--absv) * 0.5);
+  transition: opacity 0.6s ease;
+}
+
+/* ações rápidas na capa da frente: sobem no hover (no toque ficam sempre visíveis) */
+.hero-carta-acoes {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  left: 10px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid rgba(250, 250, 250, 0.16);
+  border-radius: 12px;
+  background: rgba(10, 10, 10, 0.58);
+  box-shadow: 0 14px 30px -12px rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  translate: 0 14px;
+  scale: 0.96;
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  transition: opacity 0.35s ease, translate 0.55s var(--curva), scale 0.55s var(--curva);
+}
+
+/* teclado mantém a barra aberta; clique de mouse não a deixa presa */
+.hero-carta.ativa:hover .hero-carta-acoes,
+.hero-carta-acoes:has(:focus-visible) {
+  opacity: 1;
+  translate: 0 0;
+  scale: 1;
+}
+
+@media (hover: none) {
+  .hero-carta-acoes {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+.hero-carta-acoes button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(250, 250, 250, 0.08);
+  color: #fafafa;
+  transition: background-color 0.25s ease, color 0.25s ease, scale 0.45s var(--mola);
+}
+
+.hero-carta-acoes button:hover,
+.hero-carta-acoes button.ativa {
+  background: #fafafa;
+  color: #0a0a0a;
+}
+
+.hero-carta-acoes button:active {
+  scale: 0.88;
+  transition-duration: 0.08s;
+}
+
+.hero-carta-acoes button.ativa svg {
+  animation: estalo 0.5s ease-out;
+}
+
+.hero-carta-ver {
+  flex: 1;
+  padding: 0 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.hero-carta-possui {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
+  color: var(--texto-2);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+/* nome flutuando sobre as capas laterais no hover */
+.hero-carta-nome {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  z-index: 4;
+  max-width: 150%;
+  padding: 5px 11px;
+  overflow: hidden;
+  border: 1px solid rgba(250, 250, 250, 0.18);
+  border-radius: 99px;
+  background: rgba(10, 10, 10, 0.78);
+  color: #fafafa;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  opacity: 0;
+  translate: -50% 6px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.3s ease, translate 0.45s var(--curva);
+  pointer-events: none;
+}
+
+.hero-carta:not(.ativa):hover .hero-carta-nome {
+  opacity: 1;
+  translate: -50% -100%;
+}
+
+/* faixa de luz que varre o baralho quando se usa as setas (animada em disparar()) */
+.hero-varredura {
+  position: absolute;
+  inset: -10% 10%;
+  z-index: 2;
+  background: linear-gradient(90deg, transparent 30%, rgba(255, 255, 255, 0.16) 48%, rgba(255, 255, 255, 0.28) 50%, rgba(255, 255, 255, 0.16) 52%, transparent 70%);
+  opacity: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* brilho no "chão" sob a capa em foco, respirando junto com a flutuação */
+.hero-chao {
+  position: absolute;
+  bottom: 4%;
+  left: 50%;
+  width: min(70%, 420px);
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.16), transparent);
+  filter: blur(10px);
+  translate: -50% 0;
+  animation: chao-respirar 6s ease-in-out 1.2s infinite;
+  pointer-events: none;
+}
+
+@keyframes chao-respirar {
+  0%,
+  100% {
+    opacity: 0.9;
+    scale: 1;
+  }
+  50% {
+    opacity: 0.55;
+    scale: 0.86;
+  }
+}
+
+/* --- Rodapé: progresso estilo stories + controles --- */
+
+.hero-rodape {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  max-width: var(--largura);
+  margin: 0 auto;
+  padding: 8px var(--margem) 30px;
+  animation: subir-suave 0.8s var(--curva) 0.7s backwards;
+}
+
+.hero-progresso {
+  display: flex;
+  flex: 1;
+  gap: 6px;
+  max-width: 520px;
+}
+
+.hero-progresso button {
+  position: relative;
+  flex: 1;
+  height: 18px;
+  padding: 8px 0;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(250, 250, 250, 0.18);
+  background-clip: content-box;
+  transition: background-color 0.3s ease;
+}
+
+.hero-progresso button:hover {
+  background-color: rgba(250, 250, 250, 0.4);
+}
+
+.hero-progresso button.visto {
+  background-color: rgba(250, 250, 250, 0.5);
+}
+
+.hero-progresso span {
+  position: absolute;
+  inset: 8px 0;
+  border-radius: 99px;
+  background: #fafafa;
+  transform-origin: left;
+  animation: progresso linear forwards;
+}
+
+.hero-progresso span.parado {
+  animation-play-state: paused;
+}
+
+/* Cápsula de vidro: [som] | [‹] 03: 08 [›] */
+.hero-navegacao {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  padding: 5px;
+  border: 1px solid rgba(250, 250, 250, 0.14);
+  border-radius: 99px;
+  background: rgba(10, 10, 10, 0.42);
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+}
+
+.hero-seta {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: #fafafa;
+  isolation: isolate;
+  transition: color 0.35s var(--curva), scale 0.45s var(--mola);
+}
+
+/* preenchimento branco que cresce do centro */
+.hero-seta::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  background:
-    radial-gradient(60% 85% at 72% 55%, rgba(255, 196, 128, 0.16), transparent 70%),
-    linear-gradient(180deg, rgba(10, 10, 10, 0.25), rgba(10, 10, 10, 0.55));
+  border-radius: inherit;
+  background: #fafafa;
+  transform: scale(0);
+  transition: transform 0.55s var(--curva);
 }
 
-.distribuidora-personagem {
-  position: relative;
-  display: block;
-  /* a borda clara acompanha o recorte diagonal */
-  filter: drop-shadow(3px 0 0 rgba(250, 250, 250, 0.85)) drop-shadow(14px 0 28px rgba(0, 0, 0, 0.55));
+.hero-seta:hover,
+.hero-seta[aria-pressed="true"] {
+  color: #0a0a0a;
 }
 
-.distribuidora-recorte {
+.hero-seta:hover::before,
+.hero-seta[aria-pressed="true"]::before {
+  transform: scale(1);
+}
+
+.hero-seta:active {
+  scale: 0.88;
+  transition-duration: 0.08s;
+}
+
+/* onda que se expande no clique (animada em disparar()) */
+.hero-seta-onda {
   position: absolute;
   inset: 0;
-  overflow: hidden;
-  clip-path: polygon(0 0, 100% 0, 86% 100%, 0 100%);
+  border: 1.5px solid #fafafa;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
 }
 
-.distribuidora-recorte img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 18%;
-  transform: scale(1.02) translateZ(0);
-  transition: opacity 0.35s ease, transform 1.4s var(--zoom);
-}
-
-.distribuidora-personagem:hover .distribuidora-recorte img {
-  transform: scale(1.07) translateZ(0);
-}
-
-.distribuidora-conteudo {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 30px;
-  min-width: 0;
-  padding: 44px max(var(--margem), calc((100vw - var(--largura)) / 2 + var(--margem))) 40px 32px;
-}
-
-.distribuidora-titulo {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  align-self: flex-start;
-  color: #fafafa;
-}
-
-.distribuidora-chamada {
-  font-size: clamp(20px, 2vw, 30px);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.5);
-}
-
-.distribuidora-divisor {
-  width: 2px;
-  height: 60px;
-  flex-shrink: 0;
-  background: rgba(250, 250, 250, 0.85);
-}
-
-.distribuidora-marca {
-  display: flex;
-  flex-direction: column;
-  font-size: clamp(26px, 2.6vw, 38px);
-  font-weight: 800;
-  line-height: 0.95;
-  text-transform: uppercase;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.5);
-}
-
-.distribuidora-marca small {
-  margin-top: 6px;
-  font-size: 0.48em;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-}
-
-.distribuidora-jogos {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 28px;
-}
-
-.distribuidora-jogo {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-width: 0;
-  transform: skewX(-4deg);
-  transition: transform 0.45s var(--curva);
-}
-
-.distribuidora-capa {
+/* seta que "troca": a atual sai por um lado e a nova entra pelo outro */
+.hero-seta-icones {
+  position: relative;
   display: block;
-  aspect-ratio: 616 / 353;
+  width: 18px;
+  height: 18px;
   overflow: hidden;
-  border: 3px solid rgba(250, 250, 250, 0.88);
-  background: #1a1a1a;
-  box-shadow: 0 0 36px rgba(255, 205, 150, 0.32), 0 22px 44px rgba(0, 0, 0, 0.6);
-  transition: box-shadow 0.45s ease, border-color 0.3s;
 }
 
-.distribuidora-capa img {
+.hero-seta-icones svg {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.55s var(--curva);
+}
+
+.hero-seta[data-sentido="proximo"] .hero-seta-icones svg:last-child {
+  transform: translateX(-150%);
+}
+
+.hero-seta[data-sentido="proximo"]:hover .hero-seta-icones svg:first-child {
+  transform: translateX(150%);
+}
+
+.hero-seta[data-sentido="anterior"] .hero-seta-icones svg:last-child {
+  transform: translateX(150%);
+}
+
+.hero-seta[data-sentido="anterior"]:hover .hero-seta-icones svg:first-child {
+  transform: translateX(-150%);
+}
+
+.hero-seta:hover .hero-seta-icones svg:last-child {
+  transform: translateX(0);
+}
+
+/* anel de tempo até a próxima troca */
+.hero-anel {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transform: skewX(4deg) scale(1.08) translateZ(0);
-  transition: opacity 0.35s ease, transform 1.2s var(--zoom);
+  rotate: -90deg;
+  pointer-events: none;
 }
 
-.distribuidora-jogo:hover {
-  transform: skewX(-4deg) translateY(-8px);
+.hero-anel circle {
+  fill: none;
+  stroke-width: 1.5;
 }
 
-.distribuidora-jogo:hover .distribuidora-capa {
-  border-color: #fff;
-  box-shadow: 0 0 64px rgba(255, 210, 160, 0.55), 0 30px 56px rgba(0, 0, 0, 0.65);
+.hero-anel-trilho {
+  stroke: rgba(250, 250, 250, 0.14);
 }
 
-.distribuidora-jogo:hover .distribuidora-capa img {
-  transform: skewX(4deg) scale(1.15) translateZ(0);
+.hero-anel-tempo {
+  stroke: #fafafa;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: anel-tempo linear forwards;
+  transition: stroke 0.35s ease;
 }
 
-.distribuidora-info {
+.hero-anel-tempo.parado {
+  animation-play-state: paused;
+}
+
+.hero-seta:hover .hero-anel-tempo {
+  stroke: #0a0a0a;
+}
+
+@keyframes anel-tempo {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.hero-divisor {
+  width: 1px;
+  height: 22px;
+  margin: 0 4px;
+  background: rgba(250, 250, 250, 0.16);
+}
+
+/* contador: o número rola na direção da troca */
+.hero-contador {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  min-width: 0;
-  transform: skewX(4deg);
+  gap: 8px;
+  padding: 0 8px;
+  color: var(--texto-3);
+  font-family: var(--fonte-mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
 }
 
-.distribuidora-nome {
+.hero-contador i {
+  width: 16px;
+  height: 1px;
+  background: rgba(250, 250, 250, 0.3);
+}
+
+.hero-contador-janela {
+  display: block;
+  height: 1.3em;
   overflow: hidden;
-  font-size: 15.5px;
-  font-weight: 600;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6);
+  color: #fafafa;
+  line-height: 1.3;
 }
 
-.distribuidora-ver {
-  align-self: flex-start;
-  color: rgba(250, 250, 250, 0.75);
-  font-size: 14.5px;
-  font-weight: 500;
-  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
-  transition: background-size 0.4s var(--curva), color 0.2s;
+.hero-contador-atual {
+  display: block;
+  animation: contador-frente 0.6s var(--curva);
 }
 
-.distribuidora-ver:hover {
-  color: #fff;
-  background-size: 100% 1px;
+.hero-contador-atual[data-sentido="tras"] {
+  animation-name: contador-tras;
+}
+
+@keyframes contador-frente {
+  from {
+    translate: 0 110%;
+    opacity: 0;
+  }
+}
+
+@keyframes contador-tras {
+  from {
+    translate: 0 -110%;
+    opacity: 0;
+  }
+}
+
+@media (max-width: 1000px) {
+  .hero-conteudo {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding-top: 28px;
+  }
+
+  .hero-baralho {
+    order: -1;
+    height: 340px;
+  }
+
+  .hero-carta {
+    --largura-carta: 168px;
+  }
+
+  .hero-fundo::after {
+    background: linear-gradient(0deg, #050505 30%, rgba(5, 5, 5, 0.55) 70%, rgba(5, 5, 5, 0.45));
+  }
+}
+
+@media (max-width: 720px) {
+  .hero {
+    margin-top: -16px;
+  }
+
+  .hero-baralho {
+    height: 270px;
+  }
+
+  .hero-carta {
+    --largura-carta: 128px;
+  }
+
+  .hero-tempo {
+    display: none;
+  }
+
+  .hero-texto {
+    gap: 18px;
+  }
+
+  .hero-linha {
+    gap: 14px;
+  }
+
+  .hero-marca small strong {
+    font-size: 19px;
+  }
+
+  .hero-acoes .botao {
+    flex: 1 1 auto;
+  }
+
+  /* no celular o contador e o anel já mostram posição e tempo */
+  .hero-progresso {
+    display: none;
+  }
+
+  .hero-seta {
+    width: 40px;
+    height: 40px;
+  }
+
+  .hero-contador {
+    padding: 0 4px;
+  }
 }
 
 /* ==========================================================================
-   Destaques e recomendados — slide central com vizinhos nas laterais
+   Destaques e recomendados: slide central com vizinhos nas laterais
    ========================================================================== */
 
 .destaques {
@@ -1334,13 +2276,16 @@ button.tag:hover {
   margin-top: 14px;
 }
 
+/* o traço tem 4px, mas o botão tem 24px de altura para o dedo acertar */
 .destaques-pontos button {
   position: relative;
   width: 26px;
-  height: 4px;
+  height: 24px;
+  padding: 10px 0;
   overflow: hidden;
   border-radius: 99px;
   background: var(--borda-2);
+  background-clip: content-box;
   transition: background-color 0.2s, width 0.3s var(--curva);
 }
 
@@ -1354,7 +2299,8 @@ button.tag:hover {
 
 .destaques-pontos span {
   position: absolute;
-  inset: 0;
+  inset: 10px 0;
+  border-radius: 99px;
   background: var(--texto);
   transform-origin: left;
   animation: progresso linear forwards;
@@ -1380,66 +2326,7 @@ button.tag:hover {
   }
 }
 
-@media (max-width: 1000px) {
-  .distribuidora {
-    grid-template-columns: 1fr;
-    min-height: 0;
-  }
-
-  .distribuidora-personagem {
-    display: none;
-  }
-
-  .distribuidora-conteudo {
-    padding: 32px var(--margem);
-  }
-
-  .distribuidora-jogos {
-    gap: 16px;
-  }
-}
-
 @media (max-width: 720px) {
-  .distribuidora {
-    margin-top: -16px;
-  }
-
-  .distribuidora-titulo {
-    flex-wrap: wrap;
-    gap: 6px 14px;
-  }
-
-  .distribuidora-divisor {
-    height: 40px;
-  }
-
-  .distribuidora-jogos {
-    gap: 10px;
-  }
-
-  .distribuidora-jogo,
-  .distribuidora-jogo:hover,
-  .distribuidora-info {
-    transform: none;
-  }
-
-  .distribuidora-capa {
-    border-width: 2px;
-  }
-
-  .distribuidora-capa img,
-  .distribuidora-jogo:hover .distribuidora-capa img {
-    transform: scale(1.08);
-  }
-
-  .distribuidora-nome {
-    display: none;
-  }
-
-  .distribuidora-info .preco s {
-    display: none;
-  }
-
   .destaques-seta {
     display: none;
   }
@@ -1534,7 +2421,7 @@ button.tag:hover {
   border: 1px solid var(--borda);
   border-radius: var(--raio);
   background: var(--sup-2);
-  transition: border-color 0.25s;
+  transition: border-color 0.3s ease, translate 0.5s var(--curva), box-shadow 0.5s var(--curva), transform 0.45s var(--curva);
 }
 
 .cartao-imagem img {
@@ -1543,7 +2430,7 @@ button.tag:hover {
   object-fit: cover;
   transform: scale(1) translateZ(0);
   backface-visibility: hidden;
-  transition: opacity 0.35s ease, transform 1.2s var(--zoom);
+  transition: opacity 0.35s ease, filter 0.5s ease, transform 1.2s var(--zoom);
 }
 
 .cartao:hover .cartao-imagem {
@@ -1551,7 +2438,8 @@ button.tag:hover {
 }
 
 .cartao:hover .cartao-imagem img {
-  transform: scale(1.06) translateZ(0);
+  transform: scale(1.035) translateZ(0);
+  filter: saturate(1.12) brightness(1.04);
 }
 
 .acoes-rapidas {
@@ -1588,7 +2476,12 @@ button.tag:hover {
   color: #fafafa;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  transition: background-color 0.15s, color 0.15s;
+  transition: background-color 0.2s ease, color 0.2s ease, scale 0.45s var(--mola);
+}
+
+.acao-rapida:active {
+  scale: 0.86;
+  transition-duration: 0.08s;
 }
 
 .acao-rapida:hover {
@@ -1645,6 +2538,10 @@ button.tag:hover {
   font-size: 14px;
 }
 
+.cartao {
+  container-type: inline-size;
+}
+
 .cartao-rodape {
   display: flex;
   align-items: center;
@@ -1652,6 +2549,29 @@ button.tag:hover {
   gap: 8px;
   min-height: 32px;
   margin-top: 6px;
+}
+
+/* preço sempre numa linha só, para todos os cards terem a mesma altura */
+.cartao-rodape .preco {
+  flex-wrap: nowrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.cartao-rodape .preco-desconto,
+.cartao-rodape .preco s {
+  font-size: 12.5px;
+}
+
+.cartao-rodape .preco-final {
+  font-size: 15px;
+}
+
+/* card estreito: o preço antigo sai, o desconto e o preço final ficam */
+@container (max-width: 225px) {
+  .cartao-rodape .preco s {
+    display: none;
+  }
 }
 
 .cartao-carrinho {
@@ -1663,7 +2583,12 @@ button.tag:hover {
   border: 1px solid var(--borda-2);
   border-radius: var(--raio);
   color: var(--texto-2);
-  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+  transition: background-color 0.2s var(--curva), color 0.2s ease, border-color 0.2s ease, scale 0.45s var(--mola);
+}
+
+.cartao-carrinho:active {
+  scale: 0.88;
+  transition-duration: 0.08s;
 }
 
 .cartao-carrinho:hover,
@@ -1691,7 +2616,7 @@ button.tag:hover {
   border: 1px solid var(--borda);
   border-radius: var(--raio-g);
   background: var(--sup-1);
-  transition: border-color 0.25s;
+  transition: border-color 0.3s ease, translate 0.5s var(--curva), box-shadow 0.5s var(--curva);
 }
 
 .oferta:hover {
@@ -1827,7 +2752,7 @@ button.tag:hover {
   width: 100%;
   min-height: 66px;
   padding: 8px 14px 8px 8px;
-  transition: background-color 0.12s;
+  transition: background-color 0.25s var(--curva);
 }
 
 .linha + .linha {
@@ -1933,7 +2858,7 @@ button.tag:hover {
 }
 
 /* ==========================================================================
-   Categorias — em preto e branco, ganham cor no hover
+   Categorias: em preto e branco, ganham cor no hover
    ========================================================================== */
 
 .categorias {
@@ -1955,6 +2880,7 @@ button.tag:hover {
   background: var(--sup-2);
   color: #fafafa;
   isolation: isolate;
+  transition: border-color 0.3s ease, translate 0.5s var(--curva), box-shadow 0.5s var(--curva);
 }
 
 .categoria img {
@@ -2073,13 +2999,10 @@ button.tag:hover {
 }
 
 .evento .botao-primario {
+  --inverso: #fafafa;
+  --inverso-texto: #0a0a0a;
+  --texto: #fafafa;
   margin-top: 4px;
-  background: #fafafa;
-  color: #0a0a0a;
-}
-
-.evento .botao-primario:hover {
-  background: #d4d4d4;
 }
 
 .evento-jogos {
@@ -2090,12 +3013,12 @@ button.tag:hover {
 
 .evento-jogo {
   position: relative;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 2 / 3;
   overflow: hidden;
   border: 1px solid rgba(250, 250, 250, 0.12);
   border-radius: var(--raio);
   background: #1a1a1a;
-  transition: transform 0.35s var(--curva), border-color 0.25s;
+  transition: transform 0.5s var(--curva), border-color 0.3s ease, box-shadow 0.5s var(--curva);
 }
 
 .evento-jogo img {
@@ -2106,7 +3029,8 @@ button.tag:hover {
 
 .evento-jogo:hover {
   border-color: rgba(250, 250, 250, 0.5);
-  transform: translateY(-4px);
+  transform: translateY(-6px);
+  box-shadow: 0 24px 40px -18px rgba(0, 0, 0, 0.8);
 }
 
 .evento-jogo .preco-desconto {
@@ -2179,14 +3103,9 @@ button.tag:hover {
 }
 
 .franquia .botao-secundario {
-  border-color: rgba(250, 250, 250, 0.25);
-  background: transparent;
-  color: #fafafa;
-}
-
-.franquia .botao-secundario:hover {
-  border-color: #fafafa;
-  background: rgba(250, 250, 250, 0.08);
+  --inverso: #fafafa;
+  --inverso-texto: #0a0a0a;
+  --texto: #fafafa;
 }
 
 .franquia-jogos {
@@ -2204,7 +3123,7 @@ button.tag:hover {
 
 .franquia-jogos img {
   width: 100%;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 2 / 3;
   border: 1px solid rgba(250, 250, 250, 0.12);
   border-radius: var(--raio-p);
   object-fit: cover;
@@ -2389,6 +3308,7 @@ button.tag:hover {
 
 .faixa {
   width: 100%;
+  height: 28px;
   accent-color: var(--texto);
   cursor: pointer;
 }
@@ -2521,9 +3441,14 @@ button.tag:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 4px 8px;
   color: var(--texto-3);
   font-size: 14.5px;
+}
+
+.trilha a,
+.trilha button {
+  padding-block: 6px;
 }
 
 .trilha a:hover,
@@ -2539,10 +3464,7 @@ button.tag:hover {
   margin: 14px 0 22px;
 }
 
-.jogo-cabecalho h1 {
-  font-size: clamp(32px, 4.2vw, 50px);
-  letter-spacing: -0.02em;
-}
+
 
 .jogo-meta {
   display: flex;
@@ -4119,16 +5041,57 @@ button.tag:hover {
 }
 
 .notificacao {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 10px;
+  overflow: hidden;
   border: 1px solid var(--borda-2);
   border-radius: var(--raio-g);
   background: var(--sup-1);
   box-shadow: var(--sombra);
   pointer-events: auto;
-  animation: paleta-entrar 0.25s var(--curva);
+  animation: notificacao-entrar 0.5s var(--mola);
+}
+
+/* tempo restante até a notificação sumir */
+.notificacao::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--texto-3);
+  opacity: 0.5;
+  transform-origin: left;
+  animation: esvaziar var(--duracao, 4.2s) linear forwards;
+}
+
+.notificacao.saindo {
+  animation: notificacao-sair 0.24s ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes notificacao-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.94);
+  }
+}
+
+@keyframes notificacao-sair {
+  to {
+    opacity: 0;
+    transform: translateX(24px) scale(0.97);
+  }
+}
+
+@keyframes esvaziar {
+  to {
+    transform: scaleX(0);
+  }
 }
 
 .notificacao img {
@@ -4217,8 +5180,13 @@ button.tag:hover {
 .rodape-coluna {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
   color: var(--texto-2);
+}
+
+.rodape-coluna a {
+  align-self: flex-start;
+  padding-block: 5px;
 }
 
 .rodape-coluna h3 {
@@ -4256,7 +5224,7 @@ button.tag:hover {
 }
 
 /* ==========================================================================
-   Hover — efeitos que reagem ao cursor
+   Hover: efeitos que reagem ao cursor
    ========================================================================== */
 
 :root,
@@ -4264,12 +5232,16 @@ button.tag:hover {
   --luz: rgba(255, 255, 255, 0.6);
   --luz-suave: rgba(255, 255, 255, 0.07);
   --halo: rgba(250, 250, 250, 0.16);
+  --brilho-botao: rgba(250, 250, 250, 0.35);
+  --sombra-elevada: 0 22px 44px -20px rgba(0, 0, 0, 0.85);
 }
 
 [data-tema="claro"] {
   --luz: rgba(10, 10, 10, 0.5);
   --luz-suave: rgba(10, 10, 10, 0.045);
   --halo: rgba(10, 10, 10, 0.12);
+  --brilho-botao: rgba(10, 10, 10, 0.35);
+  --sombra-elevada: 0 22px 40px -22px rgba(0, 0, 0, 0.35);
 }
 
 /* Blocos com arte escura de fundo usam sempre luz clara. */
@@ -4444,7 +5416,16 @@ button.tag:hover {
 
   .cartao:hover .cartao-imagem {
     border-color: var(--borda-2);
-    box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.7);
+    box-shadow: var(--sombra-elevada);
+    translate: 0 -4px;
+    transform: perspective(800px) rotateX(calc(var(--ty, 0) * -8deg)) rotateY(calc(var(--tx, 0) * 10deg));
+  }
+
+  /* --- Blocos clicáveis sobem um pouco --- */
+  .oferta:hover,
+  .categoria:hover {
+    box-shadow: var(--sombra-elevada);
+    translate: 0 -3px;
   }
 
   /* --- Foco por contraste: vizinhos recuam --- */
@@ -4453,7 +5434,13 @@ button.tag:hover {
   .evento-jogo,
   .franquia-jogos button,
   .categorias > .categoria {
-    transition: opacity 0.4s ease, border-color 0.25s, transform 0.35s var(--curva), box-shadow 0.3s;
+    transition:
+      opacity 0.45s ease,
+      filter 0.45s ease,
+      border-color 0.3s ease,
+      transform 0.5s var(--curva),
+      translate 0.5s var(--curva),
+      box-shadow 0.5s var(--curva);
   }
 
   .trilho:has(.cartao:hover) > .cartao:not(:hover),
@@ -4461,16 +5448,17 @@ button.tag:hover {
   .evento-jogos:has(.evento-jogo:hover) .evento-jogo:not(:hover),
   .franquia-jogos:has(button:hover) button:not(:hover),
   .categorias:has(.categoria:hover) > .categoria:not(:hover) {
-    opacity: 0.45;
+    opacity: 0.5;
+    filter: saturate(0.6);
   }
 
   /* --- Paralaxe nas artes --- */
-  .slide-midia img,
+  .slide-midia .arte,
   .galeria-palco img {
     transition: opacity 0.35s ease, transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
-  .slide-midia:hover img,
+  .slide-midia:hover .arte,
   .galeria-palco:hover img {
     transform: scale(1.07) translate(calc(var(--px, 0) * -2.2%), calc(var(--py, 0) * -2.2%));
   }
@@ -4584,19 +5572,26 @@ button.tag:hover {
   }
 
   /* --- Botões: halo e resposta tátil --- */
-  .botao-primario,
-  .carrinho-botao,
   .notificacao-acao {
-    transition: background-color 0.15s, box-shadow 0.25s ease, transform 0.1s;
+    transition: background-color 0.2s var(--curva), box-shadow 0.35s var(--curva);
   }
 
   .botao-primario:hover:not(:disabled),
+  .botao-secundario:hover:not(:disabled),
+  .botao-vidro:hover:not(:disabled),
   .carrinho-botao:hover {
-    box-shadow: 0 0 0 4px var(--halo);
+    box-shadow: 0 0 0 4px var(--halo), 0 14px 32px -12px var(--brilho-botao);
   }
 
-  .botao-secundario:hover:not(:disabled) {
-    box-shadow: 0 0 0 3px var(--sup-2);
+  .botao-primario:hover:not(:disabled),
+  .botao-secundario:hover:not(:disabled),
+  .botao-vidro:hover:not(:disabled),
+  .botao-perigo:hover:not(:disabled) {
+    translate: 0 -2px;
+  }
+
+  .botao:active:not(:disabled) {
+    translate: 0 0;
   }
 
   .botao svg,
@@ -4697,6 +5692,1656 @@ button.tag:hover {
   }
 }
 
+/* ==========================================================================
+   Prateleiras: setas laterais, páginas e bordas que indicam "tem mais"
+   ========================================================================== */
+
+.prateleira-corpo {
+  position: relative;
+}
+
+/* espaço para o card subir e a sombra aparecer sem ser cortada pela rolagem */
+.prateleira-corpo .trilho {
+  margin: -10px 0 -30px;
+  padding: 10px 0 30px;
+  --fade-e: 0px;
+  --fade-d: 0px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--fade-e), #000 calc(100% - var(--fade-d)), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 var(--fade-e), #000 calc(100% - var(--fade-d)), transparent);
+}
+
+.prateleira-corpo:not(.no-inicio) .trilho {
+  --fade-e: 56px;
+}
+
+.prateleira-corpo:not(.no-fim) .trilho {
+  --fade-d: 56px;
+}
+
+.prateleira-seta {
+  --deslocamento: min(24px, calc(var(--margem) - 4px));
+  position: absolute;
+  top: calc(var(--altura-arte, 112px) / 2);
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-top: -24px;
+  border: 1px solid var(--borda-2);
+  border-radius: 50%;
+  background: var(--vidro);
+  color: var(--texto);
+  box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  opacity: 0;
+  scale: 0.8;
+  transition:
+    opacity 0.25s ease,
+    scale 0.45s var(--mola),
+    translate 0.35s var(--curva),
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.prateleira-seta.esquerda {
+  left: calc(var(--deslocamento) * -1);
+}
+
+.prateleira-seta.direita {
+  right: calc(var(--deslocamento) * -1);
+}
+
+.prateleira-corpo:hover .prateleira-seta:not(:disabled),
+.prateleira-seta:focus-visible {
+  opacity: 1;
+  scale: 1;
+}
+
+.prateleira-seta:hover:not(:disabled) {
+  border-color: var(--inverso);
+  background: var(--inverso);
+  color: var(--inverso-texto);
+}
+
+.prateleira-seta.esquerda:hover:not(:disabled) {
+  translate: -2px 0;
+}
+
+.prateleira-seta.direita:hover:not(:disabled) {
+  translate: 2px 0;
+}
+
+.prateleira-seta:active:not(:disabled) {
+  scale: 0.9;
+  transition-duration: 0.08s;
+}
+
+.prateleira-seta:disabled {
+  pointer-events: none;
+}
+
+@media (hover: none) {
+  .prateleira-seta {
+    display: none;
+  }
+}
+
+.prateleira-paginas {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-right: 10px;
+}
+
+.prateleira-paginas button {
+  width: 24px;
+  height: 24px;
+  padding: 10px 5px;
+  border-radius: 99px;
+  background: var(--borda-2);
+  background-clip: content-box;
+  transition: width 0.4s var(--curva), background-color 0.25s ease;
+}
+
+.prateleira-paginas button:hover {
+  background-color: var(--texto-3);
+}
+
+.prateleira-paginas button.ativa {
+  width: 38px;
+  background-color: var(--texto);
+}
+
+/* ==========================================================================
+   Trailers
+   ========================================================================== */
+
+.trailer {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+/* prévias: sobem por cima da arte quando o vídeo começa de fato */
+.cartao-trailer,
+.slide-trailer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+}
+
+.cartao-trailer.pronto,
+.slide-trailer.pronto {
+  opacity: 1;
+}
+
+.slide-selo-trailer {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid rgba(250, 250, 250, 0.18);
+  border-radius: 99px;
+  background: rgba(10, 10, 10, 0.6);
+  color: #fafafa;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.3s ease;
+}
+
+.slide-midia:has(.slide-trailer.pronto) .slide-selo-trailer {
+  opacity: 0;
+}
+
+.galeria-video {
+  object-fit: contain;
+}
+
+.galeria-palco:has(.galeria-video) .galeria-contagem {
+  top: 12px;
+  bottom: auto;
+}
+
+.galeria-palco:has(.galeria-video) .galeria-seta {
+  margin-top: -40px;
+}
+
+.galeria-mini-trailer {
+  position: relative;
+}
+
+.galeria-play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fafafa;
+  background: rgba(10, 10, 10, 0.35);
+}
+
+.galeria-play svg {
+  width: 26px;
+  height: 26px;
+  padding: 6px;
+  border-radius: 50%;
+  background: rgba(10, 10, 10, 0.7);
+}
+
+/* ==========================================================================
+   Artes inteiras: a imagem cabe sem cortar e uma cópia desfocada preenche o resto
+   ========================================================================== */
+
+.oferta-grande .oferta-imagem {
+  position: relative;
+}
+
+.slide-midia .arte-fundo,
+.oferta-grande .oferta-imagem .arte-fundo {
+  position: absolute;
+  inset: -32px;
+  width: calc(100% + 64px);
+  height: calc(100% + 64px);
+  object-fit: cover;
+  filter: blur(30px) brightness(0.55) saturate(1.25);
+  pointer-events: none;
+}
+
+.slide-midia .arte,
+.oferta-grande .oferta-imagem .arte {
+  position: relative;
+  z-index: 1;
+  object-fit: contain;
+}
+
+.slide-previa {
+  z-index: 2;
+}
+
+/* ==========================================================================
+   Universos: áreas temáticas das franquias favoritas
+   Cada uma usa a linguagem visual do próprio jogo e é sempre escura,
+   independente do tema da loja.
+   ========================================================================== */
+
+.universo-possui {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--texto-2);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------------------------------
+   Soulslike: galeria épica. Painéis verticais lado a lado; o que recebe o
+   mouse se abre e troca a capa pela arte larga do jogo.
+   Desempenho: as imagens têm tamanho fixo e centralizado. Ao abrir, o painel
+   só revela mais da imagem; nada é reescalado a cada quadro da animação.
+   --------------------------------------------------------------------------- */
+
+.sanfona {
+  --sanfona-curva: cubic-bezier(0.7, 0, 0.18, 1);
+  display: flex;
+  gap: 10px;
+  height: clamp(380px, 34vw, 500px);
+}
+
+.sanfona-painel {
+  /* texto sempre claro: o fundo é a arte do jogo, nos dois temas */
+  --texto: #fafafa;
+  --texto-2: rgba(250, 250, 250, 0.76);
+  --texto-3: rgba(250, 250, 250, 0.55);
+  --inverso: #fafafa;
+  --inverso-texto: #0a0a0a;
+  --halo: rgba(250, 250, 250, 0.16);
+  --brilho-botao: rgba(250, 250, 250, 0.3);
+  --px: 0;
+  --py: 0;
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-g);
+  background: #111;
+  color: var(--texto);
+  isolation: isolate;
+  contain: layout paint;
+  /* só flex-grow e borda mudam na abertura: sombra animada seria redesenhada a cada quadro */
+  transition: flex-grow 0.85s var(--sanfona-curva), border-color 0.4s ease;
+}
+
+.sanfona-painel.aberto {
+  flex-grow: 7;
+  border-color: var(--borda-2);
+}
+
+/* imagens com tamanho fixo, centralizadas: o painel apenas mostra mais ou menos delas */
+.sanfona-capa,
+.sanfona-arte {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: -2;
+  height: 100%;
+  object-fit: cover;
+  translate: -50% 0;
+  /* camada própria na GPU: ao abrir o painel, a imagem só é recortada, nunca repintada */
+  will-change: transform;
+}
+
+.sanfona-capa {
+  width: 340px;
+  min-width: 100%;
+  filter: saturate(0.8) brightness(0.7);
+  transition: opacity 0.35s ease, filter 0.5s ease;
+}
+
+.sanfona-painel:hover .sanfona-capa {
+  filter: saturate(1) brightness(0.9);
+}
+
+/* arte larga: aparece no painel aberto, assenta com um leve zoom e acompanha o cursor */
+.sanfona-painel .sanfona-arte.imagem {
+  width: 980px;
+  max-width: none;
+  object-position: 50% 30%;
+  opacity: 0;
+  scale: 1.12;
+  translate: calc(-50% + var(--px) * -26px) calc(var(--py) * -16px);
+  transition: opacity 0.7s ease, scale 1.6s var(--zoom), translate 0.8s var(--curva);
+}
+
+.sanfona-painel.aberto .sanfona-arte.imagem.carregada {
+  opacity: 1;
+  scale: 1.05;
+}
+
+/* escurece embaixo para o texto ler sobre qualquer arte */
+.sanfona-painel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.45) 42%, rgba(0, 0, 0, 0) 70%);
+  pointer-events: none;
+}
+
+/* reflexo de luz que atravessa o painel uma vez, quando ele abre */
+.sanfona-painel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.14) 50%, transparent 62%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sanfona-painel.aberto::before {
+  animation: sanfona-brilho 1.3s ease-out 0.35s;
+}
+
+@keyframes sanfona-brilho {
+  from {
+    opacity: 1;
+    translate: -100% 0;
+  }
+  to {
+    opacity: 1;
+    translate: 100% 0;
+  }
+}
+
+/* o painel inteiro é clicável; os botões da informação ficam por cima */
+.sanfona-gatilho {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+.sanfona-gatilho:focus-visible {
+  outline-offset: -3px;
+}
+
+.sanfona-vertical {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  z-index: 2;
+  max-height: 72%;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+  writing-mode: vertical-rl;
+  transform: translateX(-50%) rotate(180deg);
+  transition: opacity 0.3s ease, translate 0.45s var(--curva);
+  pointer-events: none;
+}
+
+.sanfona-painel:not(.aberto):hover .sanfona-vertical {
+  translate: 0 -8px;
+}
+
+.sanfona-painel.aberto .sanfona-vertical {
+  opacity: 0;
+}
+
+.sanfona-desconto {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: #fafafa;
+  color: #0a0a0a;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.sanfona-info {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 420px;
+  padding: 28px 28px 32px;
+  pointer-events: none;
+}
+
+.sanfona-info button {
+  pointer-events: auto;
+}
+
+.sanfona-meta {
+  color: var(--texto-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* título revelado por máscara */
+.sanfona-titulo {
+  overflow: hidden;
+  font-size: clamp(24px, 2.4vw, 34px);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+
+.sanfona-titulo span {
+  display: block;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+}
+
+.sanfona-detalhes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--texto-2);
+  font-size: 14.5px;
+}
+
+.sanfona-detalhes strong {
+  padding: 1px 7px;
+  border: 1px solid rgba(250, 250, 250, 0.35);
+  border-radius: 4px;
+  color: #fafafa;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.sanfona-compra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 20px;
+  margin-top: 6px;
+}
+
+.sanfona-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* tempo até a troca automática */
+.sanfona-tempo {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  height: 2px;
+  background: rgba(250, 250, 250, 0.85);
+  transform-origin: left;
+  animation: progresso linear forwards;
+  pointer-events: none;
+}
+
+.sanfona-tempo.parado {
+  animation-play-state: paused;
+}
+
+/* entrada em cortina: cada painel é revelado de baixo para cima, em sequência */
+.galeria-souls.revelar .sanfona-painel {
+  clip-path: inset(100% 0 0 0 round var(--raio-g));
+}
+
+.galeria-souls.revelar.revelado .sanfona-painel {
+  clip-path: inset(0 0 0 0 round var(--raio-g));
+  transition:
+    clip-path 1s var(--sanfona-curva) calc(min(var(--ordem, 0), 9) * 70ms + 0.15s),
+    flex-grow 0.85s var(--sanfona-curva);
+}
+
+/* computador: a informação só existe no painel aberto e entra em cascata depois que ele cresceu */
+@media (min-width: 721px) {
+  /* fechado: o navegador nem calcula o conteúdo da informação (layout e pintura pulados),
+     o que deixa a abertura leve; a troca é adiada até a saída terminar */
+  .sanfona-painel:not(.aberto) .sanfona-info {
+    visibility: hidden;
+    content-visibility: hidden;
+    transition: visibility 0s linear 0.3s, content-visibility 0s linear 0.3s;
+    transition-behavior: allow-discrete;
+  }
+
+  .sanfona-info > * {
+    opacity: 0;
+    translate: 0 16px;
+    transition: opacity 0.2s ease, translate 0.3s ease;
+  }
+
+  .sanfona-titulo span {
+    translate: 0 110%;
+    transition: translate 0.3s ease;
+  }
+
+  .sanfona-painel.aberto .sanfona-info > * {
+    opacity: 1;
+    translate: 0 0;
+    transition: opacity 0.5s ease var(--atraso), translate 0.75s var(--curva) var(--atraso);
+  }
+
+  .sanfona-painel.aberto .sanfona-titulo span {
+    translate: 0 0;
+    transition: translate 0.9s var(--curva) 0.42s;
+  }
+
+  .sanfona-info > :nth-child(1) {
+    --atraso: 0.34s;
+  }
+
+  .sanfona-info > :nth-child(2) {
+    --atraso: 0.4s;
+  }
+
+  .sanfona-info > :nth-child(3) {
+    --atraso: 0.5s;
+  }
+
+  .sanfona-info > :nth-child(4) {
+    --atraso: 0.58s;
+  }
+}
+
+/* celular: fileira de cards grandes que se arrasta para o lado, tudo visível */
+@media (max-width: 720px) {
+  .sanfona {
+    height: auto;
+    margin-inline: calc(var(--margem) * -1);
+    padding-inline: var(--margem);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--margem);
+    scrollbar-width: none;
+  }
+
+  .sanfona::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sanfona-painel,
+  .sanfona-painel.aberto {
+    flex: 0 0 78%;
+    height: 440px;
+    scroll-snap-align: start;
+  }
+
+  .sanfona-capa {
+    left: 0;
+    width: 100%;
+    filter: none;
+    translate: none;
+  }
+
+  .sanfona-arte,
+  .sanfona-vertical,
+  .sanfona-tempo,
+  .sanfona-painel::before {
+    display: none;
+  }
+
+  .sanfona-info {
+    min-width: 0;
+    padding: 20px;
+  }
+}
+
+/* fundo que surge com um leve zoom (troca de arquivo no Resident Evil) */
+@keyframes universo-fundo {
+  from {
+    opacity: 0;
+    scale: 1.06;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Resident Evil: lanterna, linha do tempo do surto e dossiês datilografados
+   --------------------------------------------------------------------------- */
+
+/* posição da lanterna animável (a luz segue o cursor com inércia) */
+@property --lx {
+  syntax: "<length-percentage>";
+  inherits: true;
+  initial-value: 68%;
+}
+
+@property --ly {
+  syntax: "<length-percentage>";
+  inherits: true;
+  initial-value: 42%;
+}
+
+.re {
+  --sangue: #c8102e;
+  --texto: #e8e8e8;
+  --texto-2: rgba(232, 232, 232, 0.72);
+  --texto-3: rgba(232, 232, 232, 0.48);
+  --inverso: #ededed;
+  --inverso-texto: #0a0a0a;
+  --halo: rgba(200, 16, 46, 0.25);
+  --brilho-botao: rgba(200, 16, 46, 0.35);
+  --maquina: "Special Elite", "Courier New", monospace;
+  position: relative;
+  margin: 80px calc(50% - 50vw) 0;
+  overflow: hidden;
+  border-block: 1px solid rgba(255, 255, 255, 0.06);
+  background: #030303;
+  color: var(--texto);
+  isolation: isolate;
+  transition: --lx 0.35s ease-out, --ly 0.35s ease-out;
+  animation: lanterna-vagar 16s ease-in-out infinite alternate;
+}
+
+/* com mouse a lanterna é sua; sem ele (toque, teclado) ela vagueia sozinha */
+.re.com-mouse {
+  animation: none;
+}
+
+@keyframes lanterna-vagar {
+  0% {
+    --lx: 70%;
+    --ly: 40%;
+  }
+  33% {
+    --lx: 38%;
+    --ly: 62%;
+  }
+  66% {
+    --lx: 62%;
+    --ly: 28%;
+  }
+  100% {
+    --lx: 28%;
+    --ly: 48%;
+  }
+}
+
+/* luz de emergência vermelha pulsando no canto */
+.re::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(55% 45% at 0% 100%, rgba(200, 16, 46, 0.2), transparent 70%);
+  animation: emergencia 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes emergencia {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.re-fundo {
+  position: absolute;
+  inset: 0;
+  z-index: -4;
+}
+
+.re-fundo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 60% 30%;
+  filter: grayscale(0.3) contrast(1.15) brightness(0.9);
+  animation: universo-fundo 1.2s ease both;
+}
+
+/* escuridão com o círculo da lanterna */
+.re-escuro {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  background: radial-gradient(circle 320px at var(--lx) var(--ly), rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.45) 38%, rgba(3, 3, 3, 0.93) 70%, #030303 100%);
+  pointer-events: none;
+}
+
+/* lâmpada fluorescente falhando de vez em quando */
+.re-escuro::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  animation: lampada 8s steps(1) infinite;
+}
+
+@keyframes lampada {
+  0%,
+  61% {
+    opacity: 0;
+  }
+  62% {
+    opacity: 0.7;
+  }
+  63% {
+    opacity: 0.1;
+  }
+  64% {
+    opacity: 0.55;
+  }
+  65%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* linhas de varredura de monitor + uma faixa que desce */
+.re-varredura {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+}
+
+.re-varredura::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 140px;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.035), transparent);
+  animation: varredura-descer 7s linear infinite;
+}
+
+@keyframes varredura-descer {
+  from {
+    transform: translateY(-140px);
+  }
+  to {
+    transform: translateY(1400px);
+  }
+}
+
+.re-conteudo {
+  position: relative;
+  max-width: var(--largura);
+  margin: 0 auto;
+  padding: 76px var(--margem) 60px;
+}
+
+.re-cabecalho {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.re-alerta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--sangue);
+  font-family: var(--maquina);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.re-sirene {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sangue);
+  box-shadow: 0 0 12px var(--sangue);
+  animation: sirene 1.2s ease-in-out infinite;
+}
+
+@keyframes sirene {
+  50% {
+    opacity: 0.25;
+    box-shadow: 0 0 0 transparent;
+  }
+}
+
+/* título com interferência de monitor: cópias deslocadas aparecem em fatias por instantes */
+.re-titulo {
+  position: relative;
+  display: inline-block;
+  color: #f2f2f2;
+  font-size: clamp(38px, 8.4vw, 124px);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  text-wrap: nowrap;
+  text-shadow: 0 0 40px rgba(200, 16, 46, 0.35);
+}
+
+.re.acordado .re-titulo {
+  animation: lampada-ligar 1.6s steps(1) backwards 0.2s;
+}
+
+.re:not(.acordado) .re-titulo {
+  opacity: 0;
+}
+
+@keyframes lampada-ligar {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  18% {
+    opacity: 0.1;
+  }
+  30% {
+    opacity: 1;
+  }
+  36% {
+    opacity: 0.3;
+  }
+  48%,
+  100% {
+    opacity: 1;
+  }
+}
+
+.re-titulo::before,
+.re-titulo::after {
+  content: attr(data-texto);
+  position: absolute;
+  inset: 0;
+  clip-path: inset(100% 0 0 0);
+  pointer-events: none;
+}
+
+.re-titulo::before {
+  color: var(--sangue);
+  animation: glitch-a 5.5s steps(1) infinite;
+}
+
+.re-titulo::after {
+  color: #9ad7ff;
+  opacity: 0.6;
+  animation: glitch-b 5.5s steps(1) infinite;
+}
+
+@keyframes glitch-a {
+  0%,
+  89%,
+  100% {
+    clip-path: inset(100% 0 0 0);
+    transform: none;
+  }
+  90% {
+    clip-path: inset(18% 0 58% 0);
+    transform: translate(-6px, 0);
+  }
+  92% {
+    clip-path: inset(62% 0 12% 0);
+    transform: translate(5px, 0);
+  }
+  94% {
+    clip-path: inset(40% 0 40% 0);
+    transform: translate(-3px, 0);
+  }
+}
+
+@keyframes glitch-b {
+  0%,
+  90%,
+  100% {
+    clip-path: inset(100% 0 0 0);
+    transform: none;
+  }
+  91% {
+    clip-path: inset(70% 0 8% 0);
+    transform: translate(4px, 0);
+  }
+  93% {
+    clip-path: inset(10% 0 72% 0);
+    transform: translate(-5px, 0);
+  }
+}
+
+.re-sub {
+  max-width: 560px;
+  color: var(--texto-2);
+  font-family: var(--maquina);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* linha do tempo do surto */
+.re-linha {
+  margin: 44px calc(var(--margem) * -1) 0;
+  padding: 6px var(--margem) 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.re-linha::-webkit-scrollbar {
+  display: none;
+}
+
+.re-linha-faixa {
+  position: relative;
+  display: grid;
+  grid-auto-columns: minmax(88px, 1fr);
+  grid-auto-flow: column;
+  min-width: max-content;
+}
+
+@media (min-width: 1100px) {
+  .re-linha-faixa {
+    min-width: 0;
+  }
+}
+
+.re-linha-trilho {
+  position: absolute;
+  top: 31px;
+  right: calc(100% / var(--n) / 2);
+  left: calc(100% / var(--n) / 2);
+  height: 2px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.re-linha-trilho i {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #6a0816, var(--sangue));
+  box-shadow: 0 0 14px rgba(200, 16, 46, 0.7);
+  transform: scaleX(var(--progresso));
+  transform-origin: left;
+  transition: transform 0.9s var(--curva);
+}
+
+.re-marco {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 4px 6px;
+  color: var(--texto-3);
+  transition: color 0.3s ease;
+}
+
+.re:not(.acordado) .re-marco {
+  opacity: 0;
+}
+
+.re.acordado .re-marco {
+  animation: subir-suave 0.7s var(--curva) backwards;
+  animation-delay: calc(0.5s + var(--i, 0) * 0.05s);
+}
+
+.re-marco:hover {
+  color: var(--texto);
+}
+
+.re-marco-ano {
+  font-family: var(--maquina);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+
+.re-marco-ponto {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background: #060606;
+  transition: border-color 0.3s ease, background-color 0.3s ease, scale 0.45s var(--mola), box-shadow 0.4s ease;
+}
+
+.re-marco.passado .re-marco-ponto {
+  border-color: var(--sangue);
+  background: #3a0710;
+}
+
+.re-marco.ativo {
+  color: #fff;
+}
+
+.re-marco.ativo .re-marco-ponto {
+  border-color: #ff4d64;
+  background: var(--sangue);
+  box-shadow: 0 0 0 5px rgba(200, 16, 46, 0.2), 0 0 20px rgba(200, 16, 46, 0.8);
+  scale: 1.3;
+}
+
+.re-marco.ativo .re-marco-ponto::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border: 1px solid var(--sangue);
+  border-radius: 50%;
+  animation: marco-pulso 1.8s ease-out infinite;
+}
+
+@keyframes marco-pulso {
+  from {
+    opacity: 0.9;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+
+.re-marco-nome {
+  max-width: 110px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* dossiê: papel envelhecido datilografado, colocado sobre a mesa a cada troca */
+.re-dossie {
+  --texto: #15120d;
+  --texto-2: #2a241c;
+  --texto-3: #6b5f4f;
+  --inverso: #15120d;
+  --inverso-texto: #ece4d0;
+  --halo: rgba(21, 18, 13, 0.15);
+  --brilho-botao: rgba(21, 18, 13, 0.3);
+  --borda-2: rgba(21, 18, 13, 0.4);
+  position: relative;
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+  gap: 36px;
+  margin-top: 30px;
+  padding: 30px 32px 26px;
+  border-radius: 2px;
+  background-color: #d9d0ba;
+  background-image:
+    radial-gradient(circle at 88% 82%, transparent 38px, rgba(110, 72, 30, 0.12) 40px, transparent 46px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.28 0 0 0 0 0.2 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E"),
+    linear-gradient(135deg, #e4dcc8, #cfc4aa);
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.95), inset 0 0 60px rgba(90, 60, 25, 0.25);
+  color: var(--texto);
+  rotate: -0.6deg;
+  animation: dossie-pousar 0.75s var(--curva) both;
+}
+
+@keyframes dossie-pousar {
+  from {
+    opacity: 0;
+    translate: 0 26px;
+    rotate: -3.5deg;
+  }
+}
+
+/* foto presa com clipe */
+.re-foto {
+  position: relative;
+  align-self: start;
+  padding: 10px 10px 34px;
+  background: #f3efe6;
+  box-shadow: 0 14px 30px -12px rgba(0, 0, 0, 0.55);
+  rotate: 2.5deg;
+}
+
+.re-foto button {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  background: #222;
+}
+
+.re-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(0.85) contrast(1.1) sepia(0.2);
+  transition: opacity 0.35s ease, filter 0.6s ease, transform 1.2s var(--zoom);
+}
+
+.re-foto button:hover img {
+  filter: none;
+  transform: scale(1.04);
+}
+
+.re-clipe {
+  position: absolute;
+  top: -20px;
+  right: 26px;
+  z-index: 2;
+  width: 20px;
+  height: 58px;
+  border: 3px solid #8d949b;
+  border-radius: 12px;
+  rotate: 8deg;
+  box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.35);
+}
+
+.re-clipe::after {
+  content: "";
+  position: absolute;
+  inset: 8px 3px 14px;
+  border: 3px solid #8d949b;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+}
+
+.re-ficha {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.re-ficha-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: var(--maquina);
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.re-carimbo {
+  padding: 4px 12px;
+  border: 3px solid #a3121f;
+  border-radius: 4px;
+  color: #a3121f;
+  font-family: var(--fonte-titulo);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  mix-blend-mode: multiply;
+  opacity: 0.85;
+  rotate: -9deg;
+  animation: carimbar 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) 0.45s backwards;
+}
+
+@keyframes carimbar {
+  from {
+    opacity: 0;
+    scale: 2.4;
+    rotate: -20deg;
+  }
+}
+
+.re-ficha-nome {
+  color: #120f0a;
+  font-size: clamp(24px, 2.4vw, 32px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.re-campos {
+  display: grid;
+  gap: 0;
+}
+
+.re-campos div {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px dashed rgba(21, 18, 13, 0.25);
+}
+
+.re-campos dt {
+  color: #6b5f4f;
+  font-family: var(--maquina);
+  font-size: 12.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.re-campos dd {
+  font-family: var(--maquina);
+  font-size: 15.5px;
+}
+
+.re-ameaca {
+  color: #9c0f1d;
+  font-weight: 700;
+}
+
+.re-relatorio {
+  min-height: calc(1.6em * 5);
+  color: #2a241c;
+  font-family: var(--maquina);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.re-relatorio-rotulo {
+  color: #6b5f4f;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.re-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1.05em;
+  margin-left: 2px;
+  background: #2a241c;
+  vertical-align: text-bottom;
+  animation: cursor-piscar 1s steps(1) infinite;
+}
+
+@keyframes cursor-piscar {
+  50% {
+    opacity: 0;
+  }
+}
+
+.re-compra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px dashed rgba(21, 18, 13, 0.3);
+}
+
+.re-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* sala segura: a luz acolhedora que todo fã de RE conhece */
+.re-rodape {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.re-sala {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 30px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #f2f2f2;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease, translate 0.45s var(--curva);
+}
+
+.re-sala small {
+  color: var(--texto-3);
+  font-family: var(--maquina);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.re-sala-luz {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #ffe9b8, transparent);
+  box-shadow: 0 0 18px 4px rgba(255, 220, 160, 0.35);
+  translate: -50% 0;
+  opacity: 0.5;
+  transition: opacity 0.4s ease, width 0.5s var(--curva);
+}
+
+.re-sala:hover {
+  border-color: rgba(255, 233, 184, 0.6);
+  background: rgba(255, 233, 184, 0.06);
+  translate: 0 -2px;
+}
+
+.re-sala:hover .re-sala-luz {
+  width: 100%;
+  opacity: 1;
+}
+
+/* ---------------------------------------------------------------------------
+   Universos no celular
+   --------------------------------------------------------------------------- */
+
+@media (max-width: 1000px) {
+  .re-dossie {
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 24px;
+  }
+}
+
+@media (max-width: 720px) {
+  .re {
+    margin-top: 56px;
+  }
+
+  .re-conteudo {
+    padding-top: 56px;
+  }
+
+  .re-titulo {
+    font-size: clamp(38px, 10.6vw, 64px);
+    text-wrap: balance;
+  }
+
+  .re-dossie {
+    grid-template-columns: 1fr;
+    padding: 24px 20px 22px;
+  }
+
+  .re-ficha-topo {
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+
+  .re-carimbo {
+    font-size: 12.5px;
+    padding: 3px 9px;
+  }
+
+  .re-foto {
+    width: 150px;
+    justify-self: center;
+  }
+
+  .re-campos div {
+    grid-template-columns: 92px minmax(0, 1fr);
+  }
+}
+
+/* ==========================================================================
+   Página 404
+   ========================================================================== */
+
+.nf-topo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 48px 0 16px;
+  text-align: center;
+}
+
+/* "404" só no contorno (traço por baixo do preenchimento esconde as sobreposições da fonte) */
+.nf-codigo {
+  color: var(--fundo);
+  font-family: var(--fonte-titulo);
+  font-size: clamp(120px, 22vw, 260px);
+  font-weight: 800;
+  line-height: 0.85;
+  letter-spacing: -0.06em;
+  -webkit-text-stroke: 3px var(--texto-3);
+  paint-order: stroke fill;
+  user-select: none;
+  animation: nf-flutuar 6s ease-in-out infinite;
+}
+
+@keyframes nf-flutuar {
+  50% {
+    translate: 0 -10px;
+  }
+}
+
+.nf-topo h1 {
+  margin-top: 6px;
+}
+
+.nf-texto {
+  max-width: 52ch;
+  color: var(--texto-2);
+  font-size: 17px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.nf-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.nf-acoes kbd {
+  margin-left: 4px;
+}
+
+.nf-sugestoes {
+  margin-top: 56px;
+}
+
+@media (max-width: 720px) {
+  .nf-acoes .botao {
+    flex: 1 1 100%;
+  }
+}
+
+/* Fora da tela, as áreas animadas param (economiza bateria e processador) */
+.hero.fora-da-tela,
+.hero.fora-da-tela *,
+.hero.fora-da-tela *::before,
+.hero.fora-da-tela *::after,
+.re:not(.em-tela),
+.re:not(.em-tela)::before,
+.re:not(.em-tela) *,
+.re:not(.em-tela) *::before,
+.re:not(.em-tela) *::after {
+  animation-play-state: paused !important;
+}
+
+/* ==========================================================================
+   Movimento: entradas, carregamento e respostas táteis
+   Usa as propriedades individuais translate/scale para não brigar com os
+   transform que cada componente já define.
+   ========================================================================== */
+
+/* Esqueleto: brilho passando enquanto a arte carrega */
+:where(.cartao-imagem, .oferta-imagem, .linha-imagem, .hero-capa, .evento-jogo, .slide-capturas button, .galeria-tira button, .previa-captura, .categoria):has(> img.imagem:not(.carregada)) {
+  background-image: linear-gradient(100deg, transparent 20%, var(--sup-3) 50%, transparent 80%);
+  background-size: 200% 100%;
+  /* poucas passadas e para: imagens preguiçosas fora da tela não carregam até você chegar nelas,
+     e um brilho infinito repintaria dezenas de cards a cada quadro com a página parada */
+  animation: esqueleto 1.4s ease-in-out 4;
+}
+
+@keyframes esqueleto {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+/* A arte chega desfocada e assenta no lugar */
+.imagem.carregada {
+  animation: imagem-revelar 0.7s var(--curva);
+}
+
+/* arte que já tem filtro próprio só faz fade + escala */
+.categoria .imagem.carregada {
+  animation-name: imagem-assentar;
+}
+
+@keyframes imagem-revelar {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    scale: 1.04;
+  }
+}
+
+@keyframes imagem-assentar {
+  from {
+    opacity: 0;
+    scale: 1.04;
+  }
+}
+
+/* Seções que entram ao rolar (classe aplicada por useRevelar) */
+.revelar {
+  opacity: 0;
+  translate: 0 32px;
+}
+
+.revelar.revelado {
+  opacity: 1;
+  translate: 0 0;
+  transition: opacity 0.8s ease, translate 1s var(--curva);
+}
+
+.revelar :is(.trilho, .ofertas, .categorias, .grade) > *,
+.revelar.garantias > * {
+  opacity: 0;
+  translate: 0 20px;
+}
+
+.revelar.revelado :is(.trilho, .ofertas, .categorias, .grade) > *,
+.revelar.revelado.garantias > * {
+  opacity: 1;
+  translate: 0 0;
+  transition:
+    opacity 0.6s ease calc(min(var(--ordem, 0), 9) * 55ms + 0.1s),
+    translate 0.8s var(--curva) calc(min(var(--ordem, 0), 9) * 55ms + 0.1s);
+}
+
+/* Resultados do catálogo entram em cascata a cada filtro */
+.grade > .cartao,
+.resultados > .linha {
+  animation: subir-suave 0.55s var(--curva) backwards;
+}
+
+.grade > .cartao:nth-child(4n + 2),
+.resultados > .linha:nth-child(2) {
+  animation-delay: 45ms;
+}
+
+.grade > .cartao:nth-child(4n + 3),
+.resultados > .linha:nth-child(3) {
+  animation-delay: 90ms;
+}
+
+.grade > .cartao:nth-child(4n + 4),
+.resultados > .linha:nth-child(4) {
+  animation-delay: 135ms;
+}
+
+.resultados > .linha:nth-child(n + 5) {
+  animation-delay: 180ms;
+}
+
+@keyframes subir-suave {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+}
+
+/* Estalo ao favoritar, comparar ou pôr no carrinho */
+.acao-rapida.ativa svg,
+.cartao-carrinho.ativo svg {
+  animation: estalo 0.5s ease-out;
+}
+
+@keyframes estalo {
+  0% {
+    scale: 0.55;
+  }
+  55% {
+    scale: 1.28;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+/* Contadores pulam quando o número muda */
+.contagem {
+  animation: contagem-pulo 0.45s var(--mola);
+}
+
+@keyframes contagem-pulo {
+  from {
+    opacity: 0;
+    scale: 0.4;
+  }
+}
+
+/* Anel de foco que se fecha sobre o elemento */
+a:focus-visible,
+button:focus-visible {
+  animation: foco 0.3s var(--curva);
+}
+
+@keyframes foco {
+  from {
+    outline-color: transparent;
+    outline-offset: 7px;
+  }
+}
+
+/* Barra superior ganha sombra conforme a página rola */
+@supports (animation-timeline: scroll()) {
+  .barra {
+    animation: barra-rolada linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 160px;
+  }
+}
+
+@keyframes barra-rolada {
+  to {
+    box-shadow: 0 12px 32px -18px rgba(0, 0, 0, 0.55);
+  }
+}
+
+/* Troca de tema: o novo tema se espalha em círculo a partir do botão */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
 /* Monoespaçada apenas onde o texto é um código. */
 kbd,
 .chave code,
@@ -4720,8 +7365,17 @@ kbd,
 }
 
 @media (max-width: 1000px) {
-  .nav {
+  /* tablet: o menu continua no topo (as abas de baixo só existem no celular); a busca vira ícone */
+  .busca-gatilho {
     display: none;
+  }
+
+  .busca-movel {
+    display: inline-grid;
+  }
+
+  .barra-acoes {
+    margin-left: auto;
   }
 
   .slide {
@@ -4902,6 +7556,24 @@ kbd,
 }
 
 /* Celular: barra de abas inferior, como um app */
+/* celulares bem estreitos (320px): só o ícone da marca e sem os pontinhos das prateleiras (lá se arrasta) */
+@media (max-width: 360px) {
+  .logo-texto,
+  .prateleira-paginas {
+    display: none;
+  }
+}
+
+@media (max-width: 430px) {
+  .logo-texto small {
+    display: none;
+  }
+
+  .barra-acoes {
+    gap: 0;
+  }
+}
+
 @media (max-width: 720px) {
   :root {
     --altura-barra: 56px;
@@ -4915,6 +7587,7 @@ kbd,
     gap: 8px;
   }
 
+  .nav,
   .busca-gatilho,
   .carrinho-rotulo {
     display: none;
@@ -4930,6 +7603,15 @@ kbd,
 
   .carrinho-botao {
     padding: 0 6px 0 10px;
+  }
+
+  /* telas estreitas: a marca encolhe para as ações caberem */
+  .logo {
+    min-width: 0;
+  }
+
+  .logo-texto {
+    font-size: 17px;
   }
 
   .abas-moveis {
@@ -5061,15 +7743,25 @@ kbd,
   }
 
   .catalogo-barra {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
   .campo-busca {
-    flex-basis: 100%;
+    grid-column: 1 / -1;
   }
 
   .seletor {
-    flex: 1;
+    width: 100%;
+  }
+
+  .pagina-cabecalho {
+    margin: 16px 0 24px;
+    padding-bottom: 20px;
+  }
+
+  .pagina-cabecalho p {
+    font-size: 15.5px;
   }
 
   .estatisticas strong {
@@ -5178,7 +7870,9 @@ kbd,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
   }
 }

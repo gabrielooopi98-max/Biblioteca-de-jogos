@@ -8,7 +8,7 @@ const METODOS = { pix: "Pix", cartao: "Cartão de crédito", boleto: "Boleto" };
 
 function comprovante(pedido) {
     const linhas = [
-        "BIBLIOTECA.JOGOS — COMPROVANTE DE PEDIDO",
+        "BIBLIOTECA.JOGOS · COMPROVANTE DE PEDIDO",
         "(projeto demonstrativo: nenhum pagamento real foi processado)",
         "",
         `Pedido: ${pedido.numero}`,

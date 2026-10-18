@@ -155,7 +155,7 @@ export function GavetaCarrinho({ aberta, fechar, itens, sugestoes, cupom, setCup
                                 </button>
                                 {possui(jogo.id) && (
                                     <span className="item-carrinho-aviso">
-                                        <IconePresente tamanho={12} /> Você já possui — será presente
+                                        <IconePresente tamanho={12} /> Você já possui: será um presente
                                     </span>
                                 )}
                                 <Preco jogo={jogo} tamanho="pequeno" />

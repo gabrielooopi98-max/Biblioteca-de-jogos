@@ -2,13 +2,20 @@ import { useState } from "react";
 import { useLoja } from "../LojaContext.js";
 import { calcularPrecoFinal, formatarPreco, imagensDoJogo, resumoAvaliacoes } from "../utils.js";
 import { IconeBiblioteca, IconeCarrinho, IconeCheck, IconeComparar, IconeCoracao } from "./Icones.jsx";
+import { usePreviaTrailer } from "../hooks.js";
+import Trailer from "./Trailer.jsx";
 
-export function Imagem({ src, alt = "", className = "", alternativa, ...props }) {
+// srcSet/sizes vêm antes do src (senão o navegador pode baixar as duas versões).
+// Se a imagem falhar, cai na alternativa e abandona o srcSet, que também apontaria para a quebrada.
+export function Imagem({ src, srcSet, sizes, alt = "", className = "", alternativa, ...props }) {
     const [carregou, setCarregou] = useState(false);
     const [origem, setOrigem] = useState(src);
+    const usandoAlternativa = Boolean(alternativa) && origem === alternativa;
 
     return (
         <img
+            srcSet={usandoAlternativa ? undefined : srcSet}
+            sizes={usandoAlternativa ? undefined : sizes}
             src={origem}
             alt={alt}
             loading="lazy"
@@ -102,11 +109,13 @@ function CardJogo({ jogo }) {
     const imagens = imagensDoJogo(jogo);
     const noCarrinho = estaNoCarrinho(jogo.id);
     const jaPossui = possui(jogo.id);
+    const [previa, eventosPrevia] = usePreviaTrailer();
 
     return (
-        <article className="cartao">
+        <article className="cartao" {...eventosPrevia}>
             <button type="button" className="cartao-imagem" onClick={() => abrirJogo(jogo.id)} aria-label={`Ver ${jogo.nome}`}>
                 <Imagem src={imagens.horizontal} alt={jogo.nome} />
+                {previa && <Trailer jogo={jogo} className="cartao-trailer" />}
                 {jogo.lancamento >= 2024 && <span className="selo">Novo</span>}
             </button>
             <AcoesRapidas jogo={jogo} />

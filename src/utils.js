@@ -1,16 +1,20 @@
 const CDN_STEAM = "https://cdn.cloudflare.steamstatic.com/steam/apps";
 const CDN_CAPTURAS = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps";
 
+// Cada imagem no tamanho em que aparece: capa 600x900 só onde é grande, 300x450 nas miniaturas.
+// jogo.imagens sobrescreve endereços que a Steam não publica no CDN antigo.
 export function imagensDoJogo(jogo) {
     const base = `${CDN_STEAM}/${jogo.appId}`;
     return {
-        capa: `${base}/library_600x900.jpg`,
+        capa: `${base}/library_600x900_2x.jpg`,
+        capaPequena: `${base}/library_600x900.jpg`,
         banner: `${base}/library_hero.jpg`,
         logo: `${base}/logo.png`,
         horizontal: `${base}/header.jpg`,
         destaque: `${base}/capsule_616x353.jpg`,
         linha: `${base}/capsule_231x87.jpg`,
         fundo: jogo.fundo,
+        ...jogo.imagens,
     };
 }
 
@@ -21,7 +25,14 @@ export function capturasDoJogo(jogo) {
     }));
 }
 
-// Resumo de análises derivado da nota (0–10).
+// Trailer principal do jogo na Steam (stream HLS + miniatura).
+export function trailerDoJogo(jogo) {
+    if (!jogo.trailer) return null;
+    const capturas = capturasDoJogo(jogo);
+    return { ...jogo.trailer, poster: capturas[0]?.grande || imagensDoJogo(jogo).banner };
+}
+
+// Resumo de análises derivado da nota (0-10).
 export function resumoAvaliacoes(nota) {
     if (nota >= 9.5) return "Aclamado";
     if (nota >= 8.5) return "Muito positivo";

@@ -15,7 +15,7 @@ const ORDENACOES = {
     "maior-preco": { rotulo: "Maior preço", comparar: (a, b) => calcularPrecoFinal(b) - calcularPrecoFinal(a) },
     "mais-recentes": { rotulo: "Mais recentes", comparar: (a, b) => b.lancamento - a.lancamento },
     "melhor-avaliados": { rotulo: "Melhor avaliados", comparar: (a, b) => b.nota - a.nota },
-    alfabetica: { rotulo: "A–Z", comparar: (a, b) => a.nome.localeCompare(b.nome, "pt-BR") },
+    alfabetica: { rotulo: "A a Z", comparar: (a, b) => a.nome.localeCompare(b.nome, "pt-BR") },
 };
 
 const NOTAS = [

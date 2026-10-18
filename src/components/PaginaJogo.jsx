@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { navegar } from "../hooks.js";
 import { useLoja } from "../LojaContext.js";
-import { calcularParcelas, calcularPrecoFinal, capturasDoJogo, DESCONTO_PIX, DIAS_REEMBOLSO, formatarPreco, imagensDoJogo } from "../utils.js";
+import { calcularParcelas, calcularPrecoFinal, capturasDoJogo, DESCONTO_PIX, DIAS_REEMBOLSO, formatarPreco, imagensDoJogo, trailerDoJogo } from "../utils.js";
 import CardJogo, { Avaliacao, Imagem, Plataformas, Preco } from "./CardJogo.jsx";
 import {
     IconeBiblioteca,
@@ -11,11 +11,13 @@ import {
     IconeCoracao,
     IconeDesfazer,
     IconeEscudo,
+    IconePlay,
     IconePresente,
     IconeRaio,
     IconeSetaDireita,
     IconeSetaEsquerda,
 } from "./Icones.jsx";
+import Trailer from "./Trailer.jsx";
 
 function jogosSemelhantes(jogo, todos) {
     return todos
@@ -29,8 +31,11 @@ function jogosSemelhantes(jogo, todos) {
         .map(({ outro }) => outro);
 }
 
+// Trailer primeiro (como na Steam), depois as capturas.
 function Galeria({ jogo }) {
     const capturas = capturasDoJogo(jogo);
+    const trailer = trailerDoJogo(jogo);
+    const itens = [...(trailer ? [{ tipo: "trailer", mini: trailer.capa }] : []), ...capturas.map((c) => ({ tipo: "captura", ...c }))];
     const [indice, setIndice] = useState(0);
     const tiraRef = useRef(null);
 
@@ -38,28 +43,43 @@ function Galeria({ jogo }) {
         tiraRef.current?.children[indice]?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
     }, [indice]);
 
-    if (capturas.length === 0) return <Imagem src={imagensDoJogo(jogo).banner} alt="" className="galeria-unica" />;
+    if (itens.length === 0) return <Imagem src={imagensDoJogo(jogo).banner} alt="" className="galeria-unica" />;
 
-    const ir = (i) => setIndice((i + capturas.length) % capturas.length);
+    const ir = (i) => setIndice((i + itens.length) % itens.length);
+    const item = itens[indice];
+    const numeroCaptura = indice - (trailer ? 1 : 0) + 1;
 
     return (
         <div className="galeria">
             <div className="galeria-palco">
-                <img key={capturas[indice].grande} src={capturas[indice].grande} alt={`Captura ${indice + 1} de ${jogo.nome}`} />
-                <button type="button" className="galeria-seta esquerda" onClick={() => ir(indice - 1)} aria-label="Captura anterior">
+                {item.tipo === "trailer" ? (
+                    <Trailer jogo={jogo} controles className="galeria-video" aoTerminar={() => ir(indice + 1)} />
+                ) : (
+                    <img key={item.grande} src={item.grande} alt={`Captura ${numeroCaptura} de ${jogo.nome}`} />
+                )}
+                <button type="button" className="galeria-seta esquerda" onClick={() => ir(indice - 1)} aria-label="Anterior">
                     <IconeSetaEsquerda tamanho={22} />
                 </button>
-                <button type="button" className="galeria-seta direita" onClick={() => ir(indice + 1)} aria-label="Próxima captura">
+                <button type="button" className="galeria-seta direita" onClick={() => ir(indice + 1)} aria-label="Próximo">
                     <IconeSetaDireita tamanho={22} />
                 </button>
-                <span className="galeria-contagem">
-                    {indice + 1} / {capturas.length}
-                </span>
+                <span className="galeria-contagem">{item.tipo === "trailer" ? "Trailer" : `${numeroCaptura} / ${capturas.length}`}</span>
             </div>
             <div className="galeria-tira" ref={tiraRef}>
-                {capturas.map((captura, i) => (
-                    <button type="button" key={captura.mini} className={i === indice ? "ativa" : ""} onClick={() => setIndice(i)} aria-label={`Ver captura ${i + 1}`}>
-                        <Imagem src={captura.mini} alt="" />
+                {itens.map((miniatura, i) => (
+                    <button
+                        type="button"
+                        key={miniatura.mini}
+                        className={[i === indice ? "ativa" : "", miniatura.tipo === "trailer" ? "galeria-mini-trailer" : ""].join(" ").trim()}
+                        onClick={() => setIndice(i)}
+                        aria-label={miniatura.tipo === "trailer" ? "Ver trailer" : `Ver captura ${i - (trailer ? 1 : 0) + 1}`}
+                    >
+                        <Imagem src={miniatura.mini} alt="" />
+                        {miniatura.tipo === "trailer" && (
+                            <span className="galeria-play" aria-hidden="true">
+                                <IconePlay tamanho={14} />
+                            </span>
+                        )}
                     </button>
                 ))}
             </div>

@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { navegar, useContagemRegressiva } from "../hooks.js";
 import { useLoja } from "../LojaContext.js";
 import { calcularPrecoFinal, DIAS_REEMBOLSO, fimDoMes, formatarPreco, imagensDoJogo, nomeDoMes } from "../utils.js";
@@ -29,29 +29,79 @@ export function CabecalhoSecao({ titulo, descricao, children }) {
     );
 }
 
+const ESPACO_TRILHO = 14;
+
 export function Prateleira({ id, titulo, descricao, jogos, aoVerMais }) {
+    const corpoRef = useRef(null);
     const trilhoRef = useRef(null);
-    const rolar = (direcao) => trilhoRef.current.scrollBy({ left: direcao * trilhoRef.current.clientWidth, behavior: "smooth" });
+    const [estado, setEstado] = useState({ inicio: true, fim: true, pagina: 0, paginas: 1 });
+
+    const medir = useCallback(() => {
+        const trilho = trilhoRef.current;
+        if (!trilho) return;
+        const maximo = trilho.scrollWidth - trilho.clientWidth;
+        const passo = trilho.clientWidth + ESPACO_TRILHO;
+        const paginas = Math.max(1, Math.ceil((trilho.scrollWidth + ESPACO_TRILHO) / passo - 0.02));
+        const fim = trilho.scrollLeft >= maximo - 4;
+        const pagina = fim ? paginas - 1 : Math.round(trilho.scrollLeft / passo);
+        setEstado((atual) =>
+            atual.inicio === trilho.scrollLeft <= 4 && atual.fim === fim && atual.pagina === pagina && atual.paginas === paginas
+                ? atual
+                : { inicio: trilho.scrollLeft <= 4, fim, pagina, paginas },
+        );
+        // As setas ficam centralizadas na arte dos cards, não no card inteiro.
+        const arte = trilho.querySelector(".cartao-imagem");
+        if (arte) corpoRef.current.style.setProperty("--altura-arte", `${arte.offsetHeight}px`);
+    }, []);
+
+    useEffect(() => {
+        medir();
+        const observador = new ResizeObserver(medir);
+        observador.observe(trilhoRef.current);
+        return () => observador.disconnect();
+    }, [medir, jogos.length]);
+
+    const passo = () => trilhoRef.current.clientWidth + ESPACO_TRILHO;
+    const rolar = (direcao) => trilhoRef.current.scrollBy({ left: direcao * passo(), behavior: "smooth" });
+    const irParaPagina = (pagina) => trilhoRef.current.scrollTo({ left: pagina * passo(), behavior: "smooth" });
+
+    const classes = ["prateleira-corpo", estado.inicio && "no-inicio", estado.fim && "no-fim"].filter(Boolean).join(" ");
 
     return (
-        <section className="secao" id={id}>
+        <section className="secao prateleira" id={id}>
             <CabecalhoSecao titulo={titulo} descricao={descricao}>
+                {estado.paginas > 1 && (
+                    <div className="prateleira-paginas">
+                        {Array.from({ length: estado.paginas }, (_, i) => (
+                            <button
+                                type="button"
+                                key={i}
+                                className={i === estado.pagina ? "ativa" : ""}
+                                onClick={() => irParaPagina(i)}
+                                aria-label={`Página ${i + 1} de ${estado.paginas}`}
+                                aria-current={i === estado.pagina}
+                            />
+                        ))}
+                    </div>
+                )}
                 {aoVerMais && (
                     <button type="button" className="link-mais" onClick={aoVerMais}>
                         Ver tudo
                     </button>
                 )}
-                <button type="button" className="icone-botao borda" onClick={() => rolar(-1)} aria-label="Anteriores">
-                    <IconeSetaEsquerda tamanho={16} />
-                </button>
-                <button type="button" className="icone-botao borda" onClick={() => rolar(1)} aria-label="Próximos">
-                    <IconeSetaDireita tamanho={16} />
-                </button>
             </CabecalhoSecao>
-            <div className="trilho" ref={trilhoRef}>
-                {jogos.map((jogo) => (
-                    <CardJogo key={jogo.id} jogo={jogo} />
-                ))}
+            <div className={classes} ref={corpoRef}>
+                <button type="button" className="prateleira-seta esquerda" onClick={() => rolar(-1)} disabled={estado.inicio} aria-label="Jogos anteriores">
+                    <IconeSetaEsquerda tamanho={22} />
+                </button>
+                <div className="trilho" ref={trilhoRef} onScroll={medir}>
+                    {jogos.map((jogo) => (
+                        <CardJogo key={jogo.id} jogo={jogo} />
+                    ))}
+                </div>
+                <button type="button" className="prateleira-seta direita" onClick={() => rolar(1)} disabled={estado.fim} aria-label="Próximos jogos">
+                    <IconeSetaDireita tamanho={22} />
+                </button>
             </div>
         </section>
     );
@@ -97,7 +147,9 @@ export function Ofertas({ jogos, aoVerMais }) {
                     return (
                         <button type="button" key={jogo.id} className={grande ? "oferta oferta-grande" : "oferta"} onClick={() => abrirJogo(jogo.id)}>
                             <span className="oferta-imagem">
-                                <Imagem src={grande ? imagens.destaque : imagens.horizontal} alternativa={imagens.horizontal} alt="" />
+                                {/* Na oferta grande a arte aparece inteira, sobre uma cópia desfocada. */}
+                                {grande && <Imagem src={imagens.destaque} alternativa={imagens.horizontal} alt="" className="arte-fundo" aria-hidden="true" />}
+                                <Imagem src={grande ? imagens.destaque : imagens.horizontal} alternativa={imagens.horizontal} alt="" className={grande ? "arte" : ""} />
                             </span>
                             <span className="oferta-info">
                                 <span className="oferta-nome">{jogo.nome}</span>
@@ -118,7 +170,7 @@ export function Categorias({ categorias, aoEscolher }) {
             <div className="categorias">
                 {categorias.map(({ nome, jogo, quantidade }) => (
                     <button key={nome} type="button" className="categoria" onClick={() => aoEscolher(nome)}>
-                        <Imagem src={imagensDoJogo(jogo).banner} alternativa={imagensDoJogo(jogo).horizontal} alt="" />
+                        <Imagem src={imagensDoJogo(jogo).destaque} alternativa={imagensDoJogo(jogo).horizontal} alt="" />
                         <span className="categoria-texto">
                             <strong>{nome}</strong>
                             <small>{quantidade} jogos</small>
@@ -151,7 +203,7 @@ export function BannerPromocao({ jogos, fundo, aoClicar }) {
             <div className="evento-jogos">
                 {jogos.map((jogo) => (
                     <button key={jogo.id} type="button" className="evento-jogo" onClick={() => abrirJogo(jogo.id)}>
-                        <Imagem src={imagensDoJogo(jogo).capa} alternativa={imagensDoJogo(jogo).horizontal} alt={jogo.nome} />
+                        <Imagem src={imagensDoJogo(jogo).capaPequena} alternativa={imagensDoJogo(jogo).horizontal} alt={jogo.nome} />
                         <span className="preco-desconto">-{jogo.desconto}%</span>
                     </button>
                 ))}
@@ -182,7 +234,7 @@ export function BannerColecao({ jogo, jogos, titulo, aoClicar }) {
                 <div className="franquia-jogos">
                     {capas.map((item) => (
                         <button key={item.id} type="button" onClick={() => abrirJogo(item.id)} title={item.nome}>
-                            <Imagem src={imagensDoJogo(item).capa} alternativa={imagensDoJogo(item).horizontal} alt={item.nome} />
+                            <Imagem src={imagensDoJogo(item).capaPequena} alternativa={imagensDoJogo(item).horizontal} alt={item.nome} />
                             <Preco jogo={item} tamanho="pequeno" />
                         </button>
                     ))}
@@ -216,12 +268,12 @@ export function Rodape() {
         <footer className="rodape">
             <div className="rodape-conteudo">
                 <div className="rodape-marca">
-                    <span className="logo">
+                    <a href="#/" className="logo" aria-label="Biblioteca.jogos, voltar para a loja">
                         <LogoMarca />
                         <span className="logo-texto">
                             Biblioteca<small>.jogos</small>
                         </span>
-                    </span>
+                    </a>
                     <p>Jogos digitais para PC e consoles, com entrega instantânea e reembolso em até {DIAS_REEMBOLSO} dias.</p>
                 </div>
                 {COLUNAS_RODAPE.map((coluna) => (
@@ -245,7 +297,7 @@ export function Rodape() {
                 </div>
             </div>
             <div className="rodape-base">
-                <span>© {new Date().getFullYear()} Biblioteca.jogos — projeto demonstrativo: nenhum pagamento real é processado.</span>
+                <span>© {new Date().getFullYear()} Biblioteca.jogos. Projeto demonstrativo: nenhum pagamento real é processado.</span>
                 <span>Marcas e imagens pertencem aos seus respectivos donos.</span>
             </div>
         </footer>
