@@ -1,0 +1,155 @@
+const CDN_STEAM = "https://cdn.cloudflare.steamstatic.com/steam/apps";
+const CDN_CAPTURAS = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps";
+
+export function imagensDoJogo(jogo) {
+    const base = `${CDN_STEAM}/${jogo.appId}`;
+    return {
+        capa: `${base}/library_600x900.jpg`,
+        banner: `${base}/library_hero.jpg`,
+        logo: `${base}/logo.png`,
+        horizontal: `${base}/header.jpg`,
+        destaque: `${base}/capsule_616x353.jpg`,
+        linha: `${base}/capsule_231x87.jpg`,
+        fundo: jogo.fundo,
+    };
+}
+
+export function capturasDoJogo(jogo) {
+    return (jogo.capturas || []).map((caminho) => ({
+        mini: `${CDN_CAPTURAS}/${jogo.appId}/${caminho}.600x338.jpg`,
+        grande: `${CDN_CAPTURAS}/${jogo.appId}/${caminho}.1920x1080.jpg`,
+    }));
+}
+
+// Resumo de análises derivado da nota (0–10).
+export function resumoAvaliacoes(nota) {
+    if (nota >= 9.5) return "Aclamado";
+    if (nota >= 8.5) return "Muito positivo";
+    if (nota >= 7.8) return "Positivo";
+    if (nota >= 7) return "Misto positivo";
+    return "Misto";
+}
+
+const formatadorBRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+
+export function formatarPreco(valor) {
+    return formatadorBRL.format(valor);
+}
+
+export function formatarData(iso, comHora = false) {
+    return new Date(iso).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        ...(comHora ? { hour: "2-digit", minute: "2-digit" } : {}),
+    });
+}
+
+export function calcularPrecoFinal(jogo) {
+    return Math.round(jogo.preco * (100 - (jogo.desconto || 0))) / 100;
+}
+
+// Parcelamento sem juros: até 10x, com parcela mínima de R$ 10.
+export function calcularParcelas(valor) {
+    const quantidade = Math.max(1, Math.min(10, Math.floor(valor / 10)));
+    return { quantidade, valor: valor / quantidade };
+}
+
+export const CUPONS = {
+    BEMVINDO10: { percentual: 10, descricao: "10% na primeira compra" },
+    GAMER15: { percentual: 15, descricao: "15% em todo o carrinho" },
+};
+
+export const FILTROS_INICIAIS = {
+    termo: "",
+    generos: [],
+    plataformas: [],
+    precoMax: null,
+    notaMin: 0,
+    somentePromocao: false,
+    ocultarPossuidos: false,
+    colecao: null,
+    ordenar: "relevancia",
+};
+
+export const DESCONTO_PIX = 5;
+
+// Direito de arrependimento em compras online (CDC, art. 49).
+export const DIAS_REEMBOLSO = 7;
+
+export const LIMITE_COMPARAR = 3;
+
+export function resumirCarrinho(itens, codigoCupom, metodo) {
+    const subtotal = itens.reduce((soma, jogo) => soma + jogo.preco, 0);
+    const comDesconto = itens.reduce((soma, jogo) => soma + calcularPrecoFinal(jogo), 0);
+    const cupom = codigoCupom ? CUPONS[codigoCupom] : null;
+    const valorCupom = cupom ? Math.round(comDesconto * cupom.percentual) / 100 : 0;
+    const aposCupom = comDesconto - valorCupom;
+    const valorPix = metodo === "pix" ? Math.round(aposCupom * DESCONTO_PIX) / 100 : 0;
+
+    return {
+        subtotal,
+        descontos: subtotal - comDesconto,
+        valorCupom,
+        valorPix,
+        total: aposCupom - valorPix,
+    };
+}
+
+export function prazoReembolso(pedido) {
+    const limite = new Date(pedido.data).getTime() + DIAS_REEMBOLSO * 86400000;
+    return { limite, dentro: pedido.status === "pago" && Date.now() < limite };
+}
+
+// Recomenda jogos pelos gêneros mais frequentes entre os que a pessoa viu, deseja ou possui.
+export function recomendar(jogos, idsBase, idsExcluir, quantidade = 8) {
+    const porId = new Map(jogos.map((jogo) => [jogo.id, jogo]));
+    const peso = new Map();
+    for (const id of idsBase) for (const genero of porId.get(id)?.generos || []) peso.set(genero, (peso.get(genero) || 0) + 1);
+    if (peso.size === 0) return [];
+    const excluir = new Set([...idsBase, ...idsExcluir]);
+
+    return jogos
+        .filter((jogo) => !excluir.has(jogo.id))
+        .map((jogo) => ({ jogo, pontos: jogo.generos.reduce((soma, g) => soma + (peso.get(g) || 0), 0) + jogo.nota / 10 }))
+        .filter(({ pontos }) => pontos >= 1)
+        .sort((a, b) => b.pontos - a.pontos)
+        .slice(0, quantidade)
+        .map(({ jogo }) => jogo);
+}
+
+export function fimDoMes() {
+    const agora = new Date();
+    return new Date(agora.getFullYear(), agora.getMonth() + 1, 0, 23, 59, 59);
+}
+
+export function nomeDoMes() {
+    const mes = new Date().toLocaleDateString("pt-BR", { month: "long" });
+    return mes.charAt(0).toUpperCase() + mes.slice(1);
+}
+
+export function normalizar(texto) {
+    return texto
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "")
+        .toLowerCase()
+        .trim();
+}
+
+export function gerarCodigo(tamanho) {
+    const caracteres = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    return Array.from({ length: tamanho }, () => caracteres[Math.floor(Math.random() * caracteres.length)]).join("");
+}
+
+export function gerarChave() {
+    return `${gerarCodigo(5)}-${gerarCodigo(5)}-${gerarCodigo(5)}`;
+}
+
+export function baixarArquivo(nome, conteudo) {
+    const url = URL.createObjectURL(new Blob([conteudo], { type: "text/plain;charset=utf-8" }));
+    const link = Object.assign(document.createElement("a"), { href: url, download: nome });
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+}
