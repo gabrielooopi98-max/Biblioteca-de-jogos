@@ -1,12 +1,31 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-tema="escuro">
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Biblioteca de Jogos</title>
-  <script type="module" crossorigin src="/Biblioteca-de-jogos/assets/index-B28Vf2lr.js"></script>
-  <link rel="stylesheet" crossorigin href="/Biblioteca-de-jogos/assets/index-soE2stHK.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Biblioteca.jogos — loja de jogos digitais</title>
+  <meta name="description" content="Jogos digitais para PC e consoles com entrega instantânea, biblioteca de chaves, reembolso em até 7 dias, alertas de preço e comparador." />
+  <meta name="theme-color" content="#0a0a0a" />
+  <meta property="og:title" content="Biblioteca.jogos" />
+  <meta property="og:description" content="Jogos digitais com entrega instantânea e reembolso em até 7 dias." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" type="image/svg+xml" href="/Biblioteca-de-jogos/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin />
+  <link rel="preconnect" href="https://shared.akamai.steamstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Geist+Mono:wght@500&display=swap" rel="stylesheet" />
+  <script>
+    // Aplica o tema salvo antes da primeira pintura (evita piscar).
+    try {
+      var tema = JSON.parse(localStorage.getItem("bj:tema"));
+      if (tema) document.documentElement.dataset.tema = tema;
+    } catch (e) {}
+  </script>
+  <script type="module" crossorigin src="/Biblioteca-de-jogos/assets/index-BXAxtgjN.js"></script>
+  <link rel="modulepreload" crossorigin href="/Biblioteca-de-jogos/assets/Icones-DpqQ-mDL.js">
+  <link rel="stylesheet" crossorigin href="/Biblioteca-de-jogos/assets/index-CtfFHfgj.css">
 </head>
 
 <body>
