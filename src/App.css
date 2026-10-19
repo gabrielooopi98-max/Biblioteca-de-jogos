@@ -7175,22 +7175,10 @@ button.tag:active {
    transform que cada componente já define.
    ========================================================================== */
 
-/* Esqueleto: brilho passando enquanto a arte carrega */
+/* Esqueleto: placeholder suave enquanto a arte carrega. Estático de propósito: o brilho
+   animado repintava cada card carregando a cada quadro e travava a rolagem no celular. */
 :where(.cartao-imagem, .oferta-imagem, .linha-imagem, .hero-capa, .evento-jogo, .slide-capturas button, .galeria-tira button, .previa-captura, .categoria):has(> img.imagem:not(.carregada)) {
-  background-image: linear-gradient(100deg, transparent 20%, var(--sup-3) 50%, transparent 80%);
-  background-size: 200% 100%;
-  /* poucas passadas e para: imagens preguiçosas fora da tela não carregam até você chegar nelas,
-     e um brilho infinito repintaria dezenas de cards a cada quadro com a página parada */
-  animation: esqueleto 1.4s ease-in-out 4;
-}
-
-@keyframes esqueleto {
-  from {
-    background-position: 150% 0;
-  }
-  to {
-    background-position: -50% 0;
-  }
+  background-image: linear-gradient(100deg, transparent 15%, var(--sup-3) 50%, transparent 85%);
 }
 
 /* A arte chega desfocada e assenta no lugar */
@@ -7206,7 +7194,6 @@ button.tag:active {
 @keyframes imagem-revelar {
   from {
     opacity: 0;
-    filter: blur(10px);
     scale: 1.04;
   }
 }
@@ -7340,6 +7327,33 @@ button:focus-visible {
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
+}
+
+/* ==========================================================================
+   Desempenho: seções fora da tela não são desenhadas
+   A loja tem ~2.000 elementos e ~100 imagens; o navegador só calcula e pinta o que
+   está perto da tela. O banner e os destaques (no topo, e que vazam até a borda da
+   janela) ficam de fora. overflow-clip-margin evita que setas e sombras sejam cortadas.
+   ========================================================================== */
+
+.conteudo > section:not(.hero, .destaques),
+.rodape {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 640px;
+  overflow-clip-margin: 48px;
+}
+
+.grade > .cartao {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 270px;
+  overflow-clip-margin: 32px;
+}
+
+/* troca de tema: as centenas de transições de cor ficam pausadas por um instante */
+.sem-transicao *,
+.sem-transicao *::before,
+.sem-transicao *::after {
+  transition: none !important;
 }
 
 /* Monoespaçada apenas onde o texto é um código. */
@@ -7865,14 +7879,156 @@ kbd,
   }
 }
 
+/* ==========================================================================
+   Modo suave: o sistema pediu menos animação (no Windows, "Efeitos de animação"
+   desligado; no celular, "Reduzir movimento"). Em vez de desligar tudo, sai só o
+   que pode causar desconforto: deslocamentos grandes, paralaxe, inclinações que
+   seguem o cursor, zoom lento, tremidas e piscadas. Fades, hover dos botões,
+   brilhos, barras de progresso e transições curtas continuam.
+   ========================================================================== */
+
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-delay: 0s !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    transition-delay: 0s !important;
+  /* entradas: o elemento aparece sem se deslocar (redefinidas só neste modo) */
+  @keyframes subir-suave {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes subir {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes pagina-entrar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes linha-subir {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes carta-entrar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes imagem-revelar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes imagem-assentar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes universo-fundo {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes dossie-pousar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes carimbar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes paleta-entrar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes notificacao-entrar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes notificacao-sair {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes gaveta-entrar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes gaveta-sair {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes contagem-pulo {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* o título do Resident Evil acende com um fade, sem piscar */
+  @keyframes lampada-ligar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* seções que entram ao rolar: só fade */
+  .revelar,
+  .revelar :is(.trilho, .ofertas, .categorias, .grade) > *,
+  .revelar.garantias > * {
+    translate: 0 0 !important;
+  }
+
+  /* nada de movimento contínuo, tremida ou piscada */
+  .hero-grao,
+  .hero-carta.ativa .hero-carta-corpo,
+  .hero-chao,
+  .nf-codigo,
+  .re,
+  .re::before,
+  .re-escuro::after,
+  .re-varredura::after,
+  .re-titulo::before,
+  .re-titulo::after {
+    animation: none !important;
+  }
+
+  /* paralaxe e inclinações que seguem o cursor */
+  .hero-fundo,
+  .hero-cena,
+  .hero-carta.ativa .hero-capa,
+  .cartao:hover .cartao-imagem,
+  .slide-midia:hover .arte,
+  .galeria-palco:hover img {
+    transform: none !important;
+  }
+
+  .sanfona-painel .sanfona-arte.imagem {
+    translate: -50% 0 !important;
+  }
+
+  /* zoom lento das artes de fundo */
+  .hero-fundo .imagem.carregada {
+    transform: none !important;
   }
 }

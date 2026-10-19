@@ -101,7 +101,7 @@ export function UniversoSouls({ jogos, aoVerTodos }) {
     }, []);
 
     useEffect(() => {
-        if (parado || semMovimento() || !ehComputador()) return;
+        if (parado || !ehComputador()) return;
         const tempo = setTimeout(() => {
             const i = jogos.findIndex((j) => j.id === aberto);
             setAberto(jogos[(i + 1) % jogos.length].id);
@@ -260,10 +260,6 @@ function useDatilografia(texto, velocidade = 14) {
     const [quantidade, setQuantidade] = useState(0);
 
     useEffect(() => {
-        if (semMovimento()) {
-            setQuantidade(texto.length);
-            return;
-        }
         setQuantidade(0);
         const intervalo = setInterval(() => {
             setQuantidade((q) => {

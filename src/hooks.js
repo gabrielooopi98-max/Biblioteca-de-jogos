@@ -89,7 +89,8 @@ const SELETOR_ITENS = ".trilho > *, .ofertas > *, .categorias > *, .grade > *, .
 
 export function useRevelar() {
     useEffect(() => {
-        if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        // no modo suave a entrada vira só fade (ver o CSS do modo suave)
+        if (!("IntersectionObserver" in window)) return;
         const marcados = new WeakSet();
         const tempos = new Set();
 

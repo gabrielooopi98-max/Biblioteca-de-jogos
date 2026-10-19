@@ -62,7 +62,7 @@ function coreografar(cartas, { ativo, anterior, direcao }, total) {
 // Resposta ao clique numa seta: o botão quica, uma onda se expande, a seta dá um tranco
 // no sentido do clique e uma faixa de luz varre o baralho no mesmo sentido.
 function disparar(botao, varredura, sentido) {
-    if (!botao || semMovimento()) return;
+    if (!botao) return;
     const mola = "cubic-bezier(0.34, 1.56, 0.64, 1)";
     botao.animate([{ scale: 0.84 }, { scale: 1.08, offset: 0.45 }, { scale: 1 }], { duration: 560, easing: mola });
     botao.querySelector(".hero-seta-onda")?.animate(

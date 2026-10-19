@@ -316,8 +316,12 @@ function App() {
         (evento) => {
             const novo = tema === "escuro" ? "claro" : "escuro";
             const trocar = () => {
-                document.documentElement.dataset.tema = novo;
+                // sem isso, cada elemento com transição de cor anima sozinho (centenas de uma vez)
+                const raiz = document.documentElement;
+                raiz.classList.add("sem-transicao");
+                raiz.dataset.tema = novo;
                 flushSync(() => setTema(novo));
+                requestAnimationFrame(() => requestAnimationFrame(() => raiz.classList.remove("sem-transicao")));
             };
             if (!document.startViewTransition || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return trocar();
 
