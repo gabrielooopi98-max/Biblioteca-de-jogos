@@ -914,8 +914,11 @@ button.tag:active {
   padding: 24px var(--margem) 64px;
 }
 
+/* "backwards", não "both": segurar o fim deixava translate: 0px na página, e qualquer translate
+   faz dela a referência de position: fixed (o painel de filtros do celular ficava com a altura
+   da página inteira e não rolava) */
 .pagina {
-  animation: pagina-entrar 0.55s var(--curva) both;
+  animation: pagina-entrar 0.55s var(--curva) backwards;
 }
 
 @keyframes pagina-entrar {
@@ -3486,33 +3489,6 @@ button.tag:active {
 
 .seletor option {
   background: var(--sup-1);
-  color: var(--texto);
-}
-
-.alternador-visao {
-  display: flex;
-  gap: 2px;
-  padding: 2px;
-  border: 1px solid var(--borda-2);
-  border-radius: var(--raio);
-}
-
-.alternador-visao button {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--raio-p);
-  color: var(--texto-3);
-  transition: background-color 0.15s, color 0.15s;
-}
-
-.alternador-visao button:hover {
-  color: var(--texto);
-}
-
-.alternador-visao button.ativo {
-  background: var(--sup-3);
   color: var(--texto);
 }
 
@@ -8134,6 +8110,8 @@ kbd,
     box-shadow: var(--sombra);
     transform: translateX(-105%);
     transition: transform 0.3s var(--curva);
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   .filtros.aberto {
@@ -8412,7 +8390,7 @@ kbd,
 
   .catalogo-barra {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr);
   }
 
   .campo-busca {

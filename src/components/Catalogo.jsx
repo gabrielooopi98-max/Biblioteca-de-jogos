@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { useArmazenamento, useTeclaEsc, useTravarRolagem } from "../hooks.js";
+import { useTeclaEsc, useTravarRolagem } from "../hooks.js";
 import { useLoja } from "../LojaContext.js";
 import { calcularPrecoFinal, FILTROS_INICIAIS, formatarPreco, normalizar } from "../utils.js";
-import { LinhaJogo } from "./Abas.jsx";
 import CardJogo from "./CardJogo.jsx";
-import { IconeControle, IconeFechar, IconeFiltro, IconeGrade, IconeLista } from "./Icones.jsx";
+import { IconeControle, IconeFechar, IconeFiltro } from "./Icones.jsx";
 
 const POR_PAGINA = 24;
 
@@ -67,7 +66,6 @@ function Caixa({ marcado, aoMudar, rotulo, quantidade, tipo = "checkbox", nome }
 function Catalogo({ jogos, filtros, setFiltros }) {
     const { possui } = useLoja();
     const [painelAberto, setPainelAberto] = useState(false);
-    const [visao, setVisao] = useArmazenamento("bj:visao", "grade");
     const [limite, setLimite] = useState(POR_PAGINA);
     const assinatura = JSON.stringify(filtros);
     const [assinaturaAnterior, setAssinaturaAnterior] = useState(assinatura);
@@ -200,14 +198,6 @@ function Catalogo({ jogos, filtros, setFiltros }) {
                                 </option>
                             ))}
                         </select>
-                        <div className="alternador-visao" role="group" aria-label="Modo de visualização">
-                            <button type="button" className={visao === "grade" ? "ativo" : ""} onClick={() => setVisao("grade")} aria-pressed={visao === "grade"} aria-label="Grade" data-dica="Grade">
-                                <IconeGrade tamanho={16} />
-                            </button>
-                            <button type="button" className={visao === "lista" ? "ativo" : ""} onClick={() => setVisao("lista")} aria-pressed={visao === "lista"} aria-label="Lista" data-dica="Lista">
-                                <IconeLista tamanho={16} />
-                            </button>
-                        </div>
                     </div>
 
                     <div className="catalogo-resumo">
@@ -229,8 +219,10 @@ function Catalogo({ jogos, filtros, setFiltros }) {
 
                     {resultado.length > 0 ? (
                         <>
-                            <div className={visao === "grade" ? "grade" : "resultados"}>
-                                {resultado.slice(0, limite).map((jogo) => (visao === "grade" ? <CardJogo key={jogo.id} jogo={jogo} /> : <LinhaJogo key={jogo.id} jogo={jogo} compacta />))}
+                            <div className="grade">
+                                {resultado.slice(0, limite).map((jogo) => (
+                                    <CardJogo key={jogo.id} jogo={jogo} />
+                                ))}
                             </div>
                             {limite < resultado.length && (
                                 <button type="button" className="botao botao-secundario botao-largo carregar-mais" onClick={() => setLimite((l) => l + POR_PAGINA)}>
