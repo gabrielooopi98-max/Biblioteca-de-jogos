@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import jogos from "./dadosJogos.js";
 import acessorios from "./acessorios.js";
-import { navegar, useArmazenamento, useAtalho, useEfeitosPonteiro, useRevelar, useRota, useTravarRolagem } from "./hooks.js";
+import { navegar, useArmazenamento, useAtalho, useEfeitosPonteiro, useRota, useTravarRolagem } from "./hooks.js";
 import { LojaContext } from "./LojaContext.js";
 import { calcularPrecoFinal, ehAcessorio, FILTROS_INICIAIS, imagensDoJogo, LIMITE_COMPARAR, recomendar } from "./utils.js";
 import Abas from "./components/Abas.jsx";
@@ -125,7 +125,6 @@ function App() {
 
     const rota = useRota();
     useEfeitosPonteiro();
-    useRevelar();
     const aberto = rota.id ? porId.get(rota.id) : null;
     const jogoAberto = rota.pagina === "jogo" && aberto && !ehAcessorio(aberto) ? aberto : null;
     const produtoAberto = rota.pagina === "produto" && ehAcessorio(aberto) ? aberto : null;

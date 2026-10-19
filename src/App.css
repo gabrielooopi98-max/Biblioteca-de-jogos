@@ -25,12 +25,12 @@
   --perigo: #dc2626;
   --ok: #16a34a;
   /* dourado da marca */
-  --ouro: #d4a017;
-  --ouro-hover: #c08f0f;
-  --ouro-vivo: #f2c230;
+  --ouro: #ecb621;
+  --ouro-hover: #d9a514;
+  --ouro-vivo: #f8cf4a;
   --ouro-escuro: #8a6508; /* texto dourado sobre branco, com contraste de leitura */
   --ouro-texto: #1c1400; /* texto sobre fundo dourado */
-  --ouro-suave: rgba(212, 160, 23, 0.14);
+  --ouro-suave: rgba(236, 182, 33, 0.16);
   --foco: var(--ouro-escuro);
   color-scheme: light;
 }
@@ -6351,18 +6351,6 @@ button.tag:active {
   animation-play-state: paused;
 }
 
-/* entrada em cortina: cada painel é revelado de baixo para cima, em sequência */
-.galeria-souls.revelar .sanfona-painel {
-  clip-path: inset(100% 0 0 0 round var(--raio-g));
-}
-
-.galeria-souls.revelar.revelado .sanfona-painel {
-  clip-path: inset(0 0 0 0 round var(--raio-g));
-  transition:
-    clip-path 1s var(--sanfona-curva) calc(min(var(--ordem, 0), 9) * 70ms + 0.15s),
-    flex-grow 0.85s var(--sanfona-curva);
-}
-
 /* computador: a informação só existe no painel aberto e entra em cascata depois que ele cresceu */
 @media (min-width: 721px) {
   /* fechado: o navegador nem calcula o conteúdo da informação (layout e pintura pulados),
@@ -6829,15 +6817,6 @@ button.tag:active {
   padding: 2px 4px 6px;
   color: var(--texto-3);
   transition: color 0.3s ease;
-}
-
-.re:not(.acordado) .re-marco {
-  opacity: 0;
-}
-
-.re.acordado .re-marco {
-  animation: subir-suave 0.7s var(--curva) backwards;
-  animation-delay: calc(0.5s + var(--i, 0) * 0.05s);
 }
 
 .re-marco:hover {
@@ -7907,33 +7886,6 @@ button.tag:active {
   }
 }
 
-/* Seções que entram ao rolar (classe aplicada por useRevelar) */
-.revelar {
-  opacity: 0;
-  translate: 0 32px;
-}
-
-.revelar.revelado {
-  opacity: 1;
-  translate: 0 0;
-  transition: opacity 0.8s ease, translate 1s var(--curva);
-}
-
-.revelar :is(.trilho, .ofertas, .categorias, .grade) > *,
-.revelar.garantias > * {
-  opacity: 0;
-  translate: 0 20px;
-}
-
-.revelar.revelado :is(.trilho, .ofertas, .categorias, .grade) > *,
-.revelar.revelado.garantias > * {
-  opacity: 1;
-  translate: 0 0;
-  transition:
-    opacity 0.6s ease calc(min(var(--ordem, 0), 9) * 55ms + 0.1s),
-    translate 0.8s var(--curva) calc(min(var(--ordem, 0), 9) * 55ms + 0.1s);
-}
-
 /* Resultados do catálogo entram em cascata a cada filtro */
 .grade > .cartao,
 .resultados > .linha {
@@ -8692,13 +8644,6 @@ kbd,
     from {
       opacity: 0;
     }
-  }
-
-  /* seções que entram ao rolar: só fade */
-  .revelar,
-  .revelar :is(.trilho, .ofertas, .categorias, .grade) > *,
-  .revelar.garantias > * {
-    translate: 0 0 !important;
   }
 
   /* nada de movimento contínuo, tremida ou piscada */

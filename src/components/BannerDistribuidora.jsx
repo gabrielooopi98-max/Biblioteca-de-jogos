@@ -19,9 +19,10 @@ const semMovimento = () => window.matchMedia("(prefers-reduced-motion: reduce)")
 // Igual ao preload do index.html.
 const FUNDO_SIZES = "(max-width: 720px) 200px, 100vw";
 
-// Trailer de fundo só onde faz sentido: mouse, sem "reduzir movimento" e sem economia de dados.
+// Trailer de fundo só no PC (mouse) e sem economia de dados. Toca também no modo suave
+// ("reduzir movimento" do sistema): é mudo, fica atrás da arte escurecida e não mexe no layout.
 function podeTocarVideo() {
-    return window.matchMedia("(hover: hover) and (pointer: fine)").matches && !semMovimento() && !navigator.connection?.saveData;
+    return window.matchMedia("(hover: hover) and (pointer: fine)").matches && !navigator.connection?.saveData;
 }
 
 // Distância circular entre a carta i e a ativa: -3…4 para 8 jogos.

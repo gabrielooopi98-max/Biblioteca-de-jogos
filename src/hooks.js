@@ -83,64 +83,6 @@ export function navegar(caminho) {
     if (window.location.hash !== `#${caminho}`) window.location.hash = caminho;
 }
 
-// Seções que entram ao rolar. Só as que nascem abaixo da dobra são escondidas, para nada piscar.
-const SELETOR_REVELAR = ".conteudo > section, .conteudo .secao, .jogo-bloco, .rodape";
-const SELETOR_ITENS = ".trilho > *, .ofertas > *, .categorias > *, .grade > *, .garantias > *, .sanfona > *";
-
-export function useRevelar() {
-    useEffect(() => {
-        // no modo suave a entrada vira só fade (ver o CSS do modo suave)
-        if (!("IntersectionObserver" in window)) return;
-        const marcados = new WeakSet();
-        const tempos = new Set();
-
-        const observador = new IntersectionObserver(
-            (entradas) => {
-                for (const { target, isIntersecting } of entradas) {
-                    if (!isIntersecting) continue;
-                    observador.unobserve(target);
-                    target.classList.add("revelado");
-                    // Depois da cascata, devolve o elemento ao estado normal (hover etc.).
-                    const tempo = setTimeout(() => {
-                        tempos.delete(tempo);
-                        target.classList.remove("revelar", "revelado");
-                        for (const item of target.querySelectorAll(SELETOR_ITENS)) item.style.removeProperty("--ordem");
-                    }, 1700);
-                    tempos.add(tempo);
-                }
-            },
-            { rootMargin: "0px 0px -10% 0px" },
-        );
-
-        function marcar(elemento) {
-            if (marcados.has(elemento)) return;
-            marcados.add(elemento);
-            if (elemento.getBoundingClientRect().top < window.innerHeight) return;
-            elemento.classList.add("revelar");
-            elemento.querySelectorAll(SELETOR_ITENS).forEach((item, i) => item.style.setProperty("--ordem", i));
-            observador.observe(elemento);
-        }
-
-        function varrer(raiz) {
-            if (raiz.matches(SELETOR_REVELAR)) marcar(raiz);
-            raiz.querySelectorAll(SELETOR_REVELAR).forEach(marcar);
-        }
-
-        varrer(document.body);
-        // Páginas carregadas sob demanda e prateleiras novas também entram.
-        const mutacoes = new MutationObserver((lista) => {
-            for (const mutacao of lista) for (const no of mutacao.addedNodes) if (no instanceof Element) varrer(no);
-        });
-        mutacoes.observe(document.body, { childList: true, subtree: true });
-
-        return () => {
-            mutacoes.disconnect();
-            observador.disconnect();
-            tempos.forEach(clearTimeout);
-        };
-    }, []);
-}
-
 // Elementos com "luz que segue o cursor" e com paralaxe (lidos pelo CSS via --mx/--my e --px/--py).
 const SELETOR_LUZ =
     ".cartao-imagem, .oferta, .categoria, .chamada, .item-biblioteca, .desejo, .pedido, .compra, .garantia, .abas-lista, .resultados, .previa, .estatisticas, .slide-info, .metodo, .evento, .franquia, .comparacao-rolagem";
