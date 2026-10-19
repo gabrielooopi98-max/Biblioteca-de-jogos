@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450"><defs>
+<radialGradient id="bg" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#2a2a30"/><stop offset=".55" stop-color="#151518"/><stop offset="1" stop-color="#0a0a0c"/></radialGradient>
+<linearGradient id="corpo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#44444d"/><stop offset=".45" stop-color="#2a2a31"/><stop offset="1" stop-color="#16161a"/></linearGradient>
+<linearGradient id="corpo2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34343c"/><stop offset="1" stop-color="#121215"/></linearGradient>
+<linearGradient id="claro" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a5a64"/><stop offset="1" stop-color="#2c2c33"/></linearGradient>
+<linearGradient id="rgb" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8b5cf6"/><stop offset=".5" stop-color="#22d3ee"/><stop offset="1" stop-color="#34d399"/></linearGradient>
+<linearGradient id="tela" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b1d6e"/><stop offset=".55" stop-color="#0e4a6b"/><stop offset="1" stop-color="#062a2a"/></linearGradient>
+<linearGradient id="reflexo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="ouro" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8c766"/><stop offset="1" stop-color="#a8841f"/></linearGradient>
+<filter id="sombra" x="-50%" y="-200%" width="200%" height="500%"><feGaussianBlur stdDeviation="12"/></filter>
+<filter id="brilho" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7"/></filter>
+</defs>
+<rect width="600" height="450" fill="url(#bg)"/>
+<ellipse cx="300" cy="340" rx="200" ry="13" fill="#000" opacity=".6" filter="url(#sombra)"/>
+<rect x="186" y="176" width="228" height="110" rx="14" fill="#0b0b0e"/>
+<rect x="194" y="184" width="212" height="94" rx="8" fill="url(#tela)"/>
+<path d="M194 250 L250 222 L292 244 L346 214 L406 246 L406 278 L194 278Z" fill="#031015" opacity=".85"/>
+<rect x="194" y="184" width="212" height="30" fill="url(#reflexo)" opacity=".4"/>
+<path d="M190 170 L112 178 C96 180 88 196 92 222 L100 290 C104 314 128 318 148 304 L190 280Z" fill="url(#corpo)"/>
+<path d="M410 170 L488 178 C504 180 512 196 508 222 L500 290 C496 314 472 318 452 304 L410 280Z" fill="url(#corpo)"/>
+<circle cx="140" cy="216" r="18" fill="#121215"/><circle cx="140" cy="216" r="11" fill="#2f2f37"/>
+<g fill="#141418"><circle cx="460" cy="206" r="7"/><circle cx="474" cy="220" r="7"/><circle cx="446" cy="220" r="7"/><circle cx="460" cy="234" r="7"/></g>
+<circle cx="452" cy="268" r="15" fill="#121215"/><circle cx="452" cy="268" r="9" fill="#2f2f37"/>
+<g opacity=".9" filter="url(#brilho)"><rect x="128" y="290" width="40" height="4" rx="2" fill="url(#rgb)"/><rect x="432" y="290" width="40" height="4" rx="2" fill="url(#rgb)"/></g><rect x="128" y="290" width="40" height="4" rx="2" fill="url(#rgb)"/><rect x="432" y="290" width="40" height="4" rx="2" fill="url(#rgb)"/>
+</svg>

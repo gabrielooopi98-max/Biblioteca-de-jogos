@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450"><defs>
+<radialGradient id="bg" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#2a2a30"/><stop offset=".55" stop-color="#151518"/><stop offset="1" stop-color="#0a0a0c"/></radialGradient>
+<linearGradient id="corpo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#44444d"/><stop offset=".45" stop-color="#2a2a31"/><stop offset="1" stop-color="#16161a"/></linearGradient>
+<linearGradient id="corpo2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34343c"/><stop offset="1" stop-color="#121215"/></linearGradient>
+<linearGradient id="claro" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a5a64"/><stop offset="1" stop-color="#2c2c33"/></linearGradient>
+<linearGradient id="rgb" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8b5cf6"/><stop offset=".5" stop-color="#22d3ee"/><stop offset="1" stop-color="#34d399"/></linearGradient>
+<linearGradient id="tela" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b1d6e"/><stop offset=".55" stop-color="#0e4a6b"/><stop offset="1" stop-color="#062a2a"/></linearGradient>
+<linearGradient id="reflexo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="ouro" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8c766"/><stop offset="1" stop-color="#a8841f"/></linearGradient>
+<filter id="sombra" x="-50%" y="-200%" width="200%" height="500%"><feGaussianBlur stdDeviation="12"/></filter>
+<filter id="brilho" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7"/></filter>
+</defs>
+<rect width="600" height="450" fill="url(#bg)"/>
+<ellipse cx="300" cy="340" rx="210" ry="13" fill="#000" opacity=".6" filter="url(#sombra)"/>
+<polygon points="110,206 474,180 504,292 92,326" fill="#18181c"/>
+<polygon points="110,206 474,180 504,292 92,326" fill="none" stroke="#3a3a42" stroke-width="4" stroke-dasharray="7 5"/>
+<polygon points="116,212 470,187 476,208 114,236" fill="#fff" opacity=".05"/>
+<g opacity=".9" filter="url(#brilho)"><path d="M150 300 L230 294" stroke="url(#rgb)" stroke-width="4" stroke-linecap="round"/></g><path d="M150 300 L230 294" stroke="url(#rgb)" stroke-width="4" stroke-linecap="round"/>
+<path d="M388 196 C414 196 424 222 424 246 C424 274 408 290 388 290 C368 290 352 274 352 246 C352 222 362 196 388 196Z" fill="url(#corpo)"/>
+<path d="M388 198 V236 M354 234 Q388 244 422 234" stroke="#0b0b0e" stroke-width="2.5" fill="none"/>
+</svg>
