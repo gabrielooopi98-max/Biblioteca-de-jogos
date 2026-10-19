@@ -1,33 +1,10 @@
 /* ==========================================================================
    Universal Games: sistema de design
-   Identidade monocromática: preto, branco e cinza. A cor fica por conta das artes dos jogos.
+   Tema claro com o dourado da marca (o mesmo amarelo do logo da loja).
+   O dourado marca o que importa: ação principal, descontos, contagens e foco.
    ========================================================================== */
 
-:root,
-[data-tema="escuro"] {
-  --fundo: #0a0a0a;
-  --fundo-2: #0f0f0f;
-  --sup-1: #141414;
-  --sup-2: #1a1a1a;
-  --sup-3: #242424;
-  --borda: #232323;
-  --borda-2: #303030;
-  --texto: #fafafa;
-  --texto-2: #a3a3a3;
-  --texto-3: #6b6b6b;
-  --inverso: #fafafa;
-  --inverso-texto: #0a0a0a;
-  --inverso-hover: #d4d4d4;
-  --vidro: rgba(10, 10, 10, 0.78);
-  --veu: rgba(0, 0, 0, 0.72);
-  --sombra: 0 16px 48px rgba(0, 0, 0, 0.55);
-  --logo-interno: #0a0a0a;
-  --perigo: #f87171;
-  --ok: #4ade80;
-  color-scheme: dark;
-}
-
-[data-tema="claro"] {
+:root {
   --fundo: #fafafa;
   --fundo-2: #f4f4f4;
   --sup-1: #ffffff;
@@ -47,6 +24,14 @@
   --logo-interno: #fafafa;
   --perigo: #dc2626;
   --ok: #16a34a;
+  /* dourado da marca */
+  --ouro: #d4a017;
+  --ouro-hover: #c08f0f;
+  --ouro-vivo: #f2c230;
+  --ouro-escuro: #8a6508; /* texto dourado sobre branco, com contraste de leitura */
+  --ouro-texto: #1c1400; /* texto sobre fundo dourado */
+  --ouro-suave: rgba(212, 160, 23, 0.14);
+  --foco: var(--ouro-escuro);
   color-scheme: light;
 }
 
@@ -166,14 +151,14 @@ fieldset {
 }
 
 :focus-visible {
-  outline: 2px solid var(--texto);
+  outline: 2px solid var(--foco);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
 ::selection {
-  background: var(--inverso);
-  color: var(--inverso-texto);
+  background: var(--ouro-vivo);
+  color: var(--ouro-texto);
 }
 
 ::-webkit-scrollbar {
@@ -339,6 +324,20 @@ kbd {
 .botao-secundario.ativo::before,
 .carrinho-botao:hover::before {
   transform: translate(-50%, -50%) scale(1);
+}
+
+/* botão principal: contorno dourado que se enche de dourado no hover */
+.botao-primario {
+  border-color: var(--ouro);
+}
+
+.botao-primario::before {
+  background: var(--ouro);
+}
+
+.botao-primario:hover:not(:disabled) {
+  border-color: var(--ouro);
+  color: var(--ouro-texto);
 }
 
 .botao-fantasma {
@@ -571,8 +570,8 @@ button.tag:active {
 .preco-desconto {
   padding: 2px 6px;
   border-radius: 4px;
-  background: var(--inverso);
-  color: var(--inverso-texto);
+  background: var(--ouro);
+  color: var(--ouro-texto);
   font-size: 13.5px;
   font-weight: 700;
 }
@@ -657,8 +656,8 @@ button.tag:active {
   left: 8px;
   padding: 2px 7px;
   border-radius: 4px;
-  background: var(--inverso);
-  color: var(--inverso-texto);
+  background: var(--ouro);
+  color: var(--ouro-texto);
   font-variant-numeric: tabular-nums;
   font-size: 12px;
   font-weight: 500;
@@ -697,9 +696,10 @@ button.tag:active {
   color: var(--texto);
 }
 
+/* quadro preto com as barras douradas, como o selo da loja */
 .logo-marca {
-  color: var(--texto);
-  --logo-interno: var(--fundo);
+  color: #0a0a0a;
+  --logo-interno: var(--ouro);
 }
 
 .logo-texto {
@@ -738,7 +738,7 @@ button.tag:active {
 }
 
 .nav a.ativo {
-  background: var(--sup-2);
+  background: var(--ouro-suave);
   color: var(--texto);
 }
 
@@ -890,7 +890,8 @@ button.tag:active {
   height: 24px;
   padding: 0 6px;
   border-radius: 6px;
-  background: rgba(127, 127, 127, 0.22);
+  background: var(--ouro);
+  color: var(--ouro-texto);
   font-variant-numeric: tabular-nums;
   font-size: 13.5px;
   line-height: 24px;
@@ -1065,6 +1066,19 @@ button.tag:active {
    --cx/--cy (-0.5…0.5) vêm do cursor e inclinam o baralho e o fundo.
    ========================================================================== */
 
+/* não herdáveis: o JS escreve direto no fundo e no palco, e as cartas dentro não recalculam */
+@property --cx {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --cy {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
 .hero {
   --texto: #fafafa;
   --texto-2: rgba(250, 250, 250, 0.78);
@@ -1074,8 +1088,7 @@ button.tag:active {
   --inverso-hover: #e5e5e5;
   --halo: rgba(250, 250, 250, 0.18);
   --brilho-botao: rgba(250, 250, 250, 0.35);
-  --cx: 0;
-  --cy: 0;
+  --foco: var(--ouro-vivo);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -1096,6 +1109,8 @@ button.tag:active {
   z-index: -2;
   transform: translate(calc(var(--cx) * -22px), calc(var(--cy) * -14px));
   transition: transform 1.4s var(--curva);
+  /* camada própria: a paralaxe só move a camada, sem redesenhar arte, trailer e degradês */
+  will-change: transform;
   animation: aparecer 1.4s ease backwards;
 }
 
@@ -1142,14 +1157,16 @@ button.tag:active {
 }
 
 /* granulação de filme, quase imperceptível */
+/* só 8% de sobra: o grão se move até ~6% e a camada fica 3x menor que a de antes */
 .hero-grao {
   position: absolute;
-  inset: -50%;
+  inset: -8%;
   z-index: -1;
   opacity: 0.06;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   pointer-events: none;
   animation: grao 0.9s steps(5) infinite;
+  will-change: transform;
 }
 
 @keyframes grao {
@@ -1215,17 +1232,28 @@ button.tag:active {
   height: 7px;
   flex-shrink: 0;
   border-radius: 50%;
+  position: relative;
   background: #fafafa;
+}
+
+.hero-ponto::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(250, 250, 250, 0.5);
   animation: ponto-vivo 2s ease-out infinite;
 }
 
 @keyframes ponto-vivo {
   0% {
-    box-shadow: 0 0 0 0 rgba(250, 250, 250, 0.5);
+    opacity: 1;
+    scale: 1;
   }
   70%,
   100% {
-    box-shadow: 0 0 0 8px rgba(250, 250, 250, 0);
+    opacity: 0;
+    scale: 3.3;
   }
 }
 
@@ -1291,7 +1319,7 @@ button.tag:active {
 }
 
 .hero-marca small strong {
-  color: #fafafa;
+  color: var(--ouro-vivo);
   font-family: var(--fonte-titulo);
   font-size: 24px;
   font-weight: 700;
@@ -1362,18 +1390,6 @@ button.tag:active {
   letter-spacing: -0.03em;
 }
 
-.hero-acoes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 6px;
-}
-
-.botao-vidro {
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
 /* --- Baralho 3D de capas --- */
 
 .hero-baralho {
@@ -1390,14 +1406,36 @@ button.tag:active {
   transition: transform 0.9s var(--curva);
 }
 
+/* Posição ao vivo: não herdáveis. O arraste escreve --arrasto direto em cada carta e só ela
+   recalcula; com herança, cada movimento do dedo recalculava todo o conteúdo das 8 cartas. */
+@property --arrasto {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --dv {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --absv {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
 /* Posição de cada carta: --d (lado, inteiro) menos --arrasto (fração ao vivo enquanto se arrasta)
-   dá --dv; --absv é a distância. A ativa parada fica em 1:1, nítida.
+   dá --dv; --absv é a distância. --distancia (só --d, herdável) serve ao conteúdo da carta.
+   A ativa parada fica em 1:1, nítida.
    A mesma lista de funções em todas as cartas faz o navegador interpolar função a função,
    sem atalhos por matriz que entortariam o caminho. As mais distantes andam um pouco depois (onda). */
 .hero-carta {
   --largura-carta: clamp(184px, 16.5vw, 256px);
   --dv: calc(var(--d) - var(--arrasto, 0));
   --absv: max(var(--dv), calc(var(--dv) * -1));
+  --distancia: max(var(--d), calc(var(--d) * -1));
   position: absolute;
   top: 50%;
   left: 50%;
@@ -1457,10 +1495,6 @@ button.tag:active {
   filter: brightness(calc(1.25 - var(--absv) * 0.3));
 }
 
-.hero-capa img {
-  backface-visibility: hidden;
-}
-
 @keyframes carta-entrar {
   from {
     opacity: 0;
@@ -1510,14 +1544,14 @@ button.tag:active {
 .hero-carta.ativa .hero-capa {
   border-color: rgba(250, 250, 250, 0.6);
   box-shadow:
-    calc(var(--tx, 0) * -44px) calc(50px - var(--ty, 0) * 34px) 90px -30px rgba(0, 0, 0, 1),
+    0 50px 90px -30px rgba(0, 0, 0, 1),
     0 0 70px -12px rgba(250, 250, 250, 0.22);
   transform: perspective(900px) rotateX(calc(var(--ty, 0) * -16deg)) rotateY(calc(var(--tx, 0) * 20deg));
   transition: transform 0.7s var(--curva), border-color 0.6s ease, box-shadow 0.7s var(--curva);
 }
 
 .hero-carta.ativa .hero-capa:hover {
-  transition: transform 0.16s ease-out, border-color 0.6s ease, box-shadow 0.16s ease-out;
+  transition: transform 0.16s ease-out, border-color 0.6s ease, box-shadow 0.6s ease;
 }
 
 @keyframes carta-flutuar {
@@ -1536,7 +1570,7 @@ button.tag:active {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: radial-gradient(circle at calc(50% + var(--tx, var(--cx)) * 120%) calc(45% + var(--ty, var(--cy)) * 120%), rgba(255, 255, 255, 0.34), transparent 55%);
+  background: radial-gradient(circle at calc(50% + var(--tx, 0) * 120%) calc(45% + var(--ty, 0) * 120%), rgba(255, 255, 255, 0.34), transparent 55%);
   opacity: 0;
   mix-blend-mode: overlay;
   transition: opacity 0.6s ease;
@@ -1580,12 +1614,12 @@ button.tag:active {
   z-index: 3;
   padding: 3px 8px;
   border-radius: 6px;
-  background: #fafafa;
-  color: #0a0a0a;
+  background: var(--ouro);
+  color: var(--ouro-texto);
   font-size: 12.5px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  opacity: calc(1 - var(--absv) * 0.5);
+  opacity: calc(1 - var(--distancia) * 0.5);
   transition: opacity 0.6s ease;
 }
 
@@ -1658,9 +1692,51 @@ button.tag:active {
 
 .hero-carta-ver {
   flex: 1;
+  min-width: 0;
   padding: 0 10px;
   font-size: 13.5px;
   font-weight: 600;
+}
+
+/* tablet (capa de 168px): "Ver" sem a seta para caber ao lado do coração e do carrinho */
+@media (max-width: 1000px) {
+  .hero-carta-ver {
+    padding: 0 8px;
+  }
+
+  .hero-carta-acoes .hero-carta-ver svg {
+    display: none;
+  }
+}
+
+/* celular (capa de 128px): só coração e carrinho, maiores para o dedo; tocar na capa abre o jogo */
+@media (max-width: 720px) {
+  .hero-carta-acoes {
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    gap: 6px;
+    padding: 5px;
+    border-radius: 11px;
+  }
+
+  .hero-carta-acoes .hero-carta-ver {
+    display: none;
+  }
+
+  .hero-carta-acoes button {
+    flex: 1;
+    height: 38px;
+  }
+
+  /* "Na biblioteca" vira só o ícone */
+  .hero-carta-possui {
+    flex: 1;
+    justify-content: center;
+    height: 38px;
+    gap: 0;
+    font-size: 0;
+  }
 }
 
 .hero-carta-possui {
@@ -1786,7 +1862,7 @@ button.tag:active {
   position: absolute;
   inset: 8px 0;
   border-radius: 99px;
-  background: #fafafa;
+  background: var(--ouro-vivo);
   transform-origin: left;
   animation: progresso linear forwards;
 }
@@ -1915,11 +1991,11 @@ button.tag:active {
 }
 
 .hero-anel-tempo {
-  stroke: #fafafa;
+  stroke: var(--ouro-vivo);
   stroke-linecap: round;
   stroke-dasharray: 100;
   stroke-dashoffset: 100;
-  animation: anel-tempo linear forwards;
+  animation: anel-tempo steps(100) forwards;
   transition: stroke 0.35s ease;
 }
 
@@ -2043,10 +2119,6 @@ button.tag:active {
     font-size: 19px;
   }
 
-  .hero-acoes .botao {
-    flex: 1 1 auto;
-  }
-
   /* no celular o contador e o anel já mostram posição e tempo */
   .hero-progresso {
     display: none;
@@ -2059,6 +2131,73 @@ button.tag:active {
 
   .hero-contador {
     padding: 0 4px;
+  }
+
+  /* fundo = capa em pé: centralizada e mais escura, como luz ambiente atrás do baralho */
+  .hero-fundo .imagem {
+    object-position: 50% 22%;
+  }
+
+  .hero-fundo .imagem.carregada.ativa {
+    opacity: 0.62;
+  }
+
+  /* Celular leve: tela pequena não mostra grão, reflexo nem vidro, mas a GPU paga por eles.
+     Fica o que se vê: baralho 3D, coreografia da troca, arraste ao vivo e sombra da capa. */
+  .hero-grao,
+  .hero-capa::after {
+    display: none;
+  }
+
+  .hero-capa {
+    -webkit-box-reflect: initial;
+    box-shadow: 0 26px 40px -24px rgba(0, 0, 0, 0.95);
+  }
+
+  .hero-carta.ativa .hero-capa {
+    box-shadow: 0 30px 44px -22px rgba(0, 0, 0, 1);
+  }
+
+  .hero-carta.ativa .hero-carta-corpo,
+  .hero-chao {
+    animation: none;
+  }
+
+  /* laterais escurecem com um véu (opacidade) em vez de filtro, que obriga a redesenhar a capa */
+  .hero-carta:not(.ativa),
+  .hero-carta:not(.ativa):hover {
+    filter: none;
+  }
+
+  .hero-carta-corpo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    border-radius: 14px;
+    background: #000;
+    opacity: calc(var(--distancia) * 0.3);
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+  }
+
+  .hero-carta-acoes,
+  .hero-selo,
+  .hero-navegacao {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .hero-carta-acoes {
+    background: rgba(10, 10, 10, 0.82);
+  }
+
+  .hero-selo {
+    background: rgba(10, 10, 10, 0.7);
+  }
+
+  .hero-navegacao {
+    background: rgba(10, 10, 10, 0.72);
   }
 }
 
@@ -2252,7 +2391,7 @@ button.tag:active {
   transition: opacity 0.2s, transform 0.3s var(--curva);
 }
 
-[data-tema="claro"] .destaques-seta {
+.destaques-seta {
   color: #0a0a0a;
   filter: none;
 }
@@ -2309,7 +2448,7 @@ button.tag:active {
   position: absolute;
   inset: 10px 0;
   border-radius: 99px;
-  background: var(--texto);
+  background: var(--ouro);
   transform-origin: left;
   animation: progresso linear forwards;
 }
@@ -3317,7 +3456,7 @@ button.tag:active {
 .faixa {
   width: 100%;
   height: 28px;
-  accent-color: var(--texto);
+  accent-color: var(--ouro);
   cursor: pointer;
 }
 
@@ -5235,16 +5374,7 @@ button.tag:active {
    Hover: efeitos que reagem ao cursor
    ========================================================================== */
 
-:root,
-[data-tema="escuro"] {
-  --luz: rgba(255, 255, 255, 0.6);
-  --luz-suave: rgba(255, 255, 255, 0.07);
-  --halo: rgba(250, 250, 250, 0.16);
-  --brilho-botao: rgba(250, 250, 250, 0.35);
-  --sombra-elevada: 0 22px 44px -20px rgba(0, 0, 0, 0.85);
-}
-
-[data-tema="claro"] {
+:root {
   --luz: rgba(10, 10, 10, 0.5);
   --luz-suave: rgba(10, 10, 10, 0.045);
   --halo: rgba(10, 10, 10, 0.12);

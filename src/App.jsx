@@ -1,7 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import jogos from "./dadosJogos.js";
 import acessorios from "./acessorios.js";
-import { flushSync } from "react-dom";
 import { navegar, useArmazenamento, useAtalho, useEfeitosPonteiro, useRevelar, useRota, useTravarRolagem } from "./hooks.js";
 import { LojaContext } from "./LojaContext.js";
 import { calcularPrecoFinal, ehAcessorio, FILTROS_INICIAIS, imagensDoJogo, LIMITE_COMPARAR, recomendar } from "./utils.js";
@@ -12,7 +11,7 @@ import BannerDistribuidora from "./components/BannerDistribuidora.jsx";
 import Destaques from "./components/Destaques.jsx";
 import { GavetaCarrinho } from "./components/Gavetas.jsx";
 import Header from "./components/Header.jsx";
-import { IconeBiblioteca, IconeBussola, IconeCarrinho, IconeCasa, IconeComparar, IconeCoracao, IconeEtiqueta, IconeFone, IconeLua, IconeRecibo } from "./components/Icones.jsx";
+import { IconeBiblioteca, IconeBussola, IconeCarrinho, IconeCasa, IconeComparar, IconeCoracao, IconeEtiqueta, IconeFone, IconeRecibo } from "./components/Icones.jsx";
 import NaoEncontrada from "./components/NaoEncontrada.jsx";
 import Notificacoes from "./components/Notificacoes.jsx";
 import PaletaComandos from "./components/PaletaComandos.jsx";
@@ -117,7 +116,6 @@ function App() {
     const [pedidos, setPedidos] = useArmazenamento("bj:pedidos", []);
     const [perfil, setPerfil] = useArmazenamento("bj:perfil", { nome: "", email: "" });
     const [cupom, setCupom] = useArmazenamento("bj:cupom", null);
-    const [tema, setTema] = useArmazenamento("bj:tema", "escuro");
     const [carrinhoAberto, setCarrinhoAberto] = useState(false);
     const [paletaAberta, setPaletaAberta] = useState(false);
     const [checkout, setCheckout] = useState({ aberto: false, presente: false, carregado: false });
@@ -155,10 +153,6 @@ function App() {
     const alertasAtingidos = desejos.filter((jogo) => alertas[jogo.id] && calcularPrecoFinal(jogo) <= alertas[jogo.id]).length;
 
     useTravarRolagem(carrinhoAberto || paletaAberta || checkout.aberto);
-
-    useEffect(() => {
-        document.documentElement.dataset.tema = tema;
-    }, [tema]);
 
     useEffect(() => {
         window.scrollTo({ top: 0 });
@@ -323,34 +317,6 @@ function App() {
         navegar("/explorar");
     }
 
-    // O novo tema se espalha em círculo a partir do botão (View Transitions, quando houver suporte).
-    const alternarTema = useCallback(
-        (evento) => {
-            const novo = tema === "escuro" ? "claro" : "escuro";
-            const trocar = () => {
-                // sem isso, cada elemento com transição de cor anima sozinho (centenas de uma vez)
-                const raiz = document.documentElement;
-                raiz.classList.add("sem-transicao");
-                raiz.dataset.tema = novo;
-                flushSync(() => setTema(novo));
-                requestAnimationFrame(() => requestAnimationFrame(() => raiz.classList.remove("sem-transicao")));
-            };
-            if (!document.startViewTransition || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return trocar();
-
-            const botao = evento?.currentTarget instanceof Element ? evento.currentTarget.getBoundingClientRect() : null;
-            const x = botao ? botao.left + botao.width / 2 : window.innerWidth / 2;
-            const y = botao ? botao.top + botao.height / 2 : 0;
-            const raio = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
-
-            document.startViewTransition(trocar).ready.then(() => {
-                document.documentElement.animate(
-                    { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${raio}px at ${x}px ${y}px)`] },
-                    { duration: 600, easing: "cubic-bezier(0.22, 1, 0.36, 1)", pseudoElement: "::view-transition-new(root)" },
-                );
-            });
-        },
-        [tema, setTema],
-    );
     const abrirPaleta = useCallback(() => setPaletaAberta(true), []);
     const comCtrlK = useCallback((e) => (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k", []);
     const comBarra = useCallback((e) => e.key === "/" && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName), []);
@@ -367,7 +333,6 @@ function App() {
         { id: "desejos", rotulo: "Lista de desejos", dica: "alertas de preço", Icone: IconeCoracao, executar: () => navegar("/desejos") },
         { id: "comparar", rotulo: "Comparar jogos", dica: `${comparando.length} selecionados`, Icone: IconeComparar, executar: () => navegar("/comparar") },
         { id: "carrinho", rotulo: "Abrir carrinho", dica: `${carrinho.length} itens`, Icone: IconeCarrinho, executar: () => setCarrinhoAberto(true) },
-        { id: "tema", rotulo: tema === "escuro" ? "Usar tema claro" : "Usar tema escuro", dica: "aparência", Icone: IconeLua, executar: alternarTema },
     ];
 
     const paraVoce = recomendar(jogos, [...idsVistos, ...idsDesejos, ...idsPossuidos], [...idsPossuidos]);
@@ -405,7 +370,6 @@ function App() {
                             subtitulo="Games"
                             personagem={porId.get(4)}
                             jogos={vitrine.warner}
-                            aoVerTodos={() => aplicarFiltros({ colecao: { nome: "Promoção Warner Bros. Games", ids: vitrine.warner.map((j) => j.id) }, ordenar: "maior-desconto" })}
                         />
                         <Destaques jogos={vitrine.destaques} />
                         <Garantias />
@@ -449,8 +413,6 @@ function App() {
                 alertas={alertasAtingidos}
                 abrirCarrinho={() => setCarrinhoAberto(true)}
                 abrirPaleta={abrirPaleta}
-                tema={tema}
-                alternarTema={alternarTema}
             />
 
             <main id="conteudo" className="conteudo" tabIndex={-1}>

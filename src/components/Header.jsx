@@ -1,5 +1,5 @@
 import { navegar, useIndicador } from "../hooks.js";
-import { IconeBiblioteca, IconeBusca, IconeBussola, IconeCarrinho, IconeCasa, IconeCoracao, IconeFone, IconeLua, IconeRecibo, IconeSol, LogoMarca } from "./Icones.jsx";
+import { IconeBiblioteca, IconeBusca, IconeBussola, IconeCarrinho, IconeCasa, IconeCoracao, IconeFone, IconeRecibo, LogoMarca } from "./Icones.jsx";
 
 const PAGINAS = [
     { pagina: "loja", caminho: "/", rotulo: "Loja", Icone: IconeCasa },
@@ -11,7 +11,7 @@ const PAGINAS = [
 
 const ehMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
 
-function Header({ pagina, qtdCarrinho, qtdDesejos, qtdBiblioteca, alertas, abrirCarrinho, abrirPaleta, tema, alternarTema }) {
+function Header({ pagina, qtdCarrinho, qtdDesejos, qtdBiblioteca, alertas, abrirCarrinho, abrirPaleta }) {
     const navRef = useIndicador();
 
     return (
@@ -51,9 +51,6 @@ function Header({ pagina, qtdCarrinho, qtdDesejos, qtdBiblioteca, alertas, abrir
                     <div className="barra-acoes">
                         <button type="button" className="icone-botao busca-movel" onClick={abrirPaleta} aria-label="Buscar">
                             <IconeBusca tamanho={19} />
-                        </button>
-                        <button type="button" className="icone-botao" onClick={alternarTema} aria-label={tema === "escuro" ? "Usar tema claro" : "Usar tema escuro"} data-dica={tema === "escuro" ? "Tema claro" : "Tema escuro"}>
-                            {tema === "escuro" ? <IconeSol tamanho={18} /> : <IconeLua tamanho={18} />}
                         </button>
                         <a href="#/desejos" className={pagina === "desejos" ? "icone-botao ativo" : "icone-botao"} aria-label={`Lista de desejos (${qtdDesejos})`} data-dica="Lista de desejos">
                             <IconeCoracao tamanho={18} />

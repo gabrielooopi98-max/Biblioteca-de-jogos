@@ -14,6 +14,10 @@ const LIMIAR_ARRASTE = 6;
 const LIMITE_ELASTICO = 2;
 const IMPULSO_MS = 160;
 const semMovimento = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+// Até 720px o fundo usa a capa 600x900 (a mesma do baralho, já em cache): a arte larga de 1920px
+// pesaria ~250 KB por jogo para aparecer recortada e escurecida. "200px" faz até tela 3x escolher a capa.
+// Igual ao preload do index.html.
+const FUNDO_SIZES = "(max-width: 720px) 200px, 100vw";
 
 // Trailer de fundo só onde faz sentido: mouse, sem "reduzir movimento" e sem economia de dados.
 function podeTocarVideo() {
@@ -88,7 +92,7 @@ function disparar(botao, varredura, sentido) {
 
 // Banner de abertura: vitrine cinematográfica da promoção da distribuidora.
 // Fundo com a arte (e depois o trailer) do jogo em foco, baralho 3D de capas e troca automática.
-function BannerDistribuidora({ distribuidora, subtitulo, personagem, jogos, aoVerTodos }) {
+function BannerDistribuidora({ distribuidora, subtitulo, personagem, jogos }) {
     const { abrirJogo, adicionarAoCarrinho, alternarDesejo, estaNoCarrinho, estaNosDesejos, possui } = useLoja();
     const total = jogos.length;
     const [estado, setEstado] = useState(() => ({ ativo: Math.max(0, jogos.findIndex((j) => j.id === personagem.id)), anterior: null, direcao: 1 }));
@@ -163,7 +167,16 @@ function BannerDistribuidora({ distribuidora, subtitulo, personagem, jogos, aoVe
         return () => observador.disconnect();
     }, []);
 
-    // Inclinação do baralho, paralaxe do fundo e reflexo da capa seguindo o cursor.
+    // --cx/--cy vão só no fundo e no palco 3D (e não herdam, ver @property no CSS):
+    // mexer o mouse não recalcula o estilo de cada carta, capa e botão do banner.
+    function inclinar(cx, cy) {
+        for (const alvo of secaoRef.current?.querySelectorAll(".hero-fundo, .hero-cena") ?? []) {
+            alvo.style.setProperty("--cx", cx);
+            alvo.style.setProperty("--cy", cy);
+        }
+    }
+
+    // Inclinação do baralho e paralaxe do fundo seguindo o cursor.
     function mover(evento) {
         if (evento.pointerType !== "mouse") return;
         const { clientX, clientY } = evento;
@@ -172,8 +185,7 @@ function BannerDistribuidora({ distribuidora, subtitulo, personagem, jogos, aoVe
             const secao = secaoRef.current;
             if (!secao) return;
             const r = secao.getBoundingClientRect();
-            secao.style.setProperty("--cx", ((clientX - r.left) / r.width - 0.5).toFixed(3));
-            secao.style.setProperty("--cy", ((clientY - r.top) / r.height - 0.5).toFixed(3));
+            inclinar(((clientX - r.left) / r.width - 0.5).toFixed(3), ((clientY - r.top) / r.height - 0.5).toFixed(3));
         });
     }
 
@@ -181,8 +193,7 @@ function BannerDistribuidora({ distribuidora, subtitulo, personagem, jogos, aoVe
         setPausado(false);
         cancelAnimationFrame(quadro.current);
         // pode chegar depois de a seção sair da tela (ao abrir um jogo)
-        secaoRef.current?.style.setProperty("--cx", 0);
-        secaoRef.current?.style.setProperty("--cy", 0);
+        inclinar(0, 0);
     }
 
     // Setas (na tela ou do teclado): troca e dispara a animação do botão correspondente.
@@ -197,6 +208,11 @@ function BannerDistribuidora({ distribuidora, subtitulo, personagem, jogos, aoVe
     }
 
     // --- Arrastar o baralho (mouse ou dedo): as capas seguem ao vivo e encaixam ao soltar ---
+    // --arrasto vai em cada carta (não herda, ver @property no CSS): só as 8 cartas recalculam por quadro.
+    function definirArrasto(valor) {
+        for (const corpo of cartasRef.current) corpo?.parentElement.style.setProperty("--arrasto", valor);
+    }
+
     function comecarArraste(evento) {
         if (evento.button !== 0) return;
         const carta = baralhoRef.current.querySelector(".hero-carta.ativa");
@@ -238,7 +254,7 @@ function BannerDistribuidora({ distribuidora, subtitulo, personagem, jogos, aoVe
         let passos = -dx / a.passo;
         if (Math.abs(passos) > LIMITE_ELASTICO) passos = Math.sign(passos) * (LIMITE_ELASTICO + (Math.abs(passos) - LIMITE_ELASTICO) * 0.3);
         a.passos = passos;
-        baralhoRef.current.style.setProperty("--arrasto", passos.toFixed(3));
+        definirArrasto(passos.toFixed(3));
     }
 
     function soltarArraste(evento) {
@@ -247,7 +263,7 @@ function BannerDistribuidora({ distribuidora, subtitulo, personagem, jogos, aoVe
         if (!a?.ativo) return;
         const baralho = baralhoRef.current;
         baralho.classList.remove("arrastando");
-        baralho.style.setProperty("--arrasto", "0");
+        definirArrasto("0");
         if (baralho.hasPointerCapture(evento.pointerId)) baralho.releasePointerCapture(evento.pointerId);
         // projeta o movimento pela velocidade do gesto: um "peteleco" leva à próxima capa
         const projetado = a.passos - (a.velocidade * IMPULSO_MS) / a.passo;
@@ -306,9 +322,20 @@ function BannerDistribuidora({ distribuidora, subtitulo, personagem, jogos, aoVe
                     const manter = d === 0 || (d === 1 && adiantarProximo) || (Math.abs(d) === 1 && vistosRef.current.has(j.id));
                     if (!manter) return null;
                     const imagens = imagensDoJogo(j);
-                    return <Imagem key={j.id} src={imagens.banner} alternativa={j.fundo} alt="" loading="eager" className={i === ativo ? "ativa" : ""} />;
+                    return (
+                        <Imagem
+                            key={j.id}
+                            src={imagens.banner}
+                            srcSet={`${imagens.capaPequena} 600w, ${imagens.banner} 1920w`}
+                            sizes={FUNDO_SIZES}
+                            alternativa={j.fundo}
+                            alt=""
+                            loading="eager"
+                            className={i === ativo ? "ativa" : ""}
+                        />
+                    );
                 })}
-                {comVideo && naTela && video === jogo.id && <Trailer key={jogo.id} jogo={jogo} mudo={!comSom} inicio={12} className="hero-trailer" />}
+                {comVideo && naTela && video === jogo.id && <Trailer key={jogo.id} jogo={jogo} mudo={!comSom} inicio={12} alturaMax={480} className="hero-trailer" />}
             </div>
             <div className="hero-grao" aria-hidden="true" />
 
@@ -342,14 +369,6 @@ function BannerDistribuidora({ distribuidora, subtitulo, personagem, jogos, aoVe
                         </span>
                         <h3 className="hero-nome">{jogo.nome}</h3>
                         <Preco jogo={jogo} tamanho="grande" />
-                        <div className="hero-acoes">
-                            <button type="button" className="botao botao-primario botao-grande" onClick={() => abrirJogo(jogo.id)}>
-                                Ver jogo <IconeSeta tamanho={17} />
-                            </button>
-                            <button type="button" className="botao botao-vidro botao-grande" onClick={aoVerTodos}>
-                                Toda a promoção
-                            </button>
-                        </div>
                     </div>
                 </div>
 

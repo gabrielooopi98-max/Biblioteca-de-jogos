@@ -7,7 +7,8 @@ const obterHls = () => (carregarHls ??= import("hls.js").then((m) => m.default))
 
 // Vídeo do trailer da Steam. Sem controles = prévia muda em loop (hover de cards e destaques).
 // inicio: segundos a pular (abertura com logos de estúdio), só se o vídeo for longo o bastante.
-function Trailer({ jogo, controles = false, mudo = true, inicio = 0, className = "", aoTerminar, aoComecar }) {
+// alturaMax: teto de qualidade (o fundo do banner é coberto por degradês; 1080p só pesaria).
+function Trailer({ jogo, controles = false, mudo = true, inicio = 0, alturaMax = 0, className = "", aoTerminar, aoComecar }) {
     const videoRef = useRef(null);
     const [pronto, setPronto] = useState(false);
     const trailer = trailerDoJogo(jogo);
@@ -32,7 +33,19 @@ function Trailer({ jogo, controles = false, mudo = true, inicio = 0, className =
                     return;
                 }
                 // Prévias começam na qualidade mais leve; o player escolhe pelo tamanho na tela.
-                hls = new Hls({ capLevelToPlayerSize: true, startLevel: controles ? -1 : 0, maxBufferLength: controles ? 30 : 8 });
+                // maxBufferLength é só o mínimo: sem teto (maxMaxBufferLength) e com maxBufferSize de 60 MB,
+                // o hls.js baixava 20 a 35 MB de cada prévia que aparece por 14 s. Prévias guardam no máximo 10 s.
+                hls = new Hls(
+                    controles
+                        ? { capLevelToPlayerSize: true, maxBufferLength: 30, maxMaxBufferLength: 60 }
+                        : { capLevelToPlayerSize: true, startLevel: 0, maxBufferLength: 6, maxMaxBufferLength: 10, maxBufferSize: 8 * 1024 * 1024 },
+                );
+                if (alturaMax) {
+                    hls.on(Hls.Events.MANIFEST_PARSED, (_, dados) => {
+                        const ate = dados.levels.reduce((melhor, nivel, i) => (nivel.height && nivel.height <= alturaMax ? i : melhor), 0);
+                        hls.autoLevelCapping = ate;
+                    });
+                }
                 hls.loadSource(fonte);
                 hls.attachMedia(video);
             });
@@ -44,7 +57,7 @@ function Trailer({ jogo, controles = false, mudo = true, inicio = 0, className =
             video.removeAttribute("src");
             video.load();
         };
-    }, [fonte, controles]);
+    }, [fonte, controles, alturaMax]);
 
     if (!trailer) return null;
 
