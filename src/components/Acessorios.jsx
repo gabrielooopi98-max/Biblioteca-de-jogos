@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { navegar, useIndicador } from "../hooks.js";
+import { useIndicador } from "../hooks.js";
 import { useLoja } from "../LojaContext.js";
 import { CATEGORIAS_ACESSORIOS, nomeDaCategoria } from "../acessorios.js";
-import { calcularPrecoFinal, FRETE, formatarPreco, GARANTIA_MESES, imagensDoJogo, PRAZO_ENTREGA } from "../utils.js";
+import { calcularPrecoFinal, DIAS_PARA_RETIRAR, GARANTIA_MESES, imagensDoJogo } from "../utils.js";
 import { Imagem, Preco } from "./CardJogo.jsx";
-import { IconeCaminhao, IconeCarrinho, IconeCheck, IconeDesfazer, IconeEscudo, IconeEstrela } from "./Icones.jsx";
+import { IconeCarrinho, IconeCheck, IconeDesfazer, IconeEscudo, IconeEstrela, IconeLoja } from "./Icones.jsx";
 
 // Nota de 0 a 10 (igual aos jogos) exibida em estrelas de 0 a 5, como nas lojas de produtos.
 export function NotaProduto({ produto, completa = false }) {
@@ -24,18 +24,16 @@ export function ProdutoCard({ produto }) {
     const { abrirJogo, adicionarAoCarrinho, estaNoCarrinho } = useLoja();
     const imagens = imagensDoJogo(produto);
     const noCarrinho = estaNoCarrinho(produto.id);
-    const freteGratis = calcularPrecoFinal(produto) >= FRETE.gratisAPartirDe;
 
     return (
         <article className="produto">
             <button type="button" className="produto-imagem" onClick={() => abrirJogo(produto.id)} aria-label={`Ver ${produto.nome}`}>
                 <Imagem src={imagens.capa} alt={produto.nome} />
                 {produto.desconto > 0 && <span className="selo">-{produto.desconto}%</span>}
-                {freteGratis && <span className="produto-frete">Frete grátis</span>}
             </button>
             <div className="produto-corpo">
                 <span className="produto-categoria">
-                    {nomeDaCategoria(produto.categoria)} · {produto.compatibilidade.slice(0, 3).join(", ")}
+                    {[nomeDaCategoria(produto.categoria), produto.compatibilidade?.slice(0, 3).join(", ")].filter(Boolean).join(" · ")}
                 </span>
                 <button type="button" className="produto-nome" onClick={() => abrirJogo(produto.id)}>
                     {produto.nome}
@@ -58,12 +56,12 @@ export function ProdutoCard({ produto }) {
     );
 }
 
-// Abas de categoria (Todos + categorias), com o fundo que desliza até a aba sob o mouse.
-function AbasCategoria({ categoria, setCategoria, contagem }) {
+// Abas de departamento (Todos + departamentos), com o fundo que desliza até a aba sob o mouse.
+function AbasCategoria({ categoria, setCategoria, contagem, categorias = CATEGORIAS_ACESSORIOS }) {
     const ref = useIndicador();
     return (
-        <div className="segmentos" ref={ref} role="tablist" aria-label="Categorias de acessórios">
-            {[{ id: "todos", nome: "Todos" }, ...CATEGORIAS_ACESSORIOS].map((c) => (
+        <div className="segmentos" ref={ref} role="tablist" aria-label="Departamentos">
+            {[{ id: "todos", nome: "Todos" }, ...categorias].map((c) => (
                 <button type="button" key={c.id} role="tab" aria-selected={categoria === c.id} className={categoria === c.id ? "segmento ativo" : "segmento"} onClick={() => setCategoria(c.id)}>
                     {c.nome}
                     {contagem && <span className="segmento-contagem">{contagem[c.id]}</span>}
@@ -77,15 +75,15 @@ export function Beneficios() {
     return (
         <ul className="beneficios">
             <li>
-                <IconeCaminhao tamanho={18} />
+                <IconeLoja tamanho={18} />
                 <span>
-                    <strong>Frete grátis</strong> acima de {formatarPreco(FRETE.gratisAPartirDe)}
+                    <strong>Retire na loja</strong> em até {DIAS_PARA_RETIRAR} dias após a confirmação
                 </span>
             </li>
             <li>
                 <IconeEscudo tamanho={18} />
                 <span>
-                    <strong>Garantia de {GARANTIA_MESES} meses</strong> em todos os acessórios
+                    <strong>Garantia de {GARANTIA_MESES} meses</strong> em todos os produtos
                 </span>
             </li>
             <li>
@@ -100,32 +98,78 @@ export function Beneficios() {
 
 const maisRelevantes = (lista) => [...lista].sort((a, b) => b.nota * Math.log(b.avaliacoes) - a.nota * Math.log(a.avaliacoes));
 
-// Vitrine da página inicial: 8 acessórios da categoria escolhida.
-export function VitrineAcessorios({ acessorios }) {
+// "Todos" mistura os departamentos (um de cada, em rodízio) para a vitrine não ficar só com um tipo de produto.
+function intercalar(listas, quantidade) {
+    const filas = listas.map((l) => [...l]);
+    const saida = [];
+    while (saida.length < quantidade && filas.some((f) => f.length)) for (const f of filas) if (f.length && saida.length < quantidade) saida.push(f.shift());
+    return saida;
+}
+
+// Vitrine da página inicial: 8 produtos dos departamentos escolhidos, com abas.
+export function VitrineAcessorios({ acessorios, id = "produtos", titulo, descricao, departamentos, aoVerTodos }) {
     const [categoria, setCategoria] = useState("todos");
-    const lista = maisRelevantes(categoria === "todos" ? acessorios : acessorios.filter((a) => a.categoria === categoria)).slice(0, 8);
+    const categorias = departamentos ? CATEGORIAS_ACESSORIOS.filter((c) => departamentos.includes(c.id)) : CATEGORIAS_ACESSORIOS;
+    const daCategoria = (c) => maisRelevantes(acessorios.filter((a) => a.categoria === c));
+    const lista = categoria === "todos" ? intercalar(categorias.map((c) => daCategoria(c.id)), 8) : daCategoria(categoria).slice(0, 8);
+    const total = acessorios.filter((a) => categorias.some((c) => c.id === a.categoria)).length;
 
     return (
-        <section className="secao vitrine-acessorios" aria-labelledby="titulo-acessorios">
+        <section className="secao vitrine-acessorios" id={id} aria-labelledby={`titulo-${id}`}>
             <div className="secao-topo">
                 <div>
-                    <h2 className="titulo-secao" id="titulo-acessorios">
-                        Acessórios
+                    <h2 className="titulo-secao" id={`titulo-${id}`}>
+                        {titulo}
                     </h2>
-                    <p className="descricao-secao">Periféricos, controles e tudo para jogar melhor no PC, no console e no celular.</p>
+                    <p className="descricao-secao">{descricao}</p>
                 </div>
                 <div className="secao-acoes">
-                    <button type="button" className="link-mais" onClick={() => navegar("/acessorios")}>
-                        Ver todos os {acessorios.length}
+                    <button type="button" className="link-mais" onClick={() => aoVerTodos(categoria)}>
+                        Ver todos os {categoria === "todos" ? total : daCategoria(categoria).length}
                     </button>
                 </div>
             </div>
-            <AbasCategoria categoria={categoria} setCategoria={setCategoria} />
+            <AbasCategoria categoria={categoria} setCategoria={setCategoria} categorias={categorias} />
             <div className="produtos" key={categoria}>
                 {lista.map((produto) => (
                     <ProdutoCard key={produto.id} produto={produto} />
                 ))}
             </div>
+        </section>
+    );
+}
+
+// Atalhos da página inicial: um quadro por departamento (os jogos primeiro), com a ilustração do produto mais relevante.
+export function Departamentos({ acessorios, imagemJogos, totalJogos, aoEscolher }) {
+    const quadros = [
+        { id: "jogos", nome: "Jogos", detalhe: `${totalJogos} títulos`, imagem: imagemJogos },
+        ...CATEGORIAS_ACESSORIOS.map((c) => {
+            const lista = maisRelevantes(acessorios.filter((a) => a.categoria === c.id));
+            return { id: c.id, nome: c.nome, detalhe: `${lista.length} ${lista.length === 1 ? "produto" : "produtos"}`, imagem: lista[0] && imagensDoJogo(lista[0]).capa };
+        }),
+    ];
+
+    return (
+        <section className="secao departamentos" aria-labelledby="titulo-departamentos">
+            <div className="secao-topo">
+                <div>
+                    <h2 className="titulo-secao" id="titulo-departamentos">
+                        Departamentos
+                    </h2>
+                    <p className="descricao-secao">Jogos, celulares, video games, som, TV e muito mais em um só lugar.</p>
+                </div>
+            </div>
+            <ul className="departamentos-lista">
+                {quadros.map((q) => (
+                    <li key={q.id}>
+                        <button type="button" className={q.id === "jogos" ? "departamento jogos" : "departamento"} onClick={() => aoEscolher(q.id)}>
+                            <span className="departamento-imagem">{q.imagem && <Imagem src={q.imagem} alt="" />}</span>
+                            <strong>{q.nome}</strong>
+                            <small>{q.detalhe}</small>
+                        </button>
+                    </li>
+                ))}
+            </ul>
         </section>
     );
 }
@@ -138,9 +182,9 @@ const ORDENS = {
     "melhor-avaliados": { rotulo: "Mais bem avaliados", ordenar: (l) => [...l].sort((a, b) => b.nota - a.nota) },
 };
 
-// Página "Acessórios": abas por categoria, ordenação e a grade completa.
-function PaginaAcessorios({ acessorios }) {
-    const [categoria, setCategoria] = useState("todos");
+// Página "Produtos": abas por departamento, ordenação e a grade completa.
+// O departamento vem do App: a vitrine e os atalhos da loja abrem a página já filtrada.
+function PaginaAcessorios({ acessorios, categoria, setCategoria }) {
     const [ordem, setOrdem] = useState("relevancia");
     const filtrados = categoria === "todos" ? acessorios : acessorios.filter((a) => a.categoria === categoria);
     const lista = ORDENS[ordem].ordenar(filtrados);
@@ -150,8 +194,8 @@ function PaginaAcessorios({ acessorios }) {
         <div className="pagina">
             <header className="pagina-cabecalho">
                 <div>
-                    <h1>Acessórios</h1>
-                    <p>Mouse, teclado, headset, controles e o que mais você precisa para jogar melhor. Linha própria Universal Gear, com garantia e entrega para todo o Brasil.</p>
+                    <h1>Produtos</h1>
+                    <p>Celulares, tablets, video games, som, TV, acessórios e muito mais. Reserve pelo site e retire na loja, com garantia.</p>
                 </div>
             </header>
 
@@ -173,7 +217,7 @@ function PaginaAcessorios({ acessorios }) {
                     <strong>{lista.length}</strong> {lista.length === 1 ? "produto" : "produtos"}
                     {categoria !== "todos" && ` em ${nomeDaCategoria(categoria)}`}
                 </span>
-                <span className="texto-apagado">Entrega em {PRAZO_ENTREGA}</span>
+                <span className="texto-apagado">Retirada na loja</span>
             </p>
 
             <div className="produtos" key={`${categoria}-${ordem}`}>

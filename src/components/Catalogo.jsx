@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useTeclaEsc, useTravarRolagem } from "../hooks.js";
-import { useLoja } from "../LojaContext.js";
 import { calcularPrecoFinal, FILTROS_INICIAIS, formatarPreco, normalizar } from "../utils.js";
 import CardJogo from "./CardJogo.jsx";
 import { IconeControle, IconeFechar, IconeFiltro } from "./Icones.jsx";
@@ -24,7 +23,7 @@ const NOTAS = [
     [9.5, "9.5 ou mais"],
 ];
 
-function filtrarJogos(jogos, filtros, possui) {
+function filtrarJogos(jogos, filtros) {
     const termo = normalizar(filtros.termo);
 
     return jogos
@@ -35,7 +34,6 @@ function filtrarJogos(jogos, filtros, possui) {
             if (filtros.precoMax !== null && calcularPrecoFinal(jogo) > filtros.precoMax) return false;
             if (jogo.nota < filtros.notaMin) return false;
             if (filtros.somentePromocao && !jogo.desconto) return false;
-            if (filtros.ocultarPossuidos && possui(jogo.id)) return false;
             if (filtros.colecao && !filtros.colecao.ids.includes(jogo.id)) return false;
             return true;
         })
@@ -64,7 +62,6 @@ function Caixa({ marcado, aoMudar, rotulo, quantidade, tipo = "checkbox", nome }
 }
 
 function Catalogo({ jogos, filtros, setFiltros }) {
-    const { possui } = useLoja();
     const [painelAberto, setPainelAberto] = useState(false);
     const [limite, setLimite] = useState(POR_PAGINA);
     const assinatura = JSON.stringify(filtros);
@@ -81,7 +78,7 @@ function Catalogo({ jogos, filtros, setFiltros }) {
     const generos = contarPor(jogos, "generos");
     const plataformas = contarPor(jogos, "plataformas");
     const precoTeto = Math.ceil(Math.max(...jogos.map(calcularPrecoFinal)) / 10) * 10;
-    const resultado = filtrarJogos(jogos, filtros, possui);
+    const resultado = filtrarJogos(jogos, filtros);
 
     const atualizar = (parcial) => setFiltros((atuais) => ({ ...atuais, ...parcial }));
     const limparTudo = () => setFiltros((atuais) => ({ ...FILTROS_INICIAIS, ordenar: atuais.ordenar }));
@@ -94,14 +91,13 @@ function Catalogo({ jogos, filtros, setFiltros }) {
         filtros.precoMax !== null && { rotulo: `Até ${formatarPreco(filtros.precoMax)}`, remover: () => atualizar({ precoMax: null }) },
         filtros.notaMin > 0 && { rotulo: `Nota ${filtros.notaMin}+`, remover: () => atualizar({ notaMin: 0 }) },
         filtros.somentePromocao && { rotulo: "Em promoção", remover: () => atualizar({ somentePromocao: false }) },
-        filtros.ocultarPossuidos && { rotulo: "Sem os que possuo", remover: () => atualizar({ ocultarPossuidos: false }) },
     ].filter(Boolean);
 
     return (
         <div className="pagina">
             <div className="pagina-cabecalho">
                 <div>
-                    <h1>Explorar</h1>
+                    <h1>Jogos</h1>
                     <p>
                         {jogos.length} jogos · {jogos.filter((j) => j.desconto > 0).length} em promoção
                     </p>
@@ -119,7 +115,6 @@ function Catalogo({ jogos, filtros, setFiltros }) {
 
                     <div className="grupo-filtro">
                         <Caixa marcado={filtros.somentePromocao} aoMudar={(e) => atualizar({ somentePromocao: e.target.checked })} rotulo="Somente em promoção" />
-                        <Caixa marcado={filtros.ocultarPossuidos} aoMudar={(e) => atualizar({ ocultarPossuidos: e.target.checked })} rotulo="Ocultar jogos que já possuo" />
                     </div>
 
                     <div className="grupo-filtro">

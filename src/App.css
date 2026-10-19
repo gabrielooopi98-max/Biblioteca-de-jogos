@@ -815,8 +815,18 @@ button.tag:active {
     gap: 10px;
   }
 
+  /* marca empilhada: "Universal" em cima e "Games" menor embaixo, ocupa pouca largura */
+  .logo-texto {
+    display: flex;
+    flex-direction: column;
+    font-size: 16.5px;
+    line-height: 1.05;
+  }
+
   .logo-texto small {
-    display: none;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
   }
 
   .nav a {
@@ -4119,6 +4129,190 @@ button.tag:active {
   font-size: 13.5px;
 }
 
+/* --- Reserva com retirada na loja --- */
+
+.status-aguardando::before {
+  background: var(--ouro);
+  animation: ponto-aguardando 1.6s ease-in-out infinite;
+}
+
+@keyframes ponto-aguardando {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.status-pronto {
+  border-color: color-mix(in srgb, var(--ok) 45%, transparent);
+  color: var(--ok);
+}
+
+.status-vencido::before {
+  background: var(--perigo);
+}
+
+.status-cancelado::before {
+  background: var(--texto-3);
+}
+
+.pedido.reserva-cancelado {
+  opacity: 0.65;
+}
+
+/* passo atual da reserva: aguardando a loja, pronta para retirar ou prazo encerrado */
+.reserva-etapa {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 14px 0 4px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--ouro) 45%, transparent);
+  border-radius: var(--raio);
+  background: var(--ouro-suave);
+  font-size: 14.5px;
+}
+
+.reserva-etapa svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--ouro-escuro);
+}
+
+.reserva-etapa div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reserva-etapa span {
+  color: var(--texto-2);
+}
+
+.reserva-etapa.pronta {
+  border-color: color-mix(in srgb, var(--ok) 40%, transparent);
+  background: color-mix(in srgb, var(--ok) 9%, transparent);
+}
+
+.reserva-etapa.pronta svg {
+  color: var(--ok);
+}
+
+.reserva-etapa.vencida {
+  border-color: color-mix(in srgb, var(--perigo) 40%, transparent);
+  background: color-mix(in srgb, var(--perigo) 7%, transparent);
+}
+
+.reserva-etapa.vencida svg {
+  color: var(--perigo);
+}
+
+.reserva-codigo {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--sup-3);
+  color: var(--texto);
+  letter-spacing: 0.08em;
+}
+
+/* onde retirar: checkout, confirmação e Minhas reservas */
+.retirada-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-g);
+  background: var(--sup-1);
+  font-size: 14.5px;
+  text-align: left;
+}
+
+.retirada-info > svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--ouro-escuro);
+}
+
+.retirada-info div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.retirada-info span {
+  color: var(--texto-2);
+}
+
+.retirada-info small {
+  margin-top: 6px;
+  color: var(--texto-3);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.lista-pedidos {
+  margin-top: 14px;
+}
+
+.pagina .retirada-info.compacta {
+  margin-top: 20px;
+}
+
+.sucesso .retirada-info {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* código de retirada em destaque na confirmação */
+.retirada-codigo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  max-width: 420px;
+  padding: 16px;
+  border: 1px dashed var(--ouro);
+  border-radius: var(--raio-g);
+  background: var(--ouro-suave);
+}
+
+.retirada-codigo span,
+.retirada-codigo small {
+  color: var(--texto-2);
+  font-size: 13.5px;
+}
+
+.retirada-codigo strong {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+}
+
+/* carrinho: lembrete de que a compra é retirada na loja */
+.retirada-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--sup-1);
+  color: var(--texto-2);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.retirada-aviso svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--ouro-escuro);
+}
+
+.retirada-aviso strong {
+  color: var(--texto);
+}
+
 .desejo-acoes {
   display: flex;
   flex-direction: column;
@@ -6733,14 +6927,6 @@ button.tag:active {
   }
 }
 
-.re-sub {
-  max-width: 560px;
-  color: var(--texto-2);
-  font-family: var(--maquina);
-  font-size: 16px;
-  line-height: 1.5;
-}
-
 /* linha do tempo do surto */
 .re-linha {
   margin: 44px calc(var(--margem) * -1) 0;
@@ -7218,8 +7404,8 @@ button.tag:active {
   container-type: inline-size;
 }
 
-/* card estreito (2 colunas no celular): sai o preço antigo e o desconto pode ir para cima do preço */
-@container (max-width: 225px) {
+/* card estreito (vitrine de 5 colunas e 2 colunas no celular): sai o preço antigo e o desconto pode ir para cima do preço */
+@container (max-width: 280px) {
   .produto-rodape .preco {
     flex-wrap: wrap;
     gap: 2px 6px;
@@ -7362,6 +7548,96 @@ button.tag:active {
 
 .vitrine-acessorios .segmentos {
   margin-top: 4px;
+}
+
+/* muitas abas de departamento: rolam de lado em vez de alargar a página */
+.vitrine-acessorios .segmentos,
+.acessorios-barra .segmentos {
+  max-width: 100%;
+}
+
+.segmento {
+  white-space: nowrap;
+}
+
+/* --- Departamentos: atalhos da página inicial para tudo que a loja vende --- */
+.departamentos-lista {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.departamento {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+}
+
+.departamento-imagem {
+  display: block;
+  aspect-ratio: 4 / 3;
+  margin-bottom: 8px;
+  overflow: hidden;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-g);
+  background: #0e0e10;
+  transition: border-color 0.3s ease, translate 0.45s var(--curva), box-shadow 0.45s var(--curva);
+}
+
+.departamento-imagem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.9s var(--zoom);
+}
+
+/* jogos: capa em pé, enquadrada no rosto do personagem */
+.departamento.jogos .departamento-imagem img {
+  object-position: 50% 22%;
+}
+
+.departamento strong {
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.departamento small {
+  color: var(--texto-3);
+  font-size: 13px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .departamento:hover .departamento-imagem {
+    border-color: var(--ouro);
+    box-shadow: var(--sombra-elevada);
+    translate: 0 -3px;
+  }
+
+  .departamento:hover .departamento-imagem img {
+    transform: scale(1.06);
+  }
+}
+
+/* telas menores: os quadros viram uma faixa que rola de lado */
+@media (max-width: 1100px) {
+  .departamentos-lista {
+    grid-template-columns: none;
+    grid-auto-columns: 132px;
+    grid-auto-flow: column;
+    margin: 0 calc(var(--margem) * -1);
+    padding: 2px var(--margem) 6px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: var(--margem);
+    scrollbar-width: none;
+  }
+
+  .departamentos-lista li {
+    scroll-snap-align: start;
+  }
 }
 
 /* faixa de benefícios: frete, garantia e troca */
@@ -8204,19 +8480,25 @@ kbd,
 }
 
 /* Celular: barra de abas inferior, como um app */
-/* celulares bem estreitos (320px): só o ícone da marca e sem os pontinhos das prateleiras (lá se arrasta) */
+/* celulares bem estreitos (320px): sem os pontinhos das prateleiras (lá se arrasta) */
 @media (max-width: 360px) {
-  .logo-texto,
   .prateleira-paginas {
     display: none;
   }
 }
 
-@media (max-width: 430px) {
-  .logo-texto small {
-    display: none;
+/* 320px: o título do banner ("Melhores / descontos") encolhe um pouco para caber */
+@media (max-width: 345px) {
+  .hero-marca {
+    font-size: 40px;
   }
 
+  .hero-linha {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 430px) {
   .barra-acoes {
     gap: 0;
   }
@@ -8259,7 +8541,7 @@ kbd,
   }
 
   .logo-texto {
-    font-size: 17px;
+    font-size: 16px;
   }
 
   .abas-moveis {

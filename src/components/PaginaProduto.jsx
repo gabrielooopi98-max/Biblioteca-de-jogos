@@ -1,17 +1,16 @@
 import { MARCA_ACESSORIOS, nomeDaCategoria } from "../acessorios.js";
 import { useLoja } from "../LojaContext.js";
-import { calcularParcelas, calcularPrecoFinal, DESCONTO_PIX, FRETE, formatarPreco, GARANTIA_MESES, imagensDoJogo, PRAZO_ENTREGA } from "../utils.js";
+import { calcularParcelas, calcularPrecoFinal, DESCONTO_PIX, DIAS_PARA_RETIRAR, formatarPreco, GARANTIA_MESES, imagensDoJogo, LOJA } from "../utils.js";
 import { Beneficios, NotaProduto, ProdutoCard } from "./Acessorios.jsx";
 import { Imagem, Preco } from "./CardJogo.jsx";
-import { IconeCaminhao, IconeCarrinho, IconeCheck, IconeEscudo } from "./Icones.jsx";
+import { IconeCarrinho, IconeCheck, IconeEscudo, IconeLoja } from "./Icones.jsx";
 
-// Página de um acessório: foto grande, compra com entrega e garantia, especificações e sugestões.
+// Página de um acessório: foto grande, reserva com retirada na loja e garantia, especificações e sugestões.
 function PaginaProduto({ produto, acessorios, comprarAgora }) {
     const { adicionarAoCarrinho, estaNoCarrinho } = useLoja();
     const final = calcularPrecoFinal(produto);
     const parcelas = calcularParcelas(final);
     const noCarrinho = estaNoCarrinho(produto.id);
-    const freteGratis = final >= FRETE.gratisAPartirDe;
     const parecidos = [...acessorios.filter((a) => a.id !== produto.id && a.categoria === produto.categoria), ...acessorios.filter((a) => a.categoria !== produto.categoria)].slice(0, 4);
 
     return (
@@ -44,18 +43,12 @@ function PaginaProduto({ produto, acessorios, comprarAgora }) {
 
                     <ul className="produto-entrega">
                         <li>
-                            <IconeCaminhao tamanho={17} />
+                            <IconeLoja tamanho={17} />
                             <span>
-                                {freteGratis ? (
-                                    <>
-                                        <strong>Frete grátis</strong> para todo o Brasil
-                                    </>
-                                ) : (
-                                    <>
-                                        Frete de <strong>{formatarPreco(FRETE.valor)}</strong> (grátis acima de {formatarPreco(FRETE.gratisAPartirDe)} em acessórios)
-                                    </>
-                                )}
-                                <small>Chega em {PRAZO_ENTREGA}</small>
+                                <strong>Retire na loja</strong> depois que o pagamento for confirmado
+                                <small>
+                                    {LOJA.endereco} · até {DIAS_PARA_RETIRAR} dias para retirar
+                                </small>
                             </span>
                         </li>
                         <li>
@@ -69,7 +62,7 @@ function PaginaProduto({ produto, acessorios, comprarAgora }) {
 
                     <div className="produto-botoes">
                         <button type="button" className="botao botao-primario botao-grande botao-largo" onClick={() => comprarAgora(produto)}>
-                            Comprar agora
+                            Reservar agora
                         </button>
                         <button type="button" className="botao botao-secundario botao-grande botao-largo" onClick={() => adicionarAoCarrinho(produto)}>
                             {noCarrinho ? <IconeCheck tamanho={16} /> : <IconeCarrinho tamanho={16} />}
@@ -85,7 +78,7 @@ function PaginaProduto({ produto, acessorios, comprarAgora }) {
                     <p className="produto-descricao">{produto.descricao}</p>
                     <h3 className="produto-subtitulo">Compatível com</h3>
                     <div className="tags">
-                        {produto.compatibilidade.map((c) => (
+                        {(produto.compatibilidade || []).map((c) => (
                             <span key={c} className="tag">
                                 {c}
                             </span>

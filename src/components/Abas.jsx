@@ -3,11 +3,12 @@ import { useIndicador } from "../hooks.js";
 import { useLoja } from "../LojaContext.js";
 import { capturasDoJogo, imagensDoJogo } from "../utils.js";
 import { Avaliacao, Imagem, Plataformas, Preco } from "./CardJogo.jsx";
-import { IconeBiblioteca, IconeCoracao } from "./Icones.jsx";
+import { CabecalhoSecao } from "./Secoes.jsx";
+import { IconeCoracao } from "./Icones.jsx";
 
-// Linha de jogo usada nas abas da loja e no modo lista do catálogo.
+// Linha de jogo usada nas abas da loja.
 export function LinhaJogo({ jogo, aoPassar, ativa = false, compacta = false }) {
-    const { abrirJogo, estaNosDesejos, possui } = useLoja();
+    const { abrirJogo, estaNosDesejos } = useLoja();
     const imagens = imagensDoJogo(jogo);
 
     return (
@@ -39,13 +40,7 @@ export function LinhaJogo({ jogo, aoPassar, ativa = false, compacta = false }) {
                     </span>
                 </>
             )}
-            {possui(jogo.id) ? (
-                <span className="na-biblioteca">
-                    <IconeBiblioteca tamanho={14} /> Na biblioteca
-                </span>
-            ) : (
-                <Preco jogo={jogo} />
-            )}
+            <Preco jogo={jogo} />
         </button>
     );
 }
@@ -73,7 +68,8 @@ function Previa({ jogo }) {
     );
 }
 
-function Abas({ abas, aoVerMais }) {
+// Seção com abas de jogos; com título vira uma seção própria (ex.: clássicos de cada console).
+function Abas({ abas, aoVerMais, id = "abas", titulo, descricao }) {
     const segmentosRef = useIndicador();
     const [abaAtual, setAbaAtual] = useState(0);
     const lista = abas[abaAtual].jogos;
@@ -81,7 +77,8 @@ function Abas({ abas, aoVerMais }) {
     const exibido = lista.includes(emFoco) ? emFoco : lista[0];
 
     return (
-        <section className="secao" id="abas">
+        <section className="secao" id={id}>
+            {titulo && <CabecalhoSecao titulo={titulo} descricao={descricao} />}
             <div className="secao-topo">
                 <div className="segmentos" role="tablist" ref={segmentosRef}>
                     {abas.map((aba, indice) => (

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLoja } from "../LojaContext.js";
 import { imagensDoJogo } from "../utils.js";
 import { Imagem, Preco } from "./CardJogo.jsx";
-import { IconeBiblioteca, IconeCarrinho, IconeCheck, IconeCoracao, IconeMudo, IconeSeta, IconeSetaDireita, IconeSetaEsquerda, IconeSom } from "./Icones.jsx";
+import { IconeCarrinho, IconeCheck, IconeCoracao, IconeMudo, IconeSeta, IconeSetaDireita, IconeSetaEsquerda, IconeSom } from "./Icones.jsx";
 import { Contador } from "./Secoes.jsx";
 import Trailer from "./Trailer.jsx";
 
@@ -91,10 +91,11 @@ function disparar(botao, varredura, sentido) {
     );
 }
 
-// Banner de abertura: vitrine cinematográfica da promoção da distribuidora.
+// Banner de abertura: vitrine cinematográfica dos melhores descontos da loja.
 // Fundo com a arte (e depois o trailer) do jogo em foco, baralho 3D de capas e troca automática.
-function BannerDistribuidora({ distribuidora, subtitulo, personagem, jogos }) {
-    const { abrirJogo, adicionarAoCarrinho, alternarDesejo, estaNoCarrinho, estaNosDesejos, possui } = useLoja();
+// titulo em cima (cheio) e destaque embaixo (contorno), ex.: "Melhores" / "descontos".
+function BannerDistribuidora({ titulo, destaque, personagem, jogos }) {
+    const { abrirJogo, adicionarAoCarrinho, alternarDesejo, estaNoCarrinho, estaNosDesejos } = useLoja();
     const total = jogos.length;
     const [estado, setEstado] = useState(() => ({ ativo: Math.max(0, jogos.findIndex((j) => j.id === personagem.id)), anterior: null, direcao: 1 }));
     const [pausado, setPausado] = useState(false);
@@ -309,7 +310,7 @@ function BannerDistribuidora({ distribuidora, subtitulo, personagem, jogos }) {
             ref={secaoRef}
             className={naTela ? "hero" : "hero fora-da-tela"}
             aria-roledescription="carrossel"
-            aria-label={`Promoção da distribuidora ${distribuidora}`}
+            aria-label={`${titulo} ${destaque}`}
             onPointerEnter={(e) => e.pointerType === "mouse" && setPausado(true)}
             onPointerMove={mover}
             onPointerLeave={sair}
@@ -344,7 +345,7 @@ function BannerDistribuidora({ distribuidora, subtitulo, personagem, jogos }) {
                 <div className="hero-texto">
                     <span className="hero-selo">
                         <span className="hero-ponto" aria-hidden="true" />
-                        Promoção da distribuidora
+                        Ofertas especiais
                         <span className="hero-tempo">
                             termina em <Contador />
                         </span>
@@ -352,10 +353,10 @@ function BannerDistribuidora({ distribuidora, subtitulo, personagem, jogos }) {
 
                     <h2 className="hero-marca">
                         <span className="hero-linha">
-                            <span>{distribuidora}</span>
+                            <span>{titulo}</span>
                         </span>
                         <span className="hero-linha">
-                            <span className="hero-contorno">{subtitulo}</span>
+                            <span className="hero-contorno">{destaque}</span>
                             <small>
                                 até <strong>-{descontoMaximo}%</strong>
                                 <br />
@@ -434,20 +435,14 @@ function BannerDistribuidora({ distribuidora, subtitulo, personagem, jogos }) {
                                                 >
                                                     <IconeCoracao tamanho={16} preenchido={desejado} />
                                                 </button>
-                                                {possui(j.id) ? (
-                                                    <span className="hero-carta-possui">
-                                                        <IconeBiblioteca tamanho={15} /> Na biblioteca
-                                                    </span>
-                                                ) : (
-                                                    <button
-                                                        type="button"
-                                                        className={noCarrinho ? "ativa" : ""}
-                                                        onClick={() => adicionarAoCarrinho(j)}
-                                                        aria-label={noCarrinho ? `${j.nome} já está no carrinho` : `Adicionar ${j.nome} ao carrinho`}
-                                                    >
-                                                        {noCarrinho ? <IconeCheck tamanho={16} /> : <IconeCarrinho tamanho={16} />}
-                                                    </button>
-                                                )}
+                                                <button
+                                                    type="button"
+                                                    className={noCarrinho ? "ativa" : ""}
+                                                    onClick={() => adicionarAoCarrinho(j)}
+                                                    aria-label={noCarrinho ? `${j.nome} já está no carrinho` : `Adicionar ${j.nome} ao carrinho`}
+                                                >
+                                                    {noCarrinho ? <IconeCheck tamanho={16} /> : <IconeCarrinho tamanho={16} />}
+                                                </button>
                                                 <button type="button" className="hero-carta-ver" onClick={() => abrirJogo(j.id)}>
                                                     Ver <IconeSeta tamanho={14} />
                                                 </button>

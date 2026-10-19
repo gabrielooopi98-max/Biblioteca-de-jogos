@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLoja } from "../LojaContext.js";
 import { calcularPrecoFinal, formatarPreco, imagensDoJogo, resumoAvaliacoes } from "../utils.js";
-import { IconeBiblioteca, IconeCarrinho, IconeCheck, IconeComparar, IconeCoracao } from "./Icones.jsx";
+import { IconeCarrinho, IconeCheck, IconeComparar, IconeCoracao } from "./Icones.jsx";
 import { usePreviaTrailer } from "../hooks.js";
 import Trailer from "./Trailer.jsx";
 
@@ -54,11 +54,10 @@ export function Avaliacao({ nota, compacta = false }) {
     );
 }
 
+// A loja só vende jogos de console: PlayStation (PS2 a PS5) e Xbox (360 e Series X/S).
 const FAMILIAS = [
-    ["PC", (p) => p === "PC"],
     ["PlayStation", (p) => p.startsWith("PS")],
     ["Xbox", (p) => p.startsWith("Xbox")],
-    ["Switch", (p) => p.includes("Switch")],
 ];
 
 export function Plataformas({ lista }) {
@@ -105,10 +104,9 @@ export function AcoesRapidas({ jogo }) {
 }
 
 function CardJogo({ jogo }) {
-    const { abrirJogo, adicionarAoCarrinho, estaNoCarrinho, possui } = useLoja();
+    const { abrirJogo, adicionarAoCarrinho, estaNoCarrinho } = useLoja();
     const imagens = imagensDoJogo(jogo);
     const noCarrinho = estaNoCarrinho(jogo.id);
-    const jaPossui = possui(jogo.id);
     const [previa, eventosPrevia] = usePreviaTrailer();
 
     return (
@@ -128,24 +126,16 @@ function CardJogo({ jogo }) {
                     {jogo.generos[0]} · {jogo.lancamento}
                 </span>
                 <div className="cartao-rodape">
-                    {jaPossui ? (
-                        <span className="na-biblioteca">
-                            <IconeBiblioteca tamanho={14} /> Na biblioteca
-                        </span>
-                    ) : (
-                        <>
-                            <Preco jogo={jogo} />
-                            <button
-                                type="button"
-                                className={noCarrinho ? "cartao-carrinho ativo" : "cartao-carrinho"}
-                                onClick={() => adicionarAoCarrinho(jogo)}
-                                aria-label={noCarrinho ? `${jogo.nome} já está no carrinho` : `Adicionar ${jogo.nome} ao carrinho`}
-                                data-dica={noCarrinho ? "No carrinho" : "Adicionar"}
-                            >
-                                {noCarrinho ? <IconeCheck tamanho={15} /> : <IconeCarrinho tamanho={15} />}
-                            </button>
-                        </>
-                    )}
+                    <Preco jogo={jogo} />
+                    <button
+                        type="button"
+                        className={noCarrinho ? "cartao-carrinho ativo" : "cartao-carrinho"}
+                        onClick={() => adicionarAoCarrinho(jogo)}
+                        aria-label={noCarrinho ? `${jogo.nome} já está no carrinho` : `Adicionar ${jogo.nome} ao carrinho`}
+                        data-dica={noCarrinho ? "No carrinho" : "Adicionar"}
+                    >
+                        {noCarrinho ? <IconeCheck tamanho={15} /> : <IconeCarrinho tamanho={15} />}
+                    </button>
                 </div>
             </div>
         </article>

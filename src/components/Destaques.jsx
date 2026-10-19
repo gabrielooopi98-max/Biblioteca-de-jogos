@@ -2,19 +2,18 @@ import { useEffect, useState } from "react";
 import { useLoja } from "../LojaContext.js";
 import { capturasDoJogo, imagensDoJogo, resumoAvaliacoes } from "../utils.js";
 import { AcoesRapidas, Imagem, Plataformas, Preco } from "./CardJogo.jsx";
-import { IconeBiblioteca, IconeCarrinho, IconeCheck, IconePlay, IconeSetaDireita, IconeSetaEsquerda } from "./Icones.jsx";
+import { IconeCarrinho, IconeCheck, IconePlay, IconeSetaDireita, IconeSetaEsquerda } from "./Icones.jsx";
 import { usePreviaTrailer } from "../hooks.js";
 import Trailer from "./Trailer.jsx";
 
 const INTERVALO = 7000;
 
 function Slide({ jogo, ativo, perto, primeiro, aoClicarVizinho }) {
-    const { abrirJogo, adicionarAoCarrinho, estaNoCarrinho, possui } = useLoja();
+    const { abrirJogo, adicionarAoCarrinho, estaNoCarrinho } = useLoja();
     const [previa, setPrevia] = useState(null);
     const imagens = imagensDoJogo(jogo);
     const capturas = capturasDoJogo(jogo).slice(0, 4);
     const noCarrinho = estaNoCarrinho(jogo.id);
-    const jaPossui = possui(jogo.id);
     const [trailer, eventosTrailer] = usePreviaTrailer(450);
 
     return (
@@ -61,21 +60,13 @@ function Slide({ jogo, ativo, perto, primeiro, aoClicarVizinho }) {
                     </span>
                     <div className="slide-linha">
                         <Plataformas lista={jogo.plataformas} />
-                        {jaPossui ? (
-                            <span className="na-biblioteca">
-                                <IconeBiblioteca tamanho={15} /> Na biblioteca
-                            </span>
-                        ) : (
-                            <Preco jogo={jogo} />
-                        )}
+                        <Preco jogo={jogo} />
                     </div>
                     <div className="slide-botoes">
-                        {!jaPossui && (
-                            <button type="button" className="botao botao-primario" onClick={() => adicionarAoCarrinho(jogo)}>
-                                {noCarrinho ? <IconeCheck tamanho={16} /> : <IconeCarrinho tamanho={16} />}
-                                {noCarrinho ? "No carrinho" : "Adicionar ao carrinho"}
-                            </button>
-                        )}
+                        <button type="button" className="botao botao-primario" onClick={() => adicionarAoCarrinho(jogo)}>
+                            {noCarrinho ? <IconeCheck tamanho={16} /> : <IconeCarrinho tamanho={16} />}
+                            {noCarrinho ? "No carrinho" : "Adicionar ao carrinho"}
+                        </button>
                         <AcoesRapidas jogo={jogo} />
                     </div>
                 </div>

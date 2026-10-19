@@ -3,20 +3,37 @@ const CDN_CAPTURAS = "https://shared.akamai.steamstatic.com/store_item_assets/st
 
 export const ehAcessorio = (item) => item?.tipo === "acessorio";
 
-// Entrega dos acessórios (produtos físicos).
-export const FRETE = { gratisAPartirDe: 199, valor: 19.9, prazoMin: 3, prazoMax: 7 };
-export const PRAZO_ENTREGA = `${FRETE.prazoMin} a ${FRETE.prazoMax} dias úteis`;
 export const GARANTIA_MESES = 12;
 
-// Soma dias úteis (sem sábado e domingo) a uma data.
-export function somarDiasUteis(data, dias) {
-    const d = new Date(data);
-    let faltam = dias;
-    while (faltam > 0) {
-        d.setDate(d.getDate() + 1);
-        if (d.getDay() !== 0 && d.getDay() !== 6) faltam--;
-    }
-    return d;
+// Loja física: todo pedido é uma reserva para retirar no balcão.
+// Endereço e horário provisórios: troque aqui quando tiver os dados da loja.
+export const LOJA = {
+    nome: "Universal Games Celulares e Acessórios",
+    endereco: "Endereço da loja (em breve)",
+    horario: "Horário de atendimento (em breve)",
+};
+
+// Depois que a loja confirma o pagamento, a reserva fica separada por estes dias.
+export const DIAS_PARA_RETIRAR = 7;
+
+// Demonstração sem servidor: a "loja confirma o pagamento" alguns segundos depois da compra.
+export const CONFIRMACAO_DEMO_MS = 20000;
+
+const DIA_MS = 86400000;
+
+// "Pagar na loja": a pessoa só reserva pelo site e paga no balcão, na hora de retirar.
+export const pagaNaLoja = (pedido) => pedido.metodo === "loja";
+
+// Situação de uma reserva: aguardando a loja (confirmar o pagamento ou separar os itens), pronta para retirar ou cancelada.
+// Pedidos antigos (status "pago") contam como reservas confirmadas.
+export function situacaoReserva(pedido, agora = Date.now()) {
+    const feito = new Date(pedido.data).getTime();
+    if (pedido.status === "cancelado" || pedido.status === "reembolsado") return { id: "cancelado", rotulo: "Cancelada" };
+    const confirmadoEm = pedido.status === "pago" ? feito : feito + CONFIRMACAO_DEMO_MS;
+    if (agora < confirmadoEm) return { id: "aguardando", rotulo: pagaNaLoja(pedido) ? "Separando itens" : "Aguardando confirmação", confirmadoEm };
+    const limite = confirmadoEm + DIAS_PARA_RETIRAR * DIA_MS;
+    if (agora > limite) return { id: "vencido", rotulo: "Prazo de retirada encerrado", limite };
+    return { id: "pronto", rotulo: "Pronto para retirada", limite };
 }
 
 // Cada imagem no tamanho em que aparece: capa 600x900 só onde é grande, 300x450 nas miniaturas.
@@ -102,15 +119,12 @@ export const FILTROS_INICIAIS = {
     precoMax: null,
     notaMin: 0,
     somentePromocao: false,
-    ocultarPossuidos: false,
     colecao: null,
     ordenar: "relevancia",
 };
 
 export const DESCONTO_PIX = 5;
 
-// Direito de arrependimento em compras online (CDC, art. 49).
-export const DIAS_REEMBOLSO = 7;
 
 export const LIMITE_COMPARAR = 3;
 
@@ -121,31 +135,23 @@ export function resumirCarrinho(itens, codigoCupom, metodo) {
     const valorCupom = cupom ? Math.round(comDesconto * cupom.percentual) / 100 : 0;
     const aposCupom = comDesconto - valorCupom;
     const valorPix = metodo === "pix" ? Math.round(aposCupom * DESCONTO_PIX) / 100 : 0;
-    // frete só existe com acessório no carrinho; grátis a partir do valor mínimo em acessórios
-    const fisicos = itens.filter(ehAcessorio);
-    const valorFisicos = fisicos.reduce((soma, item) => soma + calcularPrecoFinal(item), 0);
-    const temFisicos = fisicos.length > 0;
-    const frete = !temFisicos || valorFisicos >= FRETE.gratisAPartirDe ? 0 : FRETE.valor;
-    const faltaParaFreteGratis = temFisicos && frete > 0 ? FRETE.gratisAPartirDe - valorFisicos : 0;
 
     return {
         subtotal,
         descontos: subtotal - comDesconto,
         valorCupom,
         valorPix,
-        temFisicos,
-        frete,
-        faltaParaFreteGratis,
-        total: aposCupom - valorPix + frete,
+        total: aposCupom - valorPix,
     };
 }
 
-export function prazoReembolso(pedido) {
-    const limite = new Date(pedido.data).getTime() + DIAS_REEMBOLSO * 86400000;
-    return { limite, dentro: pedido.status === "pago" && Date.now() < limite };
+// A reserva pode ser cancelada (com o valor devolvido) enquanto ainda não foi retirada.
+export function podeCancelar(pedido) {
+    const { id } = situacaoReserva(pedido);
+    return id === "aguardando" || id === "pronto";
 }
 
-// Recomenda jogos pelos gêneros mais frequentes entre os que a pessoa viu, deseja ou possui.
+// Recomenda jogos pelos gêneros mais frequentes entre os que a pessoa viu ou deseja.
 export function recomendar(jogos, idsBase, idsExcluir, quantidade = 8) {
     const porId = new Map(jogos.map((jogo) => [jogo.id, jogo]));
     const peso = new Map();
@@ -183,10 +189,6 @@ export function normalizar(texto) {
 export function gerarCodigo(tamanho) {
     const caracteres = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     return Array.from({ length: tamanho }, () => caracteres[Math.floor(Math.random() * caracteres.length)]).join("");
-}
-
-export function gerarChave() {
-    return `${gerarCodigo(5)}-${gerarCodigo(5)}-${gerarCodigo(5)}`;
 }
 
 export function baixarArquivo(nome, conteudo) {

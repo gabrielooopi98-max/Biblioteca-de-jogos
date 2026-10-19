@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLoja } from "../LojaContext.js";
 import { imagensDoJogo } from "../utils.js";
 import { Imagem, Preco } from "./CardJogo.jsx";
-import { IconeBiblioteca, IconeCarrinho, IconeCheck, IconeSeta } from "./Icones.jsx";
+import { IconeCarrinho, IconeCheck, IconeSeta } from "./Icones.jsx";
 
 const semMovimento = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -56,14 +56,7 @@ function useSelecao(inicial) {
 
 // Botão de carrinho compartilhado pelas duas áreas.
 function BotaoCarrinho({ jogo }) {
-    const { adicionarAoCarrinho, estaNoCarrinho, possui } = useLoja();
-    if (possui(jogo.id)) {
-        return (
-            <span className="universo-possui">
-                <IconeBiblioteca tamanho={15} /> Na biblioteca
-            </span>
-        );
-    }
+    const { adicionarAoCarrinho, estaNoCarrinho } = useLoja();
     const noCarrinho = estaNoCarrinho(jogo.id);
     return (
         <button type="button" className="botao botao-secundario" onClick={() => adicionarAoCarrinho(jogo)} aria-label={noCarrinho ? `${jogo.nome} já está no carrinho` : `Adicionar ${jogo.nome} ao carrinho`}>
@@ -348,9 +341,6 @@ export function UniversoResidentEvil({ jogos, aoVerTodos }) {
                     <h2 className="re-titulo" data-texto="Resident Evil">
                         Resident Evil
                     </h2>
-                    <p className="re-sub">
-                        {arquivos.length} incidentes, de Raccoon City à Europa Oriental. Escolha um arquivo, se tiver coragem.
-                    </p>
                 </header>
 
                 <div className="re-linha" ref={linhaRef} role="group" aria-label="Linha do tempo dos incidentes" onKeyDown={teclar}>

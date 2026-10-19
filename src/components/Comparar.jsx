@@ -2,9 +2,10 @@ import { navegar } from "../hooks.js";
 import { useLoja } from "../LojaContext.js";
 import { calcularPrecoFinal, formatarPreco, imagensDoJogo, LIMITE_COMPARAR } from "../utils.js";
 import { Avaliacao, Imagem } from "./CardJogo.jsx";
-import { IconeBiblioteca, IconeCarrinho, IconeCheck, IconeComparar, IconeFechar, IconeMais } from "./Icones.jsx";
+import { IconeCarrinho, IconeCheck, IconeComparar, IconeFechar, IconeMais } from "./Icones.jsx";
 
-const PLATAFORMAS = ["PC", "PS5", "PS4", "Xbox Series X/S", "Xbox One", "Nintendo Switch"];
+// consoles vendidos pela loja; a tabela mostra só os que algum dos jogos comparados tem
+const CONSOLES = ["PS5", "PS4", "PS3", "PS2", "Xbox Series X/S", "Xbox 360"];
 
 function melhorId(jogos, valor, maior = true) {
     if (jogos.length < 2) return null;
@@ -13,7 +14,7 @@ function melhorId(jogos, valor, maior = true) {
 }
 
 function Comparar({ jogos }) {
-    const { abrirJogo, adicionarAoCarrinho, alternarComparar, estaNoCarrinho, possui } = useLoja();
+    const { abrirJogo, adicionarAoCarrinho, alternarComparar, estaNoCarrinho } = useLoja();
 
     if (jogos.length === 0) {
         return (
@@ -48,7 +49,7 @@ function Comparar({ jogos }) {
         ["Lançamento", (j) => j.lancamento],
         ["Desenvolvedora", (j) => j.desenvolvedora],
         ["Gêneros", (j) => j.generos.join(", ")],
-        ...PLATAFORMAS.map((p) => [p, (j) => (j.plataformas.includes(p) ? <IconeCheck tamanho={16} className="sim" /> : <span className="nao">Não</span>)]),
+        ...CONSOLES.filter((p) => jogos.some((j) => j.plataformas.includes(p))).map((p) => [p, (j) => (j.plataformas.includes(p) ? <IconeCheck tamanho={16} className="sim" /> : <span className="nao">Não</span>)]),
     ];
 
     return (
@@ -76,16 +77,10 @@ function Comparar({ jogos }) {
                                         <button type="button" onClick={() => abrirJogo(jogo.id)} className="comparacao-nome">
                                             {jogo.nome}
                                         </button>
-                                        {possui(jogo.id) ? (
-                                            <span className="na-biblioteca">
-                                                <IconeBiblioteca tamanho={14} /> Na biblioteca
-                                            </span>
-                                        ) : (
-                                            <button type="button" className={estaNoCarrinho(jogo.id) ? "botao botao-secundario ativo" : "botao botao-primario"} onClick={() => adicionarAoCarrinho(jogo)}>
-                                                {estaNoCarrinho(jogo.id) ? <IconeCheck tamanho={15} /> : <IconeCarrinho tamanho={15} />}
-                                                {estaNoCarrinho(jogo.id) ? "No carrinho" : "Adicionar"}
-                                            </button>
-                                        )}
+                                        <button type="button" className={estaNoCarrinho(jogo.id) ? "botao botao-secundario ativo" : "botao botao-primario"} onClick={() => adicionarAoCarrinho(jogo)}>
+                                            {estaNoCarrinho(jogo.id) ? <IconeCheck tamanho={15} /> : <IconeCarrinho tamanho={15} />}
+                                            {estaNoCarrinho(jogo.id) ? "No carrinho" : "Adicionar"}
+                                        </button>
                                     </div>
                                 </th>
                             ))}

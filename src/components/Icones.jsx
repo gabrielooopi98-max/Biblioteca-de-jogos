@@ -338,6 +338,16 @@ export const IconeMais = (p) => (
     </Icone>
 );
 
+// Loja física: fachada com toldo (retirada no balcão)
+export const IconeLoja = (p) => (
+    <Icone {...p}>
+        <path d="M3.5 9.5 5 4.5h14l1.5 5" />
+        <path d="M3.5 9.5a2.8 2.8 0 0 0 5.6 0 2.8 2.8 0 0 0 5.8 0 2.8 2.8 0 0 0 5.6 0" />
+        <path d="M5 12.2v7.3h14v-7.3" />
+        <path d="M10 19.5V15h4v4.5" />
+    </Icone>
+);
+
 // Marca: o selo redondo da loja (public/logo-universal-games.jpg). O nome vem ao lado, em texto.
 const LOGO = `${import.meta.env.BASE_URL}logo-universal-games.jpg`;
 

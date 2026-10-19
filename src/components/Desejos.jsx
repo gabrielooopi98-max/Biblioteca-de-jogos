@@ -3,7 +3,7 @@ import { navegar } from "../hooks.js";
 import { useLoja } from "../LojaContext.js";
 import { calcularPrecoFinal, formatarPreco, imagensDoJogo } from "../utils.js";
 import { Avaliacao, Imagem, Preco } from "./CardJogo.jsx";
-import { IconeBiblioteca, IconeCarrinho, IconeCheck, IconeCoracao, IconeFechar, IconeSino } from "./Icones.jsx";
+import { IconeCarrinho, IconeCheck, IconeCoracao, IconeFechar, IconeSino } from "./Icones.jsx";
 
 function AlertaPreco({ jogo, alvo, definir }) {
     const [editando, setEditando] = useState(false);
@@ -58,7 +58,7 @@ function AlertaPreco({ jogo, alvo, definir }) {
 }
 
 function Desejos({ itens, alertas, definirAlerta }) {
-    const { abrirJogo, adicionarAoCarrinho, alternarDesejo, estaNoCarrinho, possui } = useLoja();
+    const { abrirJogo, adicionarAoCarrinho, alternarDesejo, estaNoCarrinho } = useLoja();
     const totalAtual = itens.reduce((soma, jogo) => soma + calcularPrecoFinal(jogo), 0);
     const economia = itens.reduce((soma, jogo) => soma + (jogo.preco - calcularPrecoFinal(jogo)), 0);
 
@@ -112,19 +112,11 @@ function Desejos({ itens, alertas, definirAlerta }) {
                                         <AlertaPreco jogo={jogo} alvo={alertas[jogo.id]} definir={(valor) => definirAlerta(jogo, valor)} />
                                     </div>
                                     <div className="desejo-acoes">
-                                        {possui(jogo.id) ? (
-                                            <span className="na-biblioteca">
-                                                <IconeBiblioteca tamanho={14} /> Na biblioteca
-                                            </span>
-                                        ) : (
-                                            <>
-                                                <Preco jogo={jogo} />
-                                                <button type="button" className={noCarrinho ? "botao botao-secundario ativo" : "botao botao-primario"} onClick={() => adicionarAoCarrinho(jogo)}>
-                                                    {noCarrinho ? <IconeCheck tamanho={15} /> : <IconeCarrinho tamanho={15} />}
-                                                    {noCarrinho ? "No carrinho" : "Adicionar"}
-                                                </button>
-                                            </>
-                                        )}
+                                        <Preco jogo={jogo} />
+                                        <button type="button" className={noCarrinho ? "botao botao-secundario ativo" : "botao botao-primario"} onClick={() => adicionarAoCarrinho(jogo)}>
+                                            {noCarrinho ? <IconeCheck tamanho={15} /> : <IconeCarrinho tamanho={15} />}
+                                            {noCarrinho ? "No carrinho" : "Adicionar"}
+                                        </button>
                                         <button type="button" className="botao botao-fantasma" onClick={() => alternarDesejo(jogo)}>
                                             Remover
                                         </button>

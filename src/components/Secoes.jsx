@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { navegar, useContagemRegressiva } from "../hooks.js";
 import { useLoja } from "../LojaContext.js";
-import { calcularPrecoFinal, DIAS_REEMBOLSO, fimDoMes, formatarPreco, imagensDoJogo, nomeDoMes } from "../utils.js";
+import { calcularPrecoFinal, DIAS_PARA_RETIRAR, fimDoMes, formatarPreco, imagensDoJogo, nomeDoMes } from "../utils.js";
 import CardJogo, { Imagem, Preco } from "./CardJogo.jsx";
 import { IconeCadeado, IconeDesfazer, IconeEscudo, IconeRaio, IconeSeta, IconeSetaDireita, IconeSetaEsquerda, LogoMarca } from "./Icones.jsx";
 
@@ -108,10 +108,10 @@ export function Prateleira({ id, titulo, descricao, jogos, aoVerMais }) {
 }
 
 const GARANTIAS = [
-    { Icone: IconeRaio, titulo: "Entrega instantânea", texto: "Chave liberada assim que o pagamento é aprovado" },
-    { Icone: IconeEscudo, titulo: "Chaves oficiais", texto: "Ativação garantida na plataforma indicada" },
-    { Icone: IconeDesfazer, titulo: `Reembolso em ${DIAS_REEMBOLSO} dias`, texto: "Direito de arrependimento, direto em Meus pedidos" },
-    { Icone: IconeCadeado, titulo: "Pix, cartão ou boleto", texto: "Até 10x sem juros ou 5% de desconto no Pix" },
+    { Icone: IconeRaio, titulo: "Reserve pelo site", texto: "Pague pelo site ou na loja, na hora de retirar" },
+    { Icone: IconeEscudo, titulo: "Retire na loja", texto: `A loja confirma o pagamento e você retira em até ${DIAS_PARA_RETIRAR} dias` },
+    { Icone: IconeDesfazer, titulo: "Cancelamento fácil", texto: "Cancele a reserva antes de retirar, direto em Minhas reservas" },
+    { Icone: IconeCadeado, titulo: "Pague como preferir", texto: "Pix, cartão em até 10x, boleto ou no balcão da loja" },
 ];
 
 export function Garantias() {
@@ -259,8 +259,8 @@ export function ChamadaCatalogo({ total }) {
 }
 
 const COLUNAS_RODAPE = [
-    { titulo: "Loja", links: [["Início", "/"], ["Explorar", "/explorar"], ["Acessórios", "/acessorios"], ["Comparar jogos", "/comparar"]] },
-    { titulo: "Sua conta", links: [["Biblioteca", "/biblioteca"], ["Pedidos e reembolsos", "/pedidos"], ["Lista de desejos", "/desejos"]] },
+    { titulo: "Loja", links: [["Início", "/"], ["Jogos", "/explorar"], ["Produtos", "/acessorios"], ["Comparar jogos", "/comparar"]] },
+    { titulo: "Sua conta", links: [["Minhas reservas", "/reservas"], ["Lista de desejos", "/desejos"]] },
 ];
 
 export function Rodape() {
@@ -274,7 +274,7 @@ export function Rodape() {
                             Universal<small> Games</small>
                         </span>
                     </a>
-                    <p>Jogos digitais para PC e consoles, com entrega instantânea e reembolso em até {DIAS_REEMBOLSO} dias.</p>
+                    <p>Jogos, celulares e acessórios em um só lugar. Reserve pelo site e retire na loja.</p>
                 </div>
                 {COLUNAS_RODAPE.map((coluna) => (
                     <nav key={coluna.titulo} className="rodape-coluna" aria-label={coluna.titulo}>

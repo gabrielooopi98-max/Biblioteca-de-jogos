@@ -1,22 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { navegar } from "../hooks.js";
 import { useLoja } from "../LojaContext.js";
-import { calcularParcelas, calcularPrecoFinal, capturasDoJogo, DESCONTO_PIX, DIAS_REEMBOLSO, formatarPreco, imagensDoJogo, trailerDoJogo } from "../utils.js";
+import { calcularParcelas, calcularPrecoFinal, capturasDoJogo, DESCONTO_PIX, DIAS_PARA_RETIRAR, formatarPreco, imagensDoJogo, trailerDoJogo } from "../utils.js";
 import CardJogo, { Avaliacao, Imagem, Plataformas, Preco } from "./CardJogo.jsx";
-import {
-    IconeBiblioteca,
-    IconeCarrinho,
-    IconeCheck,
-    IconeComparar,
-    IconeCoracao,
-    IconeDesfazer,
-    IconeEscudo,
-    IconePlay,
-    IconePresente,
-    IconeRaio,
-    IconeSetaDireita,
-    IconeSetaEsquerda,
-} from "./Icones.jsx";
+import { IconeCarrinho, IconeCheck, IconeComparar, IconeCoracao, IconeDesfazer, IconeEscudo, IconeLoja, IconePlay, IconeSetaDireita, IconeSetaEsquerda } from "./Icones.jsx";
 import Trailer from "./Trailer.jsx";
 
 function jogosSemelhantes(jogo, todos) {
@@ -87,8 +74,8 @@ function Galeria({ jogo }) {
     );
 }
 
-function PaginaJogo({ jogo, jogos, comprarAgora, presentear, aoEscolherGenero }) {
-    const { adicionarAoCarrinho, alternarDesejo, estaNoCarrinho, estaNosDesejos, alternarComparar, estaComparando, possui } = useLoja();
+function PaginaJogo({ jogo, jogos, comprarAgora, aoEscolherGenero }) {
+    const { adicionarAoCarrinho, alternarDesejo, estaNoCarrinho, estaNosDesejos, alternarComparar, estaComparando } = useLoja();
 
     if (!jogo) {
         return (
@@ -107,12 +94,11 @@ function PaginaJogo({ jogo, jogos, comprarAgora, presentear, aoEscolherGenero })
     const noCarrinho = estaNoCarrinho(jogo.id);
     const desejado = estaNosDesejos(jogo.id);
     const comparando = estaComparando(jogo.id);
-    const jaPossui = possui(jogo.id);
 
     return (
         <div className="pagina pagina-jogo" style={jogo.fundo ? { "--fundo-jogo": `url("${jogo.fundo}")` } : undefined}>
             <nav className="trilha" aria-label="Você está em">
-                <a href="#/explorar">Explorar</a>
+                <a href="#/explorar">Jogos</a>
                 <span>/</span>
                 <button type="button" onClick={() => aoEscolherGenero(jogo.generos[0])}>
                     {jogo.generos[0]}
@@ -173,8 +159,8 @@ function PaginaJogo({ jogo, jogos, comprarAgora, presentear, aoEscolherGenero })
                                 </dd>
                             </div>
                             <div>
-                                <dt>Entrega</dt>
-                                <dd>Chave digital por e-mail e na sua biblioteca</dd>
+                                <dt>Retirada</dt>
+                                <dd>Reserve pelo site e retire na loja depois da confirmação do pagamento</dd>
                             </div>
                         </dl>
                     </section>
@@ -182,51 +168,28 @@ function PaginaJogo({ jogo, jogos, comprarAgora, presentear, aoEscolherGenero })
 
                 <aside className="compra">
                     <Imagem src={imagens.horizontal} alt="" className="compra-capa" key={imagens.horizontal} />
-                    {jaPossui ? (
-                        <div className="compra-possui">
-                            <IconeBiblioteca tamanho={18} />
-                            <div>
-                                <strong>Na sua biblioteca</strong>
-                                <span>Sua chave está disponível para ativação.</span>
-                            </div>
+                    <Preco jogo={jogo} tamanho="grande" />
+                    {jogo.desconto > 0 && <span className="compra-economia">Economize {formatarPreco(jogo.preco - final)}</span>}
+                    <dl className="compra-condicoes">
+                        <div>
+                            <dt>Pix</dt>
+                            <dd>{formatarPreco(final * (1 - DESCONTO_PIX / 100))}</dd>
                         </div>
-                    ) : (
-                        <>
-                            <Preco jogo={jogo} tamanho="grande" />
-                            {jogo.desconto > 0 && <span className="compra-economia">Economize {formatarPreco(jogo.preco - final)}</span>}
-                            <dl className="compra-condicoes">
-                                <div>
-                                    <dt>Pix</dt>
-                                    <dd>{formatarPreco(final * (1 - DESCONTO_PIX / 100))}</dd>
-                                </div>
-                                <div>
-                                    <dt>Cartão</dt>
-                                    <dd>
-                                        {parcelas.quantidade}x de {formatarPreco(parcelas.valor)} sem juros
-                                    </dd>
-                                </div>
-                            </dl>
-                        </>
-                    )}
+                        <div>
+                            <dt>Cartão</dt>
+                            <dd>
+                                {parcelas.quantidade}x de {formatarPreco(parcelas.valor)} sem juros
+                            </dd>
+                        </div>
+                    </dl>
 
                     <div className="compra-botoes">
-                        {jaPossui ? (
-                            <button type="button" className="botao botao-primario botao-largo" onClick={() => navegar("/biblioteca")}>
-                                <IconeBiblioteca tamanho={16} /> Ver na biblioteca
-                            </button>
-                        ) : (
-                            <>
-                                <button type="button" className="botao botao-primario botao-largo" onClick={() => comprarAgora(jogo)}>
-                                    Comprar agora
-                                </button>
-                                <button type="button" className={noCarrinho ? "botao botao-secundario botao-largo ativo" : "botao botao-secundario botao-largo"} onClick={() => adicionarAoCarrinho(jogo)}>
-                                    {noCarrinho ? <IconeCheck tamanho={16} /> : <IconeCarrinho tamanho={16} />}
-                                    {noCarrinho ? "No carrinho" : "Adicionar ao carrinho"}
-                                </button>
-                            </>
-                        )}
-                        <button type="button" className="botao botao-secundario botao-largo" onClick={() => presentear(jogo)}>
-                            <IconePresente tamanho={16} /> Presentear
+                        <button type="button" className="botao botao-primario botao-largo" onClick={() => comprarAgora(jogo)}>
+                            Reservar agora
+                        </button>
+                        <button type="button" className={noCarrinho ? "botao botao-secundario botao-largo ativo" : "botao botao-secundario botao-largo"} onClick={() => adicionarAoCarrinho(jogo)}>
+                            {noCarrinho ? <IconeCheck tamanho={16} /> : <IconeCarrinho tamanho={16} />}
+                            {noCarrinho ? "No carrinho" : "Adicionar ao carrinho"}
                         </button>
                         <div className="compra-secundarias">
                             <button type="button" className={desejado ? "botao botao-fantasma ativo" : "botao botao-fantasma"} onClick={() => alternarDesejo(jogo)} aria-pressed={desejado}>
@@ -240,14 +203,14 @@ function PaginaJogo({ jogo, jogos, comprarAgora, presentear, aoEscolherGenero })
 
                     <ul className="compra-garantias">
                         <li>
-                            <IconeRaio tamanho={15} /> Entrega instantânea da chave
+                            <IconeLoja tamanho={15} /> Retire na loja em até {DIAS_PARA_RETIRAR} dias após a confirmação
                         </li>
                         <li>
-                            <IconeEscudo tamanho={15} /> Chave oficial para {jogo.plataformas[0]}
+                            <IconeEscudo tamanho={15} /> Produto original para {jogo.plataformas[0]}
                             {jogo.plataformas.length > 1 && ` e mais ${jogo.plataformas.length - 1}`}
                         </li>
                         <li>
-                            <IconeDesfazer tamanho={15} /> Reembolso em até {DIAS_REEMBOLSO} dias
+                            <IconeDesfazer tamanho={15} /> Cancele a reserva antes de retirar
                         </li>
                     </ul>
                 </aside>

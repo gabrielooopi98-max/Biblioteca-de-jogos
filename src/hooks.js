@@ -66,7 +66,9 @@ export function useHash() {
     return useSyncExternalStore(assinarHash, () => window.location.hash);
 }
 
-export const PAGINAS = ["loja", "explorar", "acessorios", "biblioteca", "pedidos", "desejos", "comparar"];
+export const PAGINAS = ["loja", "explorar", "acessorios", "reservas", "desejos", "comparar"];
+// endereços antigos (de antes da retirada na loja) levam às reservas
+const ALIASES = { biblioteca: "reservas", pedidos: "reservas", produtos: "acessorios", jogos: "explorar" };
 
 // Rotas por hash: #/explorar, #/jogo/25… (funciona no GitHub Pages sem configuração de servidor).
 // Endereço que não corresponde a nenhuma página vira "404" (antes caía na loja sem avisar).
@@ -75,6 +77,7 @@ export function useRota() {
     if (!hash || hash === "#" || hash === "#/") return { pagina: "loja" };
     const [, pagina, parametro] = hash.match(/^#\/([a-z]+)(?:\/(\d+))?\/?$/) || [];
     if ((pagina === "jogo" || pagina === "produto") && parametro) return { pagina, id: Number(parametro) };
+    if (ALIASES[pagina] && !parametro) return { pagina: ALIASES[pagina] };
     if (PAGINAS.includes(pagina) && !parametro) return { pagina };
     return { pagina: "404" };
 }
@@ -85,7 +88,7 @@ export function navegar(caminho) {
 
 // Elementos com "luz que segue o cursor" e com paralaxe (lidos pelo CSS via --mx/--my e --px/--py).
 const SELETOR_LUZ =
-    ".cartao-imagem, .oferta, .categoria, .chamada, .item-biblioteca, .desejo, .pedido, .compra, .garantia, .abas-lista, .resultados, .previa, .estatisticas, .slide-info, .metodo, .evento, .franquia, .comparacao-rolagem";
+    ".cartao-imagem, .oferta, .categoria, .chamada, .desejo, .pedido, .compra, .garantia, .abas-lista, .resultados, .previa, .estatisticas, .slide-info, .metodo, .evento, .franquia, .comparacao-rolagem";
 const SELETOR_PARALAXE = ".slide-midia, .galeria-palco";
 // Botões de contorno: o preenchimento nasce de onde o cursor está (--bx/--by).
 const SELETOR_BOTAO = ".botao-primario, .botao-secundario, .botao-vidro, .carrinho-botao";

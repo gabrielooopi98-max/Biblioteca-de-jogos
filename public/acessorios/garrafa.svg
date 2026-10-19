@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450"><defs>
+<radialGradient id="bg" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#2a2a30"/><stop offset=".55" stop-color="#151518"/><stop offset="1" stop-color="#0a0a0c"/></radialGradient>
+<linearGradient id="corpo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#44444d"/><stop offset=".45" stop-color="#2a2a31"/><stop offset="1" stop-color="#16161a"/></linearGradient>
+<linearGradient id="corpo2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34343c"/><stop offset="1" stop-color="#121215"/></linearGradient>
+<linearGradient id="claro" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9e9ee"/><stop offset=".6" stop-color="#c9c9d1"/><stop offset="1" stop-color="#9c9ca6"/></linearGradient>
+<linearGradient id="rgb" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8b5cf6"/><stop offset=".5" stop-color="#22d3ee"/><stop offset="1" stop-color="#34d399"/></linearGradient>
+<linearGradient id="tela" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b1d6e"/><stop offset=".55" stop-color="#0e4a6b"/><stop offset="1" stop-color="#062a2a"/></linearGradient>
+<linearGradient id="tela2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f59e0b"/><stop offset=".5" stop-color="#db2777"/><stop offset="1" stop-color="#4c1d95"/></linearGradient>
+<linearGradient id="reflexo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="diagonal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="ouro" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3d27a"/><stop offset=".5" stop-color="#d4a73a"/><stop offset="1" stop-color="#8e6c17"/></linearGradient>
+<linearGradient id="agua" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0f766e"/><stop offset=".45" stop-color="#2dd4bf"/><stop offset="1" stop-color="#115e59"/></linearGradient>
+<linearGradient id="inox" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3a3a42"/><stop offset=".35" stop-color="#8a8a96"/><stop offset=".6" stop-color="#4a4a54"/><stop offset="1" stop-color="#1c1c21"/></linearGradient>
+<pattern id="grade" width="9" height="9" patternUnits="userSpaceOnUse"><circle cx="4.5" cy="4.5" r="1.8" fill="#0b0b0e"/></pattern>
+<filter id="sombra" x="-50%" y="-200%" width="200%" height="500%"><feGaussianBlur stdDeviation="12"/></filter>
+<filter id="brilho" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7"/></filter>
+</defs>
+<rect width="600" height="450" fill="url(#bg)"/>
+<ellipse cx="300" cy="350" rx="70" ry="13" fill="#000" opacity=".6" filter="url(#sombra)"/>
+<rect x="262" y="92" width="76" height="30" rx="10" fill="#1c1c22"/>
+<rect x="270" y="86" width="60" height="12" rx="6" fill="#2a2a31"/>
+<path d="M258 132 Q258 118 272 118 H328 Q342 118 342 132 V146 Q352 156 352 176 V328 Q352 346 334 346 H266 Q248 346 248 328 V176 Q248 156 258 146Z" fill="url(#inox)"/>
+<rect x="248" y="206" width="104" height="14" fill="url(#ouro)"/>
+<text x="300" y="268" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="15" fill="#0b0b0e" opacity=".55" letter-spacing="2">1L</text>
+<path d="M262 160 Q266 140 280 134 V330 Q262 326 262 310Z" fill="#fff" opacity=".12"/>
+</svg>

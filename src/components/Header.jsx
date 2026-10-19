@@ -1,17 +1,16 @@
 import { navegar, useIndicador } from "../hooks.js";
-import { IconeBiblioteca, IconeBusca, IconeBussola, IconeCarrinho, IconeCasa, IconeCoracao, IconeFone, IconeRecibo, LogoMarca } from "./Icones.jsx";
+import { IconeBusca, IconeBussola, IconeCarrinho, IconeCasa, IconeCoracao, IconeFone, IconeRecibo, LogoMarca } from "./Icones.jsx";
 
 const PAGINAS = [
     { pagina: "loja", caminho: "/", rotulo: "Loja", Icone: IconeCasa },
-    { pagina: "explorar", caminho: "/explorar", rotulo: "Explorar", Icone: IconeBussola },
-    { pagina: "acessorios", caminho: "/acessorios", rotulo: "Acessórios", Icone: IconeFone },
-    { pagina: "biblioteca", caminho: "/biblioteca", rotulo: "Biblioteca", Icone: IconeBiblioteca },
-    { pagina: "pedidos", caminho: "/pedidos", rotulo: "Pedidos", Icone: IconeRecibo },
+    { pagina: "explorar", caminho: "/explorar", rotulo: "Jogos", Icone: IconeBussola },
+    { pagina: "acessorios", caminho: "/acessorios", rotulo: "Produtos", Icone: IconeFone },
+    { pagina: "reservas", caminho: "/reservas", rotulo: "Reservas", Icone: IconeRecibo },
 ];
 
 const ehMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
 
-function Header({ pagina, qtdCarrinho, qtdDesejos, qtdBiblioteca, alertas, abrirCarrinho, abrirPaleta }) {
+function Header({ pagina, qtdCarrinho, qtdDesejos, qtdReservas, alertas, abrirCarrinho, abrirPaleta }) {
     const navRef = useIndicador();
 
     return (
@@ -37,14 +36,14 @@ function Header({ pagina, qtdCarrinho, qtdDesejos, qtdBiblioteca, alertas, abrir
                         {PAGINAS.map((item) => (
                             <a key={item.pagina} href={`#${item.caminho}`} className={pagina === item.pagina ? "ativo" : ""} aria-current={pagina === item.pagina ? "page" : undefined}>
                                 {item.rotulo}
-                                {item.pagina === "biblioteca" && qtdBiblioteca > 0 && <span className="nav-contagem">{qtdBiblioteca}</span>}
+                                {item.pagina === "reservas" && qtdReservas > 0 && <span className="nav-contagem">{qtdReservas}</span>}
                             </a>
                         ))}
                     </nav>
 
                     <button type="button" className="busca-gatilho" onClick={abrirPaleta}>
                         <IconeBusca tamanho={16} />
-                        <span>Buscar jogos, estúdios, páginas…</span>
+                        <span>Buscar jogos, produtos, páginas…</span>
                         <kbd>{ehMac ? "⌘" : "Ctrl"} K</kbd>
                     </button>
 
@@ -83,9 +82,12 @@ function Header({ pagina, qtdCarrinho, qtdDesejos, qtdBiblioteca, alertas, abrir
                     <IconeBusca tamanho={20} />
                     Buscar
                 </button>
-                <a href="#/biblioteca" className={pagina === "biblioteca" ? "ativo" : ""}>
-                    <IconeBiblioteca tamanho={20} />
-                    Biblioteca
+                <a href="#/reservas" className={pagina === "reservas" ? "ativo" : ""}>
+                    <span className="aba-icone">
+                        <IconeRecibo tamanho={20} />
+                        {qtdReservas > 0 && <span className="contagem">{qtdReservas}</span>}
+                    </span>
+                    Reservas
                 </a>
                 <button type="button" onClick={abrirCarrinho}>
                     <span className="aba-icone">

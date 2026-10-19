@@ -6,7 +6,7 @@ import { Preco } from "./CardJogo.jsx";
 import { IconeBusca, IconeSeta } from "./Icones.jsx";
 
 function PaletaComandos({ aberta, fechar, jogos, comandos }) {
-    const { abrirJogo, possui } = useLoja();
+    const { abrirJogo } = useLoja();
     const { montado, saindo } = usePresenca(aberta, 150);
     const [consulta, setConsulta] = useState("");
     const [ativo, setAtivo] = useState(0);
@@ -76,7 +76,7 @@ function PaletaComandos({ aberta, fechar, jogos, comandos }) {
                             {item.jogo.desenvolvedora} · {item.jogo.generos.slice(0, 2).join(", ")}
                         </small>
                     </span>
-                    {possui(item.jogo.id) ? <span className="paleta-dica">Na biblioteca</span> : <Preco jogo={item.jogo} tamanho="pequeno" />}
+                    <Preco jogo={item.jogo} tamanho="pequeno" />
                 </>
             ) : (
                 <>

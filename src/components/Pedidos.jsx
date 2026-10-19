@@ -1,36 +1,27 @@
 import { useState } from "react";
 import { navegar } from "../hooks.js";
 import { useLoja } from "../LojaContext.js";
-import { baixarArquivo, DIAS_REEMBOLSO, ehAcessorio, formatarData, formatarPreco, imagensDoJogo, prazoReembolso } from "../utils.js";
-import { IconeCaminhao, IconeDesfazer, IconeDownload, IconePresente, IconeRecibo } from "./Icones.jsx";
+import { baixarArquivo, ehAcessorio, formatarData, formatarPreco, imagensDoJogo, LOJA, pagaNaLoja, podeCancelar, situacaoReserva } from "../utils.js";
+import { IconeCheck, IconeDesfazer, IconeDownload, IconeRecibo, IconeRelogio } from "./Icones.jsx";
+import { InfoRetirada } from "./Retirada.jsx";
 
-const enderecoEmLinha = (e) => `${e.rua}, ${e.numero}${e.complemento ? ` (${e.complemento})` : ""} · ${e.bairro} · ${e.cidade}/${e.uf} · CEP ${e.cep}`;
-
-// Situação da entrega pela data (demonstração): separando, a caminho e entregue.
-function situacaoEntrega(pedido) {
-    const agora = Date.now();
-    const fim = new Date(pedido.entrega.previsao[1]).getTime();
-    if (pedido.status !== "pago") return "Cancelada";
-    if (agora >= fim) return "Entregue";
-    if (agora - new Date(pedido.data).getTime() > 86400000) return "A caminho";
-    return "Em separação";
-}
-
-const METODOS = { pix: "Pix", cartao: "Cartão de crédito", boleto: "Boleto" };
+const METODOS = { pix: "Pix", cartao: "Cartão de crédito", boleto: "Boleto", loja: "Pagar na loja" };
 
 function comprovante(pedido) {
+    const situacao = situacaoReserva(pedido);
+    const { comprador } = pedido;
     const linhas = [
-        "UNIVERSAL GAMES · COMPROVANTE DE PEDIDO",
+        "UNIVERSAL GAMES · COMPROVANTE DE RESERVA",
         "(projeto demonstrativo: nenhum pagamento real foi processado)",
         "",
         `Pedido: ${pedido.numero}`,
         `Data: ${formatarData(pedido.data, true)}`,
-        `Status: ${pedido.status === "pago" ? "Pago" : "Reembolsado"}`,
-        `Comprador: ${pedido.comprador.nome} <${pedido.comprador.email}>`,
-        pedido.presente ? `Presente para: ${pedido.presente.nome} <${pedido.presente.email}>` : null,
-        `Pagamento: ${METODOS[pedido.metodo]}`,
-        pedido.entrega ? `Entrega: ${enderecoEmLinha(pedido.entrega.endereco)}` : null,
-        pedido.entrega ? `Previsão: ${formatarData(pedido.entrega.previsao[0])} a ${formatarData(pedido.entrega.previsao[1])}` : null,
+        `Situação: ${situacao.rotulo}`,
+        `Cliente: ${comprador.nome} <${comprador.email}>${comprador.telefone ? ` · ${comprador.telefone}` : ""}`,
+        `Pagamento: ${METODOS[pedido.metodo]}${pagaNaLoja(pedido) ? " (pago no balcão, na retirada)" : ""}`,
+        `Retirada: ${LOJA.nome} · ${LOJA.endereco}`,
+        pedido.retirada ? `Código de retirada: ${pedido.retirada.codigo}` : null,
+        situacao.limite ? `Retirar até: ${formatarData(new Date(situacao.limite).toISOString())}` : null,
         "",
         "Itens:",
         ...pedido.itens.map((item) => `  - ${item.nome}: ${formatarPreco(item.pago)}`),
@@ -39,19 +30,19 @@ function comprovante(pedido) {
         `Descontos: -${formatarPreco(pedido.resumo.descontos)}`,
         pedido.resumo.valorCupom ? `Cupom ${pedido.cupom}: -${formatarPreco(pedido.resumo.valorCupom)}` : null,
         pedido.resumo.valorPix ? `Desconto Pix: -${formatarPreco(pedido.resumo.valorPix)}` : null,
-        pedido.entrega ? `Frete: ${pedido.resumo.frete ? formatarPreco(pedido.resumo.frete) : "Grátis"}` : null,
-        `Total: ${formatarPreco(pedido.resumo.total)}`,
+        `Total${pagaNaLoja(pedido) ? " a pagar na loja" : ""}: ${formatarPreco(pedido.resumo.total)}`,
     ];
     return linhas.filter((linha) => linha !== null).join("\n");
 }
 
-function Pedido({ pedido }) {
-    const { reembolsar } = useLoja();
+function Reserva({ pedido }) {
+    const { cancelarReserva } = useLoja();
     const [confirmando, setConfirmando] = useState(false);
-    const { limite, dentro } = prazoReembolso(pedido);
+    const situacao = situacaoReserva(pedido);
+    const codigo = pedido.retirada?.codigo;
 
     return (
-        <article className={`pedido ${pedido.status}`}>
+        <article className={`pedido reserva-${situacao.id}`}>
             <header className="pedido-topo">
                 <div>
                     <strong className="pedido-numero">{pedido.numero}</strong>
@@ -59,24 +50,47 @@ function Pedido({ pedido }) {
                         {formatarData(pedido.data, true)} · {METODOS[pedido.metodo]}
                     </span>
                 </div>
-                <span className={`status status-${pedido.status}`}>{pedido.status === "pago" ? (pedido.presente ? "Presente enviado" : "Pago") : "Reembolsado"}</span>
+                <span className={`status status-${situacao.id}`}>{situacao.rotulo}</span>
             </header>
 
-            {pedido.presente && (
-                <p className="pedido-presente">
-                    <IconePresente tamanho={15} /> Presente para <strong>{pedido.presente.nome}</strong> ({pedido.presente.email})
-                    {pedido.presente.mensagem && <em>“{pedido.presente.mensagem}”</em>}
-                </p>
+            {situacao.id === "aguardando" && (
+                <div className="reserva-etapa">
+                    <IconeRelogio tamanho={18} />
+                    <div>
+                        <strong>Itens reservados</strong>
+                        <span>
+                            {pagaNaLoja(pedido) ? "A loja está separando seus itens." : "A loja está confirmando o pagamento."} Avisamos{" "}
+                            {pedido.comprador.telefone ? `no ${pedido.comprador.telefone}` : "por aqui"} quando estiver pronto.
+                        </span>
+                    </div>
+                </div>
             )}
 
-            {pedido.entrega && (
-                <div className="pedido-entrega">
-                    <IconeCaminhao tamanho={16} />
+            {situacao.id === "pronto" && (
+                <div className="reserva-etapa pronta">
+                    <IconeCheck tamanho={18} />
                     <div>
-                        <strong>
-                            {situacaoEntrega(pedido)} · previsão {formatarData(pedido.entrega.previsao[0])} a {formatarData(pedido.entrega.previsao[1])}
-                        </strong>
-                        <span>{enderecoEmLinha(pedido.entrega.endereco)}</span>
+                        <strong>Pronto para retirada</strong>
+                        <span>
+                            Retire até {formatarData(new Date(situacao.limite).toISOString())} na loja
+                            {codigo && (
+                                <>
+                                    {" "}
+                                    com o código <strong className="mono reserva-codigo">{codigo}</strong>
+                                </>
+                            )}
+                            {pagaNaLoja(pedido) ? ` e pague ${formatarPreco(pedido.resumo.total)} no balcão.` : "."}
+                        </span>
+                    </div>
+                </div>
+            )}
+
+            {situacao.id === "vencido" && (
+                <div className="reserva-etapa vencida">
+                    <IconeRelogio tamanho={18} />
+                    <div>
+                        <strong>O prazo para retirar acabou</strong>
+                        <span>Fale com a loja para combinar a retirada ou o reembolso.</span>
                     </div>
                 </div>
             )}
@@ -87,7 +101,7 @@ function Pedido({ pedido }) {
                         <img src={imagensDoJogo(item).horizontal} alt="" loading="lazy" />
                         <span>
                             {item.nome}
-                            {ehAcessorio(item) && <small className="pedido-item-tipo">Acessório · entrega em casa</small>}
+                            <small className="pedido-item-tipo">{ehAcessorio(item) ? "Produto" : "Jogo"}</small>
                         </span>
                         <span className="mono">{formatarPreco(item.pago)}</span>
                     </li>
@@ -96,52 +110,54 @@ function Pedido({ pedido }) {
 
             <footer className="pedido-rodape">
                 <div className="pedido-total">
-                    <span>Total</span>
+                    <span>{pagaNaLoja(pedido) && situacaoReserva(pedido).id !== "cancelado" ? "A pagar na loja" : "Total"}</span>
                     <strong className="mono">{formatarPreco(pedido.resumo.total)}</strong>
                 </div>
                 <div className="pedido-acoes">
-                    <button type="button" className="botao botao-fantasma" onClick={() => baixarArquivo(`comprovante-${pedido.numero}.txt`, comprovante(pedido))}>
+                    <button type="button" className="botao botao-fantasma" onClick={() => baixarArquivo(`reserva-${pedido.numero}.txt`, comprovante(pedido))}>
                         <IconeDownload tamanho={15} /> Comprovante
                     </button>
-                    {dentro &&
+                    {podeCancelar(pedido) &&
                         (confirmando ? (
                             <span className="confirmacao">
-                                {pedido.entrega ? "Cancelar o pedido e reembolsar?" : `Reembolsar e remover ${pedido.itens.length > 1 ? "os jogos" : "o jogo"}?`}
+                                {pagaNaLoja(pedido) ? "Cancelar a reserva?" : "Cancelar a reserva e devolver o valor?"}
                                 <button type="button" className="botao botao-secundario" onClick={() => setConfirmando(false)}>
-                                    Cancelar
+                                    Voltar
                                 </button>
-                                <button type="button" className="botao botao-perigo" onClick={() => reembolsar(pedido.numero)}>
-                                    Confirmar
+                                <button type="button" className="botao botao-perigo" onClick={() => cancelarReserva(pedido.numero)}>
+                                    Cancelar reserva
                                 </button>
                             </span>
                         ) : (
                             <button type="button" className="botao botao-secundario" onClick={() => setConfirmando(true)}>
-                                <IconeDesfazer tamanho={15} /> Solicitar reembolso
+                                <IconeDesfazer tamanho={15} /> Cancelar reserva
                             </button>
                         ))}
                 </div>
             </footer>
-            {dentro && <p className="pedido-prazo">Reembolso disponível até {formatarData(new Date(limite).toISOString(), true)}.</p>}
         </article>
     );
 }
 
 function Pedidos({ pedidos }) {
-    const totalGasto = pedidos.filter((p) => p.status === "pago").reduce((soma, p) => soma + p.resumo.total, 0);
+    const situacoes = pedidos.map((pedido) => situacaoReserva(pedido).id);
+    const ativas = situacoes.filter((id) => id === "aguardando" || id === "pronto").length;
+    const prontas = situacoes.filter((id) => id === "pronto").length;
+    const totalReservado = pedidos.filter((_, i) => situacoes[i] !== "cancelado").reduce((soma, p) => soma + p.resumo.total, 0);
 
     return (
         <div className="pagina">
             <div className="pagina-cabecalho">
                 <div>
-                    <h1>Pedidos</h1>
-                    <p>Histórico de compras, comprovantes e reembolsos em até {DIAS_REEMBOLSO} dias.</p>
+                    <h1>Minhas reservas</h1>
+                    <p>A loja separa seus itens e avisa quando o pedido estiver pronto para retirar. Pagou pelo site ou vai pagar no balcão? Está tudo aqui.</p>
                 </div>
             </div>
             {pedidos.length === 0 ? (
                 <div className="vazio">
                     <IconeRecibo tamanho={30} />
-                    <h3>Nenhum pedido ainda</h3>
-                    <p>Quando você finalizar uma compra, o pedido aparece aqui.</p>
+                    <h3>Nenhuma reserva ainda</h3>
+                    <p>Quando você finalizar uma compra, a reserva aparece aqui com o código de retirada.</p>
                     <button type="button" className="botao botao-primario" onClick={() => navegar("/explorar")}>
                         Explorar jogos
                     </button>
@@ -150,21 +166,22 @@ function Pedidos({ pedidos }) {
                 <>
                     <div className="estatisticas">
                         <div>
-                            <span>Pedidos</span>
-                            <strong>{pedidos.length}</strong>
+                            <span>Reservas ativas</span>
+                            <strong>{ativas}</strong>
                         </div>
                         <div>
-                            <span>Total gasto</span>
-                            <strong>{formatarPreco(totalGasto)}</strong>
+                            <span>Prontas para retirar</span>
+                            <strong>{prontas}</strong>
                         </div>
                         <div>
-                            <span>Reembolsados</span>
-                            <strong>{pedidos.filter((p) => p.status === "reembolsado").length}</strong>
+                            <span>Total reservado</span>
+                            <strong>{formatarPreco(totalReservado)}</strong>
                         </div>
                     </div>
+                    <InfoRetirada compacta />
                     <div className="lista-pedidos">
                         {pedidos.map((pedido) => (
-                            <Pedido key={pedido.numero} pedido={pedido} />
+                            <Reserva key={pedido.numero} pedido={pedido} />
                         ))}
                     </div>
                 </>
