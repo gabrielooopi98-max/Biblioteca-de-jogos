@@ -259,7 +259,7 @@ export function ChamadaCatalogo({ total }) {
 }
 
 const COLUNAS_RODAPE = [
-    { titulo: "Loja", links: [["Início", "/"], ["Explorar", "/explorar"], ["Comparar jogos", "/comparar"]] },
+    { titulo: "Loja", links: [["Início", "/"], ["Explorar", "/explorar"], ["Acessórios", "/acessorios"], ["Comparar jogos", "/comparar"]] },
     { titulo: "Sua conta", links: [["Biblioteca", "/biblioteca"], ["Pedidos e reembolsos", "/pedidos"], ["Lista de desejos", "/desejos"]] },
 ];
 
@@ -268,10 +268,10 @@ export function Rodape() {
         <footer className="rodape">
             <div className="rodape-conteudo">
                 <div className="rodape-marca">
-                    <a href="#/" className="logo" aria-label="Biblioteca.jogos, voltar para a loja">
+                    <a href="#/" className="logo" aria-label="Universal Games, voltar para a loja">
                         <LogoMarca />
                         <span className="logo-texto">
-                            Biblioteca<small>.jogos</small>
+                            Universal<small> Games</small>
                         </span>
                     </a>
                     <p>Jogos digitais para PC e consoles, com entrega instantânea e reembolso em até {DIAS_REEMBOLSO} dias.</p>
@@ -297,7 +297,7 @@ export function Rodape() {
                 </div>
             </div>
             <div className="rodape-base">
-                <span>© {new Date().getFullYear()} Biblioteca.jogos. Projeto demonstrativo: nenhum pagamento real é processado.</span>
+                <span>© {new Date().getFullYear()} Universal Games. Projeto demonstrativo: nenhum pagamento real é processado.</span>
                 <span>Marcas e imagens pertencem aos seus respectivos donos.</span>
             </div>
         </footer>

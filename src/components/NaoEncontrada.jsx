@@ -7,6 +7,10 @@ const TEXTOS = {
         titulo: "Página não encontrada",
         texto: "O endereço pode ter mudado ou nunca ter existido. Mas a sua próxima partida pode estar logo aqui.",
     },
+    produto: {
+        titulo: "Esse produto não está na loja",
+        texto: "Ele pode ter esgotado ou o link está incompleto. Veja os acessórios disponíveis ou busque pelo nome.",
+    },
     jogo: {
         titulo: "Esse jogo não está no catálogo",
         texto: "Ele pode ter saído da loja ou o link está incompleto. Busque pelo nome ou veja o que está em alta.",

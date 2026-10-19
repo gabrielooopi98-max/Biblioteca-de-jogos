@@ -1,14 +1,26 @@
 import { useState } from "react";
 import { navegar } from "../hooks.js";
 import { useLoja } from "../LojaContext.js";
-import { baixarArquivo, DIAS_REEMBOLSO, formatarData, formatarPreco, imagensDoJogo, prazoReembolso } from "../utils.js";
-import { IconeDesfazer, IconeDownload, IconePresente, IconeRecibo } from "./Icones.jsx";
+import { baixarArquivo, DIAS_REEMBOLSO, ehAcessorio, formatarData, formatarPreco, imagensDoJogo, prazoReembolso } from "../utils.js";
+import { IconeCaminhao, IconeDesfazer, IconeDownload, IconePresente, IconeRecibo } from "./Icones.jsx";
+
+const enderecoEmLinha = (e) => `${e.rua}, ${e.numero}${e.complemento ? ` (${e.complemento})` : ""} · ${e.bairro} · ${e.cidade}/${e.uf} · CEP ${e.cep}`;
+
+// Situação da entrega pela data (demonstração): separando, a caminho e entregue.
+function situacaoEntrega(pedido) {
+    const agora = Date.now();
+    const fim = new Date(pedido.entrega.previsao[1]).getTime();
+    if (pedido.status !== "pago") return "Cancelada";
+    if (agora >= fim) return "Entregue";
+    if (agora - new Date(pedido.data).getTime() > 86400000) return "A caminho";
+    return "Em separação";
+}
 
 const METODOS = { pix: "Pix", cartao: "Cartão de crédito", boleto: "Boleto" };
 
 function comprovante(pedido) {
     const linhas = [
-        "BIBLIOTECA.JOGOS · COMPROVANTE DE PEDIDO",
+        "UNIVERSAL GAMES · COMPROVANTE DE PEDIDO",
         "(projeto demonstrativo: nenhum pagamento real foi processado)",
         "",
         `Pedido: ${pedido.numero}`,
@@ -17,6 +29,8 @@ function comprovante(pedido) {
         `Comprador: ${pedido.comprador.nome} <${pedido.comprador.email}>`,
         pedido.presente ? `Presente para: ${pedido.presente.nome} <${pedido.presente.email}>` : null,
         `Pagamento: ${METODOS[pedido.metodo]}`,
+        pedido.entrega ? `Entrega: ${enderecoEmLinha(pedido.entrega.endereco)}` : null,
+        pedido.entrega ? `Previsão: ${formatarData(pedido.entrega.previsao[0])} a ${formatarData(pedido.entrega.previsao[1])}` : null,
         "",
         "Itens:",
         ...pedido.itens.map((item) => `  - ${item.nome}: ${formatarPreco(item.pago)}`),
@@ -25,6 +39,7 @@ function comprovante(pedido) {
         `Descontos: -${formatarPreco(pedido.resumo.descontos)}`,
         pedido.resumo.valorCupom ? `Cupom ${pedido.cupom}: -${formatarPreco(pedido.resumo.valorCupom)}` : null,
         pedido.resumo.valorPix ? `Desconto Pix: -${formatarPreco(pedido.resumo.valorPix)}` : null,
+        pedido.entrega ? `Frete: ${pedido.resumo.frete ? formatarPreco(pedido.resumo.frete) : "Grátis"}` : null,
         `Total: ${formatarPreco(pedido.resumo.total)}`,
     ];
     return linhas.filter((linha) => linha !== null).join("\n");
@@ -54,11 +69,26 @@ function Pedido({ pedido }) {
                 </p>
             )}
 
+            {pedido.entrega && (
+                <div className="pedido-entrega">
+                    <IconeCaminhao tamanho={16} />
+                    <div>
+                        <strong>
+                            {situacaoEntrega(pedido)} · previsão {formatarData(pedido.entrega.previsao[0])} a {formatarData(pedido.entrega.previsao[1])}
+                        </strong>
+                        <span>{enderecoEmLinha(pedido.entrega.endereco)}</span>
+                    </div>
+                </div>
+            )}
+
             <ul className="pedido-itens">
                 {pedido.itens.map((item) => (
                     <li key={item.id}>
                         <img src={imagensDoJogo(item).horizontal} alt="" loading="lazy" />
-                        <span>{item.nome}</span>
+                        <span>
+                            {item.nome}
+                            {ehAcessorio(item) && <small className="pedido-item-tipo">Acessório · entrega em casa</small>}
+                        </span>
                         <span className="mono">{formatarPreco(item.pago)}</span>
                     </li>
                 ))}
@@ -76,7 +106,7 @@ function Pedido({ pedido }) {
                     {dentro &&
                         (confirmando ? (
                             <span className="confirmacao">
-                                Reembolsar e remover {pedido.itens.length > 1 ? "os jogos" : "o jogo"}?
+                                {pedido.entrega ? "Cancelar o pedido e reembolsar?" : `Reembolsar e remover ${pedido.itens.length > 1 ? "os jogos" : "o jogo"}?`}
                                 <button type="button" className="botao botao-secundario" onClick={() => setConfirmando(false)}>
                                     Cancelar
                                 </button>

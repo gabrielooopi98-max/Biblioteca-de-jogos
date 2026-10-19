@@ -1,9 +1,33 @@
 const CDN_STEAM = "https://cdn.cloudflare.steamstatic.com/steam/apps";
 const CDN_CAPTURAS = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps";
 
+export const ehAcessorio = (item) => item?.tipo === "acessorio";
+
+// Entrega dos acessórios (produtos físicos).
+export const FRETE = { gratisAPartirDe: 199, valor: 19.9, prazoMin: 3, prazoMax: 7 };
+export const PRAZO_ENTREGA = `${FRETE.prazoMin} a ${FRETE.prazoMax} dias úteis`;
+export const GARANTIA_MESES = 12;
+
+// Soma dias úteis (sem sábado e domingo) a uma data.
+export function somarDiasUteis(data, dias) {
+    const d = new Date(data);
+    let faltam = dias;
+    while (faltam > 0) {
+        d.setDate(d.getDate() + 1);
+        if (d.getDay() !== 0 && d.getDay() !== 6) faltam--;
+    }
+    return d;
+}
+
 // Cada imagem no tamanho em que aparece: capa 600x900 só onde é grande, 300x450 nas miniaturas.
 // jogo.imagens sobrescreve endereços que a Steam não publica no CDN antigo.
+// Acessórios usam a ilustração própria (ou uma foto, se "ilustracao" for um caminho com extensão).
 export function imagensDoJogo(jogo) {
+    if (ehAcessorio(jogo)) {
+        const arquivo = /\.[a-z0-9]+$/i.test(jogo.ilustracao) ? jogo.ilustracao : `acessorios/${jogo.ilustracao}.svg`;
+        const arte = `${import.meta.env.BASE_URL}${arquivo}`;
+        return { capa: arte, capaPequena: arte, banner: arte, logo: null, horizontal: arte, destaque: arte, linha: arte, fundo: null };
+    }
     const base = `${CDN_STEAM}/${jogo.appId}`;
     return {
         capa: `${base}/library_600x900_2x.jpg`,
@@ -97,13 +121,22 @@ export function resumirCarrinho(itens, codigoCupom, metodo) {
     const valorCupom = cupom ? Math.round(comDesconto * cupom.percentual) / 100 : 0;
     const aposCupom = comDesconto - valorCupom;
     const valorPix = metodo === "pix" ? Math.round(aposCupom * DESCONTO_PIX) / 100 : 0;
+    // frete só existe com acessório no carrinho; grátis a partir do valor mínimo em acessórios
+    const fisicos = itens.filter(ehAcessorio);
+    const valorFisicos = fisicos.reduce((soma, item) => soma + calcularPrecoFinal(item), 0);
+    const temFisicos = fisicos.length > 0;
+    const frete = !temFisicos || valorFisicos >= FRETE.gratisAPartirDe ? 0 : FRETE.valor;
+    const faltaParaFreteGratis = temFisicos && frete > 0 ? FRETE.gratisAPartirDe - valorFisicos : 0;
 
     return {
         subtotal,
         descontos: subtotal - comDesconto,
         valorCupom,
         valorPix,
-        total: aposCupom - valorPix,
+        temFisicos,
+        frete,
+        faltaParaFreteGratis,
+        total: aposCupom - valorPix + frete,
     };
 }
 

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { usePresenca, useTeclaEsc } from "../hooks.js";
 import { useLoja } from "../LojaContext.js";
-import { calcularParcelas, CUPONS, formatarPreco, imagensDoJogo, resumirCarrinho } from "../utils.js";
+import { calcularParcelas, CUPONS, ehAcessorio, FRETE, formatarPreco, imagensDoJogo, PRAZO_ENTREGA, resumirCarrinho } from "../utils.js";
 import { Imagem, Preco } from "./CardJogo.jsx";
-import { IconeCadeado, IconeCarrinho, IconeCoracao, IconeEtiqueta, IconeFechar, IconeLixeira, IconePresente } from "./Icones.jsx";
+import { IconeCadeado, IconeCaminhao, IconeCarrinho, IconeCoracao, IconeEtiqueta, IconeFechar, IconeLixeira, IconePresente } from "./Icones.jsx";
 
 function Gaveta({ aberta, fechar, titulo, children, rodape }) {
     const { montado, saindo } = usePresenca(aberta);
@@ -96,6 +96,12 @@ export function GavetaCarrinho({ aberta, fechar, itens, sugestoes, cupom, setCup
                         <dd>-{formatarPreco(resumo.valorCupom)}</dd>
                     </div>
                 )}
+                {resumo.temFisicos && (
+                    <div>
+                        <dt>Frete</dt>
+                        <dd>{resumo.frete ? formatarPreco(resumo.frete) : "Grátis"}</dd>
+                    </div>
+                )}
                 <div className="resumo-total">
                     <dt>Total</dt>
                     <dd>
@@ -106,6 +112,25 @@ export function GavetaCarrinho({ aberta, fechar, itens, sugestoes, cupom, setCup
                     </dd>
                 </div>
             </dl>
+            {resumo.temFisicos && (
+                <div className="frete-aviso">
+                    <IconeCaminhao tamanho={16} />
+                    <span>
+                        {resumo.faltaParaFreteGratis > 0 ? (
+                            <>
+                                Faltam <strong>{formatarPreco(resumo.faltaParaFreteGratis)}</strong> em acessórios para o frete grátis
+                            </>
+                        ) : (
+                            <>
+                                <strong>Frete grátis</strong> · os acessórios chegam em {PRAZO_ENTREGA}
+                            </>
+                        )}
+                    </span>
+                    <span className="frete-barra" aria-hidden="true">
+                        <i style={{ "--progresso": Math.min(1, 1 - resumo.faltaParaFreteGratis / FRETE.gratisAPartirDe) }} />
+                    </span>
+                </div>
+            )}
             <button type="button" className="botao botao-primario botao-largo botao-grande" onClick={irParaCheckout}>
                 <IconeCadeado tamanho={16} /> Finalizar compra
             </button>
@@ -160,7 +185,7 @@ export function GavetaCarrinho({ aberta, fechar, itens, sugestoes, cupom, setCup
                                 )}
                                 <Preco jogo={jogo} tamanho="pequeno" />
                                 <div className="item-carrinho-acoes">
-                                    {!estaNosDesejos(jogo.id) && (
+                                    {!ehAcessorio(jogo) && !estaNosDesejos(jogo.id) && (
                                         <button
                                             type="button"
                                             onClick={() => {

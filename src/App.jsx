@@ -1,16 +1,18 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import jogos from "./dadosJogos.js";
+import acessorios from "./acessorios.js";
 import { flushSync } from "react-dom";
 import { navegar, useArmazenamento, useAtalho, useEfeitosPonteiro, useRevelar, useRota, useTravarRolagem } from "./hooks.js";
 import { LojaContext } from "./LojaContext.js";
-import { calcularPrecoFinal, FILTROS_INICIAIS, imagensDoJogo, LIMITE_COMPARAR, recomendar } from "./utils.js";
+import { calcularPrecoFinal, ehAcessorio, FILTROS_INICIAIS, imagensDoJogo, LIMITE_COMPARAR, recomendar } from "./utils.js";
 import Abas from "./components/Abas.jsx";
+import { VitrineAcessorios } from "./components/Acessorios.jsx";
 import BandejaComparar from "./components/BandejaComparar.jsx";
 import BannerDistribuidora from "./components/BannerDistribuidora.jsx";
 import Destaques from "./components/Destaques.jsx";
 import { GavetaCarrinho } from "./components/Gavetas.jsx";
 import Header from "./components/Header.jsx";
-import { IconeBiblioteca, IconeBussola, IconeCarrinho, IconeCasa, IconeComparar, IconeCoracao, IconeEtiqueta, IconeLua, IconeRecibo } from "./components/Icones.jsx";
+import { IconeBiblioteca, IconeBussola, IconeCarrinho, IconeCasa, IconeComparar, IconeCoracao, IconeEtiqueta, IconeFone, IconeLua, IconeRecibo } from "./components/Icones.jsx";
 import NaoEncontrada from "./components/NaoEncontrada.jsx";
 import Notificacoes from "./components/Notificacoes.jsx";
 import PaletaComandos from "./components/PaletaComandos.jsx";
@@ -21,6 +23,8 @@ import "./App.css";
 // Páginas secundárias carregadas sob demanda: a loja abre mais rápido.
 const Catalogo = lazy(() => import("./components/Catalogo.jsx"));
 const PaginaJogo = lazy(() => import("./components/PaginaJogo.jsx"));
+const PaginaAcessorios = lazy(() => import("./components/Acessorios.jsx"));
+const PaginaProduto = lazy(() => import("./components/PaginaProduto.jsx"));
 const Biblioteca = lazy(() => import("./components/Biblioteca.jsx"));
 const Pedidos = lazy(() => import("./components/Pedidos.jsx"));
 const Desejos = lazy(() => import("./components/Desejos.jsx"));
@@ -28,24 +32,26 @@ const Comparar = lazy(() => import("./components/Comparar.jsx"));
 const Checkout = lazy(() => import("./components/Checkout.jsx"));
 
 const TITULOS = {
-    loja: "Biblioteca.jogos: loja de jogos digitais",
-    explorar: "Explorar · Biblioteca.jogos",
-    biblioteca: "Biblioteca · Biblioteca.jogos",
-    pedidos: "Pedidos · Biblioteca.jogos",
-    desejos: "Lista de desejos · Biblioteca.jogos",
-    comparar: "Comparar · Biblioteca.jogos",
-    404: "Página não encontrada · Biblioteca.jogos",
+    loja: "Universal Games: loja de jogos digitais",
+    explorar: "Explorar · Universal Games",
+    acessorios: "Acessórios · Universal Games",
+    biblioteca: "Biblioteca · Universal Games",
+    pedidos: "Pedidos · Universal Games",
+    desejos: "Lista de desejos · Universal Games",
+    comparar: "Comparar · Universal Games",
+    404: "Página não encontrada · Universal Games",
 };
 
 // Descrição de cada página para buscadores e para o preview de links compartilhados.
 const DESCRICOES = {
     loja: `Loja de jogos digitais para PC e consoles: ${jogos.length} jogos com entrega instantânea, reembolso em até 7 dias, alertas de preço e comparador.`,
     explorar: `Explore os ${jogos.length} jogos do catálogo com filtros por gênero, plataforma, preço e avaliação.`,
+    acessorios: `Mouse, teclado, headset, controles e acessórios para PC, console e celular. Frete grátis acima de R$ 199 e garantia de 12 meses.`,
     biblioteca: "Sua biblioteca de jogos com as chaves de ativação de cada compra.",
     pedidos: "Histórico de pedidos, comprovantes e reembolsos em até 7 dias.",
     desejos: "Sua lista de desejos com alertas de preço para cada jogo.",
     comparar: "Compare jogos lado a lado: preço, avaliação, plataformas e gêneros.",
-    404: "Página não encontrada na Biblioteca.jogos.",
+    404: "Página não encontrada na Universal Games.",
 };
 
 function resumir(texto, limite = 155) {
@@ -57,7 +63,7 @@ function definirMeta(seletor, valor) {
     document.querySelector(seletor)?.setAttribute("content", valor);
 }
 
-const porId = new Map(jogos.map((jogo) => [jogo.id, jogo]));
+const porId = new Map([...jogos, ...acessorios].map((item) => [item.id, item]));
 const buscarJogos = (ids) => ids.map((id) => porId.get(id)).filter(Boolean);
 
 const CATEGORIAS = [
@@ -122,7 +128,9 @@ function App() {
     const rota = useRota();
     useEfeitosPonteiro();
     useRevelar();
-    const jogoAberto = rota.pagina === "jogo" ? porId.get(rota.id) : null;
+    const aberto = rota.id ? porId.get(rota.id) : null;
+    const jogoAberto = rota.pagina === "jogo" && aberto && !ehAcessorio(aberto) ? aberto : null;
+    const produtoAberto = rota.pagina === "produto" && ehAcessorio(aberto) ? aberto : null;
 
     const carrinho = useMemo(() => buscarJogos(idsCarrinho), [idsCarrinho]);
     const desejos = useMemo(() => buscarJogos(idsDesejos), [idsDesejos]);
@@ -136,6 +144,7 @@ function App() {
             if (pedido.status !== "pago" || pedido.presente) continue;
             for (const item of pedido.itens) {
                 const jogo = porId.get(item.id);
+                if (ehAcessorio(jogo)) continue;
                 if (jogo && !itens.has(item.id)) itens.set(item.id, { jogo, chave: item.chave, pago: item.pago, pedido });
             }
         }
@@ -154,16 +163,17 @@ function App() {
     useEffect(() => {
         window.scrollTo({ top: 0 });
         // jogo inexistente também é 404
-        const pagina = rota.pagina === "jogo" && !jogoAberto ? "404" : rota.pagina;
-        const titulo = jogoAberto ? `${jogoAberto.nome} · Biblioteca.jogos` : TITULOS[pagina] || TITULOS.loja;
-        const descricao = jogoAberto ? resumir(`${jogoAberto.nome}: ${jogoAberto.descricao}`) : DESCRICOES[pagina] || DESCRICOES.loja;
+        const pagina = (rota.pagina === "jogo" && !jogoAberto) || (rota.pagina === "produto" && !produtoAberto) ? "404" : rota.pagina;
+        const item = jogoAberto || produtoAberto;
+        const titulo = item ? `${item.nome} · Universal Games` : TITULOS[pagina] || TITULOS.loja;
+        const descricao = item ? resumir(`${item.nome}: ${item.descricao}`) : DESCRICOES[pagina] || DESCRICOES.loja;
         document.title = titulo;
         definirMeta('meta[name="description"]', descricao);
         definirMeta('meta[property="og:title"]', titulo);
         definirMeta('meta[property="og:description"]', descricao);
         definirMeta('meta[name="robots"]', pagina === "404" ? "noindex" : "index, follow");
         if (jogoAberto) setIdsVistos((ids) => [jogoAberto.id, ...ids.filter((id) => id !== jogoAberto.id)].slice(0, 12));
-    }, [rota.pagina, jogoAberto, setIdsVistos]);
+    }, [rota.pagina, jogoAberto, produtoAberto, setIdsVistos]);
 
     // Com a loja aberta e o navegador ocioso, já baixa as páginas mais visitadas: a navegação fica instantânea.
     useEffect(() => {
@@ -194,9 +204,10 @@ function App() {
         [removerNotificacao],
     );
 
+    // abre a página certa para cada item: jogo ou acessório
     const abrirJogo = useCallback((id) => {
         setCarrinhoAberto(false);
-        navegar(`/jogo/${id}`);
+        navegar(ehAcessorio(porId.get(id)) ? `/produto/${id}` : `/jogo/${id}`);
     }, []);
 
     const possui = useCallback((id) => idsPossuidos.has(id), [idsPossuidos]);
@@ -291,7 +302,8 @@ function App() {
 
     function concluirPedido(pedido) {
         setPedidos((lista) => [pedido, ...lista]);
-        setPerfil(pedido.comprador);
+        // guarda também o endereço, para a próxima compra de acessório já vir preenchida
+        setPerfil((atual) => ({ ...atual, ...pedido.comprador, endereco: pedido.entrega?.endereco ?? atual.endereco }));
         setIdsCarrinho([]);
         setCupom(null);
     }
@@ -348,6 +360,7 @@ function App() {
     const comandos = [
         { id: "loja", rotulo: "Ir para a loja", Icone: IconeCasa, executar: () => navegar("/") },
         { id: "explorar", rotulo: "Explorar catálogo", dica: "filtros por gênero, plataforma e preço", Icone: IconeBussola, executar: () => navegar("/explorar") },
+        { id: "acessorios", rotulo: "Acessórios", dica: "mouse, teclado, headset, controles", Icone: IconeFone, executar: () => navegar("/acessorios") },
         { id: "ofertas", rotulo: "Ver ofertas", dica: "jogos em promoção", Icone: IconeEtiqueta, executar: () => aplicarFiltros({ somentePromocao: true, ordenar: "maior-desconto" }) },
         { id: "biblioteca", rotulo: "Minha biblioteca", dica: `${biblioteca.length} jogos · chaves de ativação`, Icone: IconeBiblioteca, executar: () => navegar("/biblioteca") },
         { id: "pedidos", rotulo: "Meus pedidos", dica: "comprovantes e reembolsos", Icone: IconeRecibo, executar: () => navegar("/pedidos") },
@@ -367,6 +380,11 @@ function App() {
                 return <Catalogo jogos={jogos} filtros={filtros} setFiltros={setFiltros} />;
             case "404":
                 return <NaoEncontrada sugestoes={vitrine.melhores.slice(0, 4)} abrirPaleta={abrirPaleta} />;
+            case "acessorios":
+                return <PaginaAcessorios acessorios={acessorios} />;
+            case "produto":
+                if (!produtoAberto) return <NaoEncontrada tipo="produto" sugestoes={vitrine.melhores.slice(0, 4)} abrirPaleta={abrirPaleta} />;
+                return <PaginaProduto key={produtoAberto.id} produto={produtoAberto} acessorios={acessorios} comprarAgora={comprarAgora} />;
             case "jogo":
                 if (!jogoAberto) return <NaoEncontrada tipo="jogo" sugestoes={vitrine.melhores.slice(0, 4)} abrirPaleta={abrirPaleta} />;
                 return <PaginaJogo jogo={jogoAberto} jogos={jogos} comprarAgora={comprarAgora} presentear={presentear} aoEscolherGenero={(genero) => aplicarFiltros({ generos: [genero] })} />;
@@ -381,7 +399,7 @@ function App() {
             default:
                 return (
                     <>
-                        <h1 className="so-leitor">Biblioteca.jogos: loja de jogos digitais para PC e consoles</h1>
+                        <h1 className="so-leitor">Universal Games: loja de jogos digitais para PC e consoles</h1>
                         <BannerDistribuidora
                             distribuidora="Warner Bros."
                             subtitulo="Games"
@@ -404,6 +422,7 @@ function App() {
                         {vistos.length > 0 && <Prateleira id="vistos" titulo="Vistos recentemente" jogos={vistos} />}
                         <UniversoResidentEvil jogos={vitrine.residentEvil} aoVerTodos={() => aplicarFiltros({ termo: "Resident Evil", ordenar: "mais-recentes" })} />
                         <Prateleira id="lancamentos" titulo="Lançamentos" jogos={vitrine.lancamentos.slice(0, 15)} aoVerMais={() => aplicarFiltros({ ordenar: "mais-recentes" })} />
+                        <VitrineAcessorios acessorios={acessorios} />
                         <ChamadaCatalogo total={jogos.length} />
                     </>
                 );
@@ -441,7 +460,7 @@ function App() {
             <Rodape />
 
             <BandejaComparar jogos={comparando} limpar={() => setIdsComparar([])} oculta={rota.pagina === "comparar"} />
-            <PaletaComandos aberta={paletaAberta} fechar={() => setPaletaAberta(false)} jogos={jogos} comandos={comandos} />
+            <PaletaComandos aberta={paletaAberta} fechar={() => setPaletaAberta(false)} jogos={[...jogos, ...acessorios]} comandos={comandos} />
             <GavetaCarrinho
                 aberta={carrinhoAberto}
                 fechar={() => setCarrinhoAberto(false)}

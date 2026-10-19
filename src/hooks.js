@@ -66,7 +66,7 @@ export function useHash() {
     return useSyncExternalStore(assinarHash, () => window.location.hash);
 }
 
-export const PAGINAS = ["loja", "explorar", "biblioteca", "pedidos", "desejos", "comparar"];
+export const PAGINAS = ["loja", "explorar", "acessorios", "biblioteca", "pedidos", "desejos", "comparar"];
 
 // Rotas por hash: #/explorar, #/jogo/25… (funciona no GitHub Pages sem configuração de servidor).
 // Endereço que não corresponde a nenhuma página vira "404" (antes caía na loja sem avisar).
@@ -74,7 +74,7 @@ export function useRota() {
     const hash = useHash();
     if (!hash || hash === "#" || hash === "#/") return { pagina: "loja" };
     const [, pagina, parametro] = hash.match(/^#\/([a-z]+)(?:\/(\d+))?\/?$/) || [];
-    if (pagina === "jogo" && parametro) return { pagina, id: Number(parametro) };
+    if ((pagina === "jogo" || pagina === "produto") && parametro) return { pagina, id: Number(parametro) };
     if (PAGINAS.includes(pagina) && !parametro) return { pagina };
     return { pagina: "404" };
 }

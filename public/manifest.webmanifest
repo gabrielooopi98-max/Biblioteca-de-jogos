@@ -1,6 +1,6 @@
 {
-  "name": "Biblioteca.jogos",
-  "short_name": "Biblioteca",
+  "name": "Universal Games",
+  "short_name": "Universal",
   "description": "Loja de jogos digitais para PC e consoles, com entrega instantânea e reembolso em até 7 dias.",
   "lang": "pt-BR",
   "start_url": "./",

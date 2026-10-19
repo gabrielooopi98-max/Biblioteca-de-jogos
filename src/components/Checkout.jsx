@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { navegar, usePresenca, useTeclaEsc } from "../hooks.js";
 import { useLoja } from "../LojaContext.js";
-import { calcularParcelas, calcularPrecoFinal, DESCONTO_PIX, DIAS_REEMBOLSO, formatarPreco, gerarChave, gerarCodigo, imagensDoJogo, resumirCarrinho } from "../utils.js";
-import { IconeBiblioteca, IconeBoleto, IconeCadeado, IconeCartao, IconeCheck, IconeFechar, IconePix, IconePresente, IconeRecibo } from "./Icones.jsx";
+import { calcularParcelas, calcularPrecoFinal, DESCONTO_PIX, DIAS_REEMBOLSO, ehAcessorio, FRETE, formatarData, formatarPreco, gerarChave, gerarCodigo, imagensDoJogo, PRAZO_ENTREGA, resumirCarrinho, somarDiasUteis } from "../utils.js";
+import { IconeBiblioteca, IconeBoleto, IconeCadeado, IconeCaminhao, IconeCartao, IconeCheck, IconeFechar, IconePix, IconePresente, IconeRecibo } from "./Icones.jsx";
+
+const ENDERECO_VAZIO = { cep: "", rua: "", numero: "", complemento: "", bairro: "", cidade: "", uf: "" };
+const UFS = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"];
+const formatarCep = (digitos) => digitos.slice(0, 8).replace(/^(\d{5})(\d)/, "$1-$2");
 
 const ETAPAS = ["Dados", "Pagamento", "Concluído"];
 
@@ -22,9 +26,15 @@ function Checkout({ aberto, fechar, itens, cupom, presenteInicial, perfil, concl
     const [processando, setProcessando] = useState(false);
     const [pedido, setPedido] = useState(null);
     const [estavaAberto, setEstavaAberto] = useState(false);
+    const [endereco, setEndereco] = useState(perfil.endereco || ENDERECO_VAZIO);
+    const [cepStatus, setCepStatus] = useState({ buscando: false, erro: "" });
+    const numeroRef = useRef(null);
 
     const possuidos = itens.filter((jogo) => possui(jogo.id));
     const presenteObrigatorio = possuidos.length > 0;
+    // acessório é entregue em casa; jogo é digital (chave na biblioteca ou presente por e-mail)
+    const temFisicos = itens.some(ehAcessorio);
+    const temJogos = itens.some((item) => !ehAcessorio(item));
 
     // Recomeça a cada abertura, já com os dados da última compra.
     if (aberto !== estavaAberto) {
@@ -33,6 +43,8 @@ function Checkout({ aberto, fechar, itens, cupom, presenteInicial, perfil, concl
             setEtapa(0);
             setPedido(null);
             setDados(perfil);
+            setEndereco(perfil.endereco || ENDERECO_VAZIO);
+            setCepStatus({ buscando: false, erro: "" });
             setPresente({ ativo: presenteInicial || presenteObrigatorio, nome: "", email: "", mensagem: "" });
         }
     }
@@ -46,19 +58,54 @@ function Checkout({ aberto, fechar, itens, cupom, presenteInicial, perfil, concl
     const resumo = pedido ? pedido.resumo : resumirCarrinho(itens, cupom, etapa === 1 ? metodo : null);
     const parcelas = calcularParcelas(resumirCarrinho(itens, cupom).total);
 
+    // CEP completo: busca rua, bairro, cidade e UF na ViaCEP (se falhar, a pessoa preenche à mão)
+    async function mudarCep(valor) {
+        const digitos = valor.replace(/\D/g, "");
+        setEndereco((e) => ({ ...e, cep: formatarCep(digitos) }));
+        setCepStatus({ buscando: false, erro: "" });
+        if (digitos.length !== 8) return;
+        setCepStatus({ buscando: true, erro: "" });
+        try {
+            const resposta = await fetch(`https://viacep.com.br/ws/${digitos}/json/`);
+            const dadosCep = await resposta.json();
+            if (dadosCep.erro) {
+                setCepStatus({ buscando: false, erro: "CEP não encontrado. Confira o número ou preencha o endereço à mão." });
+                return;
+            }
+            setEndereco((e) => ({ ...e, rua: dadosCep.logradouro || e.rua, bairro: dadosCep.bairro || e.bairro, cidade: dadosCep.localidade || e.cidade, uf: dadosCep.uf || e.uf }));
+            setCepStatus({ buscando: false, erro: "" });
+            numeroRef.current?.focus();
+        } catch {
+            setCepStatus({ buscando: false, erro: "Não foi possível consultar o CEP agora. Preencha o endereço à mão." });
+        }
+    }
+
+    const campoEndereco = (chave) => ({ value: endereco[chave], onChange: (e) => setEndereco({ ...endereco, [chave]: e.target.value }) });
+
     function pagar() {
         setProcessando(true);
         setTimeout(() => {
             const final = resumirCarrinho(itens, cupom, metodo);
             const novo = {
-                numero: `BJ-${gerarCodigo(8)}`,
+                numero: `UG-${gerarCodigo(8)}`,
                 data: new Date().toISOString(),
                 status: "pago",
                 metodo,
                 cupom,
                 comprador: { nome: dados.nome.trim(), email: dados.email.trim() },
                 presente: ehPresente ? { nome: presente.nome.trim(), email: presente.email.trim(), mensagem: presente.mensagem.trim() } : null,
-                itens: itens.map((jogo) => ({ id: jogo.id, appId: jogo.appId, nome: jogo.nome, pago: calcularPrecoFinal(jogo), chave: gerarChave() })),
+                itens: itens.map((item) =>
+                    ehAcessorio(item)
+                        ? { id: item.id, tipo: "acessorio", ilustracao: item.ilustracao, nome: item.nome, pago: calcularPrecoFinal(item) }
+                        : { id: item.id, appId: item.appId, nome: item.nome, pago: calcularPrecoFinal(item), chave: gerarChave() },
+                ),
+                entrega: temFisicos
+                    ? {
+                          endereco: { ...endereco, rua: endereco.rua.trim(), numero: endereco.numero.trim(), complemento: endereco.complemento.trim(), bairro: endereco.bairro.trim(), cidade: endereco.cidade.trim() },
+                          frete: final.frete,
+                          previsao: [somarDiasUteis(new Date(), FRETE.prazoMin).toISOString(), somarDiasUteis(new Date(), FRETE.prazoMax).toISOString()],
+                      }
+                    : null,
                 resumo: final,
             };
             setPedido({ ...novo, itensJogos: itens });
@@ -113,6 +160,67 @@ function Checkout({ aberto, fechar, itens, cupom, presenteInicial, perfil, concl
                                     </label>
                                 </fieldset>
 
+                                {temFisicos && (
+                                    <fieldset className="entrega-campos">
+                                        <legend>
+                                            <IconeCaminhao tamanho={16} /> Endereço de entrega
+                                        </legend>
+                                        <label className="rotulo-campo campo-cep">
+                                            CEP
+                                            <input
+                                                className="campo mono"
+                                                required
+                                                inputMode="numeric"
+                                                autoComplete="postal-code"
+                                                pattern="\d{5}-?\d{3}"
+                                                placeholder="00000-000"
+                                                value={endereco.cep}
+                                                onChange={(e) => mudarCep(e.target.value)}
+                                                aria-invalid={Boolean(cepStatus.erro)}
+                                                aria-describedby="cep-ajuda"
+                                            />
+                                        </label>
+                                        <p id="cep-ajuda" className={cepStatus.erro ? "erro-campo" : "nota-rodape"} aria-live="polite">
+                                            {cepStatus.buscando ? "Buscando endereço…" : cepStatus.erro || "Digite o CEP e o endereço aparece sozinho."}
+                                        </p>
+                                        <label className="rotulo-campo campo-rua">
+                                            Rua
+                                            <input className="campo" required autoComplete="address-line1" {...campoEndereco("rua")} />
+                                        </label>
+                                        <label className="rotulo-campo campo-numero">
+                                            Número
+                                            <input className="campo" required ref={numeroRef} inputMode="numeric" {...campoEndereco("numero")} />
+                                        </label>
+                                        <label className="rotulo-campo campo-complemento">
+                                            Complemento (opcional)
+                                            <input className="campo" autoComplete="address-line2" {...campoEndereco("complemento")} />
+                                        </label>
+                                        <label className="rotulo-campo campo-bairro">
+                                            Bairro
+                                            <input className="campo" required {...campoEndereco("bairro")} />
+                                        </label>
+                                        <label className="rotulo-campo campo-cidade">
+                                            Cidade
+                                            <input className="campo" required autoComplete="address-level2" {...campoEndereco("cidade")} />
+                                        </label>
+                                        <label className="rotulo-campo campo-uf">
+                                            UF
+                                            <select className="campo seletor" required autoComplete="address-level1" {...campoEndereco("uf")}>
+                                                <option value="">--</option>
+                                                {UFS.map((uf) => (
+                                                    <option key={uf} value={uf}>
+                                                        {uf}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </label>
+                                        <p className="nota-rodape entrega-prazo">
+                                            Chega em {PRAZO_ENTREGA} · {resumo.frete ? `frete de ${formatarPreco(resumo.frete)}` : "frete grátis"}
+                                        </p>
+                                    </fieldset>
+                                )}
+
+                                {temJogos && (
                                 <fieldset>
                                     <label className="interruptor">
                                         <input type="checkbox" checked={ehPresente} disabled={presenteObrigatorio} onChange={(e) => setPresente({ ...presente, ativo: e.target.checked })} />
@@ -142,7 +250,9 @@ function Checkout({ aberto, fechar, itens, cupom, presenteInicial, perfil, concl
                                             </label>
                                         </div>
                                     )}
+                                    {ehPresente && temFisicos && <p className="nota-rodape">O presente vale para os jogos; os acessórios são entregues no endereço acima.</p>}
                                 </fieldset>
+                                )}
 
                                 <button type="submit" className="botao botao-primario botao-grande botao-largo">
                                     Continuar para pagamento
@@ -191,14 +301,24 @@ function Checkout({ aberto, fechar, itens, cupom, presenteInicial, perfil, concl
                                     <IconeCheck tamanho={28} />
                                 </span>
                                 <h3>Pedido {pedido.numero} confirmado</h3>
-                                {pedido.presente ? (
+                                {pedido.itens.some((i) => !ehAcessorio(i)) &&
+                                    (pedido.presente ? (
+                                        <p>
+                                            O presente foi enviado para <strong>{pedido.presente.email}</strong>. Você recebe a confirmação em {pedido.comprador.email}.
+                                        </p>
+                                    ) : (
+                                        <p>
+                                            {pedido.itens.filter((i) => !ehAcessorio(i)).length > 1 ? "Os jogos já estão" : "O jogo já está"} na sua biblioteca, com a chave de ativação. Uma cópia foi enviada para{" "}
+                                            <strong>{pedido.comprador.email}</strong>.
+                                        </p>
+                                    ))}
+                                {pedido.entrega && (
                                     <p>
-                                        O presente foi enviado para <strong>{pedido.presente.email}</strong>. Você recebe a confirmação em {pedido.comprador.email}.
-                                    </p>
-                                ) : (
-                                    <p>
-                                        {pedido.itens.length > 1 ? "Os jogos já estão" : "O jogo já está"} na sua biblioteca, com a chave de ativação. Uma cópia foi enviada para{" "}
-                                        <strong>{pedido.comprador.email}</strong>.
+                                        <IconeCaminhao tamanho={15} /> {pedido.itens.filter(ehAcessorio).length > 1 ? "Os acessórios chegam" : "O acessório chega"} entre{" "}
+                                        <strong>
+                                            {formatarData(pedido.entrega.previsao[0])} e {formatarData(pedido.entrega.previsao[1])}
+                                        </strong>{" "}
+                                        em {pedido.entrega.endereco.rua}, {pedido.entrega.endereco.numero}, {pedido.entrega.endereco.cidade}/{pedido.entrega.endereco.uf}.
                                     </p>
                                 )}
                                 <p className="nota-rodape">Você pode solicitar reembolso em até {DIAS_REEMBOLSO} dias em Meus pedidos.</p>
@@ -213,7 +333,7 @@ function Checkout({ aberto, fechar, itens, cupom, presenteInicial, perfil, concl
                                     >
                                         <IconeRecibo tamanho={15} /> Ver pedido
                                     </button>
-                                    {!pedido.presente && (
+                                    {!pedido.presente && pedido.itens.some((i) => !ehAcessorio(i)) && (
                                         <button
                                             type="button"
                                             className="botao botao-primario"
@@ -263,6 +383,12 @@ function Checkout({ aberto, fechar, itens, cupom, presenteInicial, perfil, concl
                                     <div>
                                         <dt>Desconto Pix</dt>
                                         <dd>-{formatarPreco(resumo.valorPix)}</dd>
+                                    </div>
+                                )}
+                                {resumo.temFisicos && (
+                                    <div>
+                                        <dt>Frete</dt>
+                                        <dd>{resumo.frete ? formatarPreco(resumo.frete) : "Grátis"}</dd>
                                     </div>
                                 )}
                                 <div className="resumo-total">

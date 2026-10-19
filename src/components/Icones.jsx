@@ -76,6 +76,23 @@ export const IconeMudo = (p) => (
     </Icone>
 );
 
+export const IconeFone = (p) => (
+    <Icone {...p}>
+        <path d="M4 14v-2a8 8 0 0 1 16 0v2" />
+        <rect x="3" y="14" width="4.5" height="6.5" rx="1.5" />
+        <rect x="16.5" y="14" width="4.5" height="6.5" rx="1.5" />
+    </Icone>
+);
+
+export const IconeCaminhao = (p) => (
+    <Icone {...p}>
+        <path d="M2.5 6.5h11v9h-11z" />
+        <path d="M13.5 9.5h4l3 3v3h-7" />
+        <circle cx="7" cy="17.5" r="1.8" />
+        <circle cx="17" cy="17.5" r="1.8" />
+    </Icone>
+);
+
 export const IconeSeta = (p) => (
     <Icone {...p}>
         <path d="M5 12h14M13 6l6 6-6 6" />

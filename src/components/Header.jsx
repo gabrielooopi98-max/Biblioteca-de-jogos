@@ -1,9 +1,10 @@
 import { navegar, useIndicador } from "../hooks.js";
-import { IconeBiblioteca, IconeBusca, IconeBussola, IconeCarrinho, IconeCasa, IconeCoracao, IconeLua, IconeRecibo, IconeSol, LogoMarca } from "./Icones.jsx";
+import { IconeBiblioteca, IconeBusca, IconeBussola, IconeCarrinho, IconeCasa, IconeCoracao, IconeFone, IconeLua, IconeRecibo, IconeSol, LogoMarca } from "./Icones.jsx";
 
 const PAGINAS = [
     { pagina: "loja", caminho: "/", rotulo: "Loja", Icone: IconeCasa },
     { pagina: "explorar", caminho: "/explorar", rotulo: "Explorar", Icone: IconeBussola },
+    { pagina: "acessorios", caminho: "/acessorios", rotulo: "Acessórios", Icone: IconeFone },
     { pagina: "biblioteca", caminho: "/biblioteca", rotulo: "Biblioteca", Icone: IconeBiblioteca },
     { pagina: "pedidos", caminho: "/pedidos", rotulo: "Pedidos", Icone: IconeRecibo },
 ];
@@ -24,11 +25,11 @@ function Header({ pagina, qtdCarrinho, qtdDesejos, qtdBiblioteca, alertas, abrir
                             e.preventDefault();
                             navegar("/");
                         }}
-                        aria-label="Biblioteca.jogos, página inicial"
+                        aria-label="Universal Games, página inicial"
                     >
                         <LogoMarca />
                         <span className="logo-texto">
-                            Biblioteca<small>.jogos</small>
+                            Universal<small> Games</small>
                         </span>
                     </a>
 
