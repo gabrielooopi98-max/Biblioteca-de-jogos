@@ -21,7 +21,6 @@
   --vidro: rgba(250, 250, 250, 0.82);
   --veu: rgba(10, 10, 10, 0.45);
   --sombra: 0 16px 48px rgba(0, 0, 0, 0.14);
-  --logo-interno: #fafafa;
   --perigo: #dc2626;
   --ok: #16a34a;
   /* dourado da marca */
@@ -696,10 +695,13 @@ button.tag:active {
   color: var(--texto);
 }
 
-/* quadro preto com as barras douradas, como o selo da loja */
+/* selo redondo da loja */
 .logo-marca {
-  color: #0a0a0a;
-  --logo-interno: var(--ouro);
+  display: block;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgba(236, 182, 33, 0.35);
 }
 
 .logo-texto {

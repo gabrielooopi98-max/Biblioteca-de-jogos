@@ -338,17 +338,9 @@ export const IconeMais = (p) => (
     </Icone>
 );
 
-// Marca: lombadas de livros/jogos numa estante, uma delas inclinada.
-export function LogoMarca({ tamanho = 30 }) {
-    return (
-        <svg width={tamanho} height={tamanho} viewBox="0 0 32 32" aria-hidden="true" className="logo-marca">
-            <rect width="32" height="32" rx="8" fill="currentColor" />
-            <g fill="var(--logo-interno, #0a0a0a)">
-                <rect x="7" y="8" width="4" height="15" rx="1" />
-                <rect x="12.5" y="11" width="4" height="12" rx="1" />
-                <rect x="18.6" y="7.4" width="4" height="15.6" rx="1" transform="rotate(14 20.6 23)" />
-                <rect x="6" y="24" width="20" height="1.6" rx=".8" />
-            </g>
-        </svg>
-    );
+// Marca: o selo redondo da loja (public/logo-universal-games.jpg). O nome vem ao lado, em texto.
+const LOGO = `${import.meta.env.BASE_URL}logo-universal-games.jpg`;
+
+export function LogoMarca({ tamanho = 38 }) {
+    return <img src={LOGO} width={tamanho} height={tamanho} alt="" aria-hidden="true" className="logo-marca" decoding="async" />;
 }
