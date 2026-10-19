@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR" data-tema="escuro">
+<html lang="pt-BR">
 
 <head>
   <meta charset="UTF-8" />
@@ -27,7 +27,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/Biblioteca-de-jogos/favicon-32.png" />
   <link rel="apple-touch-icon" href="/Biblioteca-de-jogos/apple-touch-icon.png" />
   <link rel="manifest" href="/Biblioteca-de-jogos/manifest.webmanifest" />
-  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="theme-color" content="#ffffff" />
   <meta name="apple-mobile-web-app-title" content="Universal" />
 
   <!-- Conexões antecipadas. As imagens da Steam são pedidas sem CORS, então o preconnect também é sem CORS
@@ -38,7 +38,7 @@
   <link rel="preconnect" href="https://shared.akamai.steamstatic.com" />
 
   <!-- Arte do banner de abertura (maior elemento da tela): começa a baixar antes do JavaScript -->
-  <link rel="preload" as="image" href="https://cdn.cloudflare.steamstatic.com/steam/apps/208650/library_hero.jpg" fetchpriority="high" />
+  <link rel="preload" as="image" href="https://cdn.cloudflare.steamstatic.com/steam/apps/208650/library_hero.jpg" imagesrcset="https://cdn.cloudflare.steamstatic.com/steam/apps/208650/library_600x900.jpg 600w, https://cdn.cloudflare.steamstatic.com/steam/apps/208650/library_hero.jpg 1920w" imagesizes="(max-width: 720px) 200px, 100vw" fetchpriority="high" />
 
   <!-- Fontes sem bloquear a primeira pintura: o texto aparece na hora e troca quando a fonte chega.
        As fontes temáticas (Soulslike e Resident Evil) ficam num pedido separado, de menor prioridade. -->
@@ -48,16 +48,9 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&family=Sora:wght@500..800&family=Geist+Mono:wght@500&family=Special+Elite&display=swap" />
   </noscript>
 
-  <script>
-    // Aplica o tema salvo antes da primeira pintura (evita piscar).
-    try {
-      var tema = JSON.parse(localStorage.getItem("bj:tema"));
-      if (tema) document.documentElement.dataset.tema = tema;
-    } catch (e) {}
-  </script>
-  <script type="module" crossorigin src="/Biblioteca-de-jogos/assets/index-C2qriYl8.js"></script>
-  <link rel="modulepreload" crossorigin href="/Biblioteca-de-jogos/assets/Icones-BGibiVB4.js">
-  <link rel="stylesheet" crossorigin href="/Biblioteca-de-jogos/assets/index-DwyUtmbF.css">
+  <script type="module" crossorigin src="/Biblioteca-de-jogos/assets/index-ByaQI7gb.js"></script>
+  <link rel="modulepreload" crossorigin href="/Biblioteca-de-jogos/assets/Icones-D20-lNEA.js">
+  <link rel="stylesheet" crossorigin href="/Biblioteca-de-jogos/assets/index-B9-OezzZ.css">
 </head>
 
 <body>
