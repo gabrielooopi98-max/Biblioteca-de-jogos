@@ -1,5 +1,5 @@
 import { navegar, useIndicador } from "../hooks.js";
-import { IconeBusca, IconeBussola, IconeCarrinho, IconeCasa, IconeCoracao, IconeFone, IconeRecibo, LogoMarca } from "./Icones.jsx";
+import { IconeBusca, IconeBussola, IconeCarrinho, IconeCasa, IconeCoracao, IconeFone, IconeRecibo, IconeUsuario, LogoMarca } from "./Icones.jsx";
 
 const PAGINAS = [
     { pagina: "loja", caminho: "/", rotulo: "Loja", Icone: IconeCasa },
@@ -10,7 +10,26 @@ const PAGINAS = [
 
 const ehMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
 
-function Header({ pagina, qtdCarrinho, qtdDesejos, qtdReservas, alertas, abrirCarrinho, abrirPaleta }) {
+// botão da conta: "Entrar" para visitantes, inicial do nome para quem está logado
+function BotaoConta({ usuario, pronta, ativo }) {
+    if (!import.meta.env.VITE_SUPABASE_URL) return null;
+    if (usuario) {
+        const nome = usuario.user_metadata?.nome || usuario.email;
+        return (
+            <a href="#/conta" className={ativo ? "conta-botao logado ativo" : "conta-botao logado"} aria-label={`Minha conta (${usuario.email})`} data-dica="Minha conta">
+                <span className="conta-botao-avatar">{nome[0]?.toUpperCase()}</span>
+            </a>
+        );
+    }
+    return (
+        <a href="#/conta" className={pronta ? "conta-botao" : "conta-botao carregando"} aria-label="Entrar ou criar conta">
+            <IconeUsuario tamanho={17} />
+            <span className="conta-botao-rotulo">Entrar</span>
+        </a>
+    );
+}
+
+function Header({ pagina, qtdCarrinho, qtdDesejos, qtdReservas, alertas, abrirCarrinho, abrirPaleta, usuario, contaPronta }) {
     const navRef = useIndicador();
 
     return (
@@ -60,6 +79,7 @@ function Header({ pagina, qtdCarrinho, qtdDesejos, qtdReservas, alertas, abrirCa
                             )}
                             {alertas > 0 && <span className="ponto-alerta" title={`${alertas} alerta(s) de preço atingido(s)`} />}
                         </a>
+                        <BotaoConta usuario={usuario} pronta={contaPronta} ativo={pagina === "conta"} />
                         <button type="button" className="carrinho-botao" onClick={abrirCarrinho} aria-label={`Carrinho (${qtdCarrinho})`}>
                             <IconeCarrinho tamanho={17} />
                             <span className="carrinho-rotulo">Carrinho</span>

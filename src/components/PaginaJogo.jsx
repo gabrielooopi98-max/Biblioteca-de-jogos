@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { navegar } from "../hooks.js";
-import { useLoja } from "../LojaContext.js";
-import { calcularParcelas, calcularPrecoFinal, capturasDoJogo, DESCONTO_PIX, DIAS_PARA_RETIRAR, formatarPreco, imagensDoJogo, trailerDoJogo } from "../utils.js";
-import CardJogo, { Avaliacao, Imagem, Plataformas, Preco } from "./CardJogo.jsx";
-import { IconeCarrinho, IconeCheck, IconeComparar, IconeCoracao, IconeDesfazer, IconeEscudo, IconeLoja, IconePlay, IconeSetaDireita, IconeSetaEsquerda } from "./Icones.jsx";
+import { capturasDoJogo, DIAS_PARA_RETIRAR, imagensDoJogo, resumoAvaliacoes, trailerDoJogo } from "../utils.js";
+import CaixaCompra from "./CaixaCompra.jsx";
+import CardJogo, { Imagem } from "./CardJogo.jsx";
+import { IconePlay, IconeSetaDireita, IconeSetaEsquerda } from "./Icones.jsx";
 import Trailer from "./Trailer.jsx";
 
 function jogosSemelhantes(jogo, todos) {
@@ -14,7 +14,7 @@ function jogosSemelhantes(jogo, todos) {
             pontos: outro.generos.filter((g) => jogo.generos.includes(g)).length * 2 + (outro.desenvolvedora === jogo.desenvolvedora ? 3 : 0) + outro.nota / 10,
         }))
         .sort((a, b) => b.pontos - a.pontos)
-        .slice(0, 4)
+        .slice(0, 5)
         .map(({ outro }) => outro);
 }
 
@@ -75,8 +75,6 @@ function Galeria({ jogo }) {
 }
 
 function PaginaJogo({ jogo, jogos, comprarAgora, aoEscolherGenero }) {
-    const { adicionarAoCarrinho, alternarDesejo, estaNoCarrinho, estaNosDesejos, alternarComparar, estaComparando } = useLoja();
-
     if (!jogo) {
         return (
             <div className="pagina vazio">
@@ -89,11 +87,14 @@ function PaginaJogo({ jogo, jogos, comprarAgora, aoEscolherGenero }) {
     }
 
     const imagens = imagensDoJogo(jogo);
-    const final = calcularPrecoFinal(jogo);
-    const parcelas = calcularParcelas(final);
-    const noCarrinho = estaNoCarrinho(jogo.id);
-    const desejado = estaNosDesejos(jogo.id);
-    const comparando = estaComparando(jogo.id);
+    const ficha = [
+        ["Desenvolvedora", jogo.desenvolvedora],
+        ["Lançamento", jogo.lancamento],
+        ["Plataformas", jogo.plataformas.join(", ")],
+        ["Gêneros", jogo.generos.join(", ")],
+        ["Mídia", "Física (disco original lacrado)"],
+        ["Retirada", `Na loja, em até ${DIAS_PARA_RETIRAR} dias após a confirmação`],
+    ];
 
     return (
         <div className="pagina pagina-jogo" style={jogo.fundo ? { "--fundo-jogo": `url("${jogo.fundo}")` } : undefined}>
@@ -110,10 +111,18 @@ function PaginaJogo({ jogo, jogos, comprarAgora, aoEscolherGenero }) {
             <header className="jogo-cabecalho">
                 <h1>{jogo.nome}</h1>
                 <div className="jogo-meta">
-                    <Avaliacao nota={jogo.nota} />
+                    <span className="jogo-nota" title={`Nota ${jogo.nota.toFixed(1)} de 10`}>
+                        <strong>{jogo.nota.toFixed(1)}</strong> {resumoAvaliacoes(jogo.nota)}
+                    </span>
                     <span>{jogo.desenvolvedora}</span>
                     <span>{jogo.lancamento}</span>
-                    <Plataformas lista={jogo.plataformas} />
+                    <span className="jogo-meta-plataformas">
+                        {jogo.plataformas.map((p) => (
+                            <span key={p} className="caixa-plataforma">
+                                {p}
+                            </span>
+                        ))}
+                    </span>
                 </div>
             </header>
 
@@ -121,104 +130,43 @@ function PaginaJogo({ jogo, jogos, comprarAgora, aoEscolherGenero }) {
                 <div className="jogo-principal">
                     <Galeria key={jogo.id} jogo={jogo} />
 
-                    <section className="jogo-bloco">
-                        <h2 className="titulo-secao">Sobre o jogo</h2>
-                        <p className="jogo-sobre">{jogo.descricao}</p>
-                        <div className="tags">
-                            {jogo.generos.map((genero) => (
-                                <button type="button" key={genero} className="tag" onClick={() => aoEscolherGenero(genero)}>
-                                    {genero}
-                                </button>
-                            ))}
-                        </div>
-                    </section>
+                    <div className="jogo-informacoes">
+                        <section className="jogo-bloco">
+                            <h2 className="titulo-secao">Sobre o jogo</h2>
+                            <p className="jogo-sobre">{jogo.descricao}</p>
+                            <div className="tags">
+                                {jogo.generos.map((genero) => (
+                                    <button type="button" key={genero} className="tag" onClick={() => aoEscolherGenero(genero)}>
+                                        {genero}
+                                    </button>
+                                ))}
+                            </div>
+                        </section>
 
-                    <section className="jogo-bloco">
-                        <h2 className="titulo-secao">Detalhes</h2>
-                        <dl className="ficha">
-                            <div>
-                                <dt>Desenvolvedora</dt>
-                                <dd>{jogo.desenvolvedora}</dd>
-                            </div>
-                            <div>
-                                <dt>Lançamento</dt>
-                                <dd>{jogo.lancamento}</dd>
-                            </div>
-                            <div>
-                                <dt>Plataformas</dt>
-                                <dd>{jogo.plataformas.join(", ")}</dd>
-                            </div>
-                            <div>
-                                <dt>Gêneros</dt>
-                                <dd>{jogo.generos.join(", ")}</dd>
-                            </div>
-                            <div>
-                                <dt>Nota</dt>
-                                <dd>
-                                    <Avaliacao nota={jogo.nota} />
-                                </dd>
-                            </div>
-                            <div>
-                                <dt>Retirada</dt>
-                                <dd>Reserve pelo site e retire na loja depois da confirmação do pagamento</dd>
-                            </div>
-                        </dl>
-                    </section>
+                        <section className="jogo-bloco">
+                            <h2 className="titulo-secao">Ficha técnica</h2>
+                            <dl className="ficha-lista">
+                                {ficha.map(([rotulo, valor]) => (
+                                    <div key={rotulo}>
+                                        <dt>{rotulo}</dt>
+                                        <dd>{valor}</dd>
+                                    </div>
+                                ))}
+                            </dl>
+                        </section>
+                    </div>
                 </div>
 
                 <aside className="compra">
-                    <Imagem src={imagens.horizontal} alt="" className="compra-capa" key={imagens.horizontal} />
-                    <Preco jogo={jogo} tamanho="grande" />
-                    {jogo.desconto > 0 && <span className="compra-economia">Economize {formatarPreco(jogo.preco - final)}</span>}
-                    <dl className="compra-condicoes">
-                        <div>
-                            <dt>Pix</dt>
-                            <dd>{formatarPreco(final * (1 - DESCONTO_PIX / 100))}</dd>
-                        </div>
-                        <div>
-                            <dt>Cartão</dt>
-                            <dd>
-                                {parcelas.quantidade}x de {formatarPreco(parcelas.valor)} sem juros
-                            </dd>
-                        </div>
-                    </dl>
-
-                    <div className="compra-botoes">
-                        <button type="button" className="botao botao-primario botao-largo" onClick={() => comprarAgora(jogo)}>
-                            Reservar agora
-                        </button>
-                        <button type="button" className={noCarrinho ? "botao botao-secundario botao-largo ativo" : "botao botao-secundario botao-largo"} onClick={() => adicionarAoCarrinho(jogo)}>
-                            {noCarrinho ? <IconeCheck tamanho={16} /> : <IconeCarrinho tamanho={16} />}
-                            {noCarrinho ? "No carrinho" : "Adicionar ao carrinho"}
-                        </button>
-                        <div className="compra-secundarias">
-                            <button type="button" className={desejado ? "botao botao-fantasma ativo" : "botao botao-fantasma"} onClick={() => alternarDesejo(jogo)} aria-pressed={desejado}>
-                                <IconeCoracao tamanho={15} preenchido={desejado} /> {desejado ? "Desejado" : "Desejar"}
-                            </button>
-                            <button type="button" className={comparando ? "botao botao-fantasma ativo" : "botao botao-fantasma"} onClick={() => alternarComparar(jogo)} aria-pressed={comparando}>
-                                <IconeComparar tamanho={15} /> {comparando ? "Comparando" : "Comparar"}
-                            </button>
-                        </div>
-                    </div>
-
-                    <ul className="compra-garantias">
-                        <li>
-                            <IconeLoja tamanho={15} /> Retire na loja em até {DIAS_PARA_RETIRAR} dias após a confirmação
-                        </li>
-                        <li>
-                            <IconeEscudo tamanho={15} /> Produto original para {jogo.plataformas[0]}
-                            {jogo.plataformas.length > 1 && ` e mais ${jogo.plataformas.length - 1}`}
-                        </li>
-                        <li>
-                            <IconeDesfazer tamanho={15} /> Cancele a reserva antes de retirar
-                        </li>
-                    </ul>
+                    <CaixaCompra item={jogo} comprarAgora={comprarAgora} plataformas={jogo.plataformas}>
+                        <Imagem src={imagens.horizontal} alt="" className="compra-capa" key={imagens.horizontal} />
+                    </CaixaCompra>
                 </aside>
             </div>
 
             <section className="secao">
                 <h2 className="titulo-secao">Você também pode gostar</h2>
-                <div className="grade">
+                <div className="grade grade-relacionados">
                     {jogosSemelhantes(jogo, jogos).map((outro) => (
                         <CardJogo key={outro.id} jogo={outro} />
                     ))}

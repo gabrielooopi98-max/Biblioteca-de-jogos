@@ -260,7 +260,7 @@ export function ChamadaCatalogo({ total }) {
 
 const COLUNAS_RODAPE = [
     { titulo: "Loja", links: [["Início", "/"], ["Jogos", "/explorar"], ["Produtos", "/acessorios"], ["Comparar jogos", "/comparar"]] },
-    { titulo: "Sua conta", links: [["Minhas reservas", "/reservas"], ["Lista de desejos", "/desejos"]] },
+    { titulo: "Sua conta", links: [["Entrar ou criar conta", "/conta"], ["Minhas reservas", "/reservas"], ["Lista de desejos", "/desejos"]] },
 ];
 
 export function Rodape() {

@@ -438,6 +438,13 @@ const acessorios = [
     },
 ];
 
+// Departamentos vindos do banco (painel) substituem os locais. A lista é trocada no lugar para que
+// todos os componentes que a importam passem a ver a versão nova no próximo desenho.
+export function definirCategorias(lista) {
+    if (!lista?.length) return;
+    CATEGORIAS_ACESSORIOS.splice(0, CATEGORIAS_ACESSORIOS.length, ...lista);
+}
+
 // A busca e as listas usam "desenvolvedora" e "generos"; nos produtos eles viram marca e categoria.
 const nomeDaCategoria = (id) => CATEGORIAS_ACESSORIOS.find((c) => c.id === id)?.nome ?? id;
 for (const item of acessorios) {

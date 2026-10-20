@@ -7,10 +7,18 @@ import Trailer from "./Trailer.jsx";
 
 // srcSet/sizes vêm antes do src (senão o navegador pode baixar as duas versões).
 // Se a imagem falhar, cai na alternativa e abandona o srcSet, que também apontaria para a quebrada.
+const SEM_IMAGEM = `${import.meta.env.BASE_URL}sem-imagem.svg`;
+
+// Imagem com reserva: se a original falhar, tenta a alternativa e, por último, o placeholder (nunca fica quebrada).
 export function Imagem({ src, srcSet, sizes, alt = "", className = "", alternativa, ...props }) {
     const [carregou, setCarregou] = useState(false);
-    const [origem, setOrigem] = useState(src);
-    const usandoAlternativa = Boolean(alternativa) && origem === alternativa;
+    const [origem, setOrigem] = useState(src || alternativa || SEM_IMAGEM);
+    const [anterior, setAnterior] = useState(src);
+    if (src !== anterior) {
+        setAnterior(src);
+        setOrigem(src || alternativa || SEM_IMAGEM);
+    }
+    const usandoAlternativa = origem !== src;
 
     return (
         <img
@@ -23,7 +31,8 @@ export function Imagem({ src, srcSet, sizes, alt = "", className = "", alternati
             className={`${className} imagem ${carregou ? "carregada" : ""}`}
             onLoad={() => setCarregou(true)}
             onError={() => {
-                if (alternativa && origem !== alternativa) setOrigem(alternativa);
+                if (alternativa && origem !== alternativa && origem !== SEM_IMAGEM) setOrigem(alternativa);
+                else if (origem !== SEM_IMAGEM) setOrigem(SEM_IMAGEM);
             }}
             {...props}
         />

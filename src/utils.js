@@ -24,9 +24,20 @@ const DIA_MS = 86400000;
 // "Pagar na loja": a pessoa só reserva pelo site e paga no balcão, na hora de retirar.
 export const pagaNaLoja = (pedido) => pedido.metodo === "loja";
 
-// Situação de uma reserva: aguardando a loja (confirmar o pagamento ou separar os itens), pronta para retirar ou cancelada.
+// Situação de uma reserva: aguardando a loja (confirmar o pagamento ou separar os itens), pronta para retirar,
+// retirada ou cancelada. Com o banco, quem decide é a loja pelo painel (pedido.situacaoLoja);
+// sem banco (demonstração), a confirmação é simulada alguns segundos depois.
 // Pedidos antigos (status "pago") contam como reservas confirmadas.
 export function situacaoReserva(pedido, agora = Date.now()) {
+    if (pedido.remoto) {
+        const loja = pedido.situacaoLoja || {};
+        if (loja.status === "cancelado") return { id: "cancelado", rotulo: "Cancelada" };
+        if (loja.status === "retirado") return { id: "retirado", rotulo: "Retirado", retiradoEm: loja.retirado_em };
+        if (loja.status !== "confirmado") return { id: "aguardando", rotulo: pagaNaLoja(pedido) ? "Separando itens" : "Aguardando confirmação" };
+        const limite = new Date(loja.confirmado_em || pedido.data).getTime() + DIAS_PARA_RETIRAR * DIA_MS;
+        if (agora > limite) return { id: "vencido", rotulo: "Prazo de retirada encerrado", limite };
+        return { id: "pronto", rotulo: "Pronto para retirada", limite };
+    }
     const feito = new Date(pedido.data).getTime();
     if (pedido.status === "cancelado" || pedido.status === "reembolsado") return { id: "cancelado", rotulo: "Cancelada" };
     const confirmadoEm = pedido.status === "pago" ? feito : feito + CONFIRMACAO_DEMO_MS;
@@ -39,10 +50,17 @@ export function situacaoReserva(pedido, agora = Date.now()) {
 // Cada imagem no tamanho em que aparece: capa 600x900 só onde é grande, 300x450 nas miniaturas.
 // jogo.imagens sobrescreve endereços que a Steam não publica no CDN antigo.
 // Acessórios usam a ilustração própria (ou uma foto, se "ilustracao" for um caminho com extensão).
+const SEM_IMAGEM = `${import.meta.env.BASE_URL}sem-imagem.svg`;
+
 export function imagensDoJogo(jogo) {
     if (ehAcessorio(jogo)) {
-        const arquivo = /\.[a-z0-9]+$/i.test(jogo.ilustracao) ? jogo.ilustracao : `acessorios/${jogo.ilustracao}.svg`;
-        const arte = `${import.meta.env.BASE_URL}${arquivo}`;
+        // URL enviada pelo painel, foto em public/ (com extensão) ou o nome de uma ilustração de public/acessorios
+        const ilustracao = jogo.ilustracao;
+        const arte = !ilustracao
+            ? SEM_IMAGEM
+            : /^(https?:)?\/\//.test(ilustracao)
+              ? ilustracao
+              : `${import.meta.env.BASE_URL}${/\.[a-z0-9]+$/i.test(ilustracao) ? ilustracao : `acessorios/${ilustracao}.svg`}`;
         return { capa: arte, capaPequena: arte, banner: arte, logo: null, horizontal: arte, destaque: arte, linha: arte, fundo: null };
     }
     const base = `${CDN_STEAM}/${jogo.appId}`;
@@ -60,6 +78,8 @@ export function imagensDoJogo(jogo) {
 }
 
 export function capturasDoJogo(jogo) {
+    // galeria enviada pelo painel tem prioridade sobre as capturas da Steam
+    if (jogo.galeria?.length) return jogo.galeria.map((url) => ({ mini: url, grande: url }));
     return (jogo.capturas || []).map((caminho) => ({
         mini: `${CDN_CAPTURAS}/${jogo.appId}/${caminho}.600x338.jpg`,
         grande: `${CDN_CAPTURAS}/${jogo.appId}/${caminho}.1920x1080.jpg`,
@@ -97,7 +117,9 @@ export function formatarData(iso, comHora = false) {
     });
 }
 
+// Preço do momento. Com o banco, vem calculado por ele (precoFinal), o mesmo que o checkout cobra.
 export function calcularPrecoFinal(jogo) {
+    if (jogo.precoFinal != null) return jogo.precoFinal;
     return Math.round(jogo.preco * (100 - (jogo.desconto || 0))) / 100;
 }
 

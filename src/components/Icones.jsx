@@ -338,6 +338,77 @@ export const IconeMais = (p) => (
     </Icone>
 );
 
+// --- Painel administrativo ---
+export const IconeEditar = (p) => (
+    <Icone {...p}>
+        <path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-4-4L4 16v4Z" />
+        <path d="m13.5 6.5 4 4" />
+    </Icone>
+);
+
+export const IconeArquivo = (p) => (
+    <Icone {...p}>
+        <rect x="3" y="4" width="18" height="4.5" rx="1.2" />
+        <path d="M5 8.5V18a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5" />
+        <path d="M10 12.5h4" />
+    </Icone>
+);
+
+export const IconeCaixa = (p) => (
+    <Icone {...p}>
+        <path d="M21 8 12 3 3 8v8l9 5 9-5V8Z" />
+        <path d="m3 8 9 5 9-5M12 13v8" />
+    </Icone>
+);
+
+export const IconeSair = (p) => (
+    <Icone {...p}>
+        <path d="M14 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" />
+        <path d="M10 16l-4-4 4-4M6 12h10" />
+    </Icone>
+);
+
+export const IconeImagem = (p) => (
+    <Icone {...p}>
+        <rect x="3" y="4" width="18" height="16" rx="2.5" />
+        <circle cx="9" cy="9.5" r="1.6" />
+        <path d="m4 18 5.5-5.5 4 4 2.5-2.5L20 18" />
+    </Icone>
+);
+
+export const IconeAlerta = (p) => (
+    <Icone {...p}>
+        <path d="M10.3 4.3 2.6 17.6A2 2 0 0 0 4.3 20.6h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0Z" />
+        <path d="M12 9.5v4M12 17h.01" />
+    </Icone>
+);
+
+export const IconeEnviar = (p) => (
+    <Icone {...p}>
+        <path d="M12 16V4M7 9l5-5 5 5" />
+        <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+    </Icone>
+);
+
+export const IconeSetaCima = (p) => (
+    <Icone {...p}>
+        <path d="m6 15 6-6 6 6" />
+    </Icone>
+);
+
+export const IconeSetaBaixo = (p) => (
+    <Icone {...p}>
+        <path d="m6 9 6 6 6-6" />
+    </Icone>
+);
+
+export const IconeExterno = (p) => (
+    <Icone {...p}>
+        <path d="M14 4h6v6M20 4l-9 9" />
+        <path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4" />
+    </Icone>
+);
+
 // Loja física: fachada com toldo (retirada no balcão)
 export const IconeLoja = (p) => (
     <Icone {...p}>
@@ -350,6 +421,13 @@ export const IconeLoja = (p) => (
 
 // Marca: o selo redondo da loja (public/logo-universal-games.jpg). O nome vem ao lado, em texto.
 const LOGO = `${import.meta.env.BASE_URL}logo-universal-games.jpg`;
+
+export const IconeUsuario = (p) => (
+    <Icone {...p}>
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5" />
+    </Icone>
+);
 
 export function LogoMarca({ tamanho = 38 }) {
     return <img src={LOGO} width={tamanho} height={tamanho} alt="" aria-hidden="true" className="logo-marca" decoding="async" />;

@@ -85,6 +85,16 @@ function Reserva({ pedido }) {
                 </div>
             )}
 
+            {situacao.id === "retirado" && (
+                <div className="reserva-etapa retirada">
+                    <IconeCheck tamanho={18} />
+                    <div>
+                        <strong>Retirado na loja</strong>
+                        <span>{situacao.retiradoEm ? `Retirado em ${formatarData(situacao.retiradoEm, true)}. ` : ""}Obrigado pela compra!</span>
+                    </div>
+                </div>
+            )}
+
             {situacao.id === "vencido" && (
                 <div className="reserva-etapa vencida">
                     <IconeRelogio tamanho={18} />

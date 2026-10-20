@@ -20,6 +20,13 @@ export function NotaProduto({ produto, completa = false }) {
     );
 }
 
+// Esgotado ou últimas unidades (só para produtos com estoque controlado pelo painel)
+export function EtiquetaEstoque({ produto }) {
+    if (produto.esgotado) return <span className="produto-estoque esgotado">Esgotado</span>;
+    if (produto.estoque != null && produto.estoque <= 3) return <span className="produto-estoque">{produto.estoque === 1 ? "Última unidade" : `Últimas ${produto.estoque} unidades`}</span>;
+    return null;
+}
+
 export function ProdutoCard({ produto }) {
     const { abrirJogo, adicionarAoCarrinho, estaNoCarrinho } = useLoja();
     const imagens = imagensDoJogo(produto);
@@ -30,6 +37,7 @@ export function ProdutoCard({ produto }) {
             <button type="button" className="produto-imagem" onClick={() => abrirJogo(produto.id)} aria-label={`Ver ${produto.nome}`}>
                 <Imagem src={imagens.capa} alt={produto.nome} />
                 {produto.desconto > 0 && <span className="selo">-{produto.desconto}%</span>}
+                <EtiquetaEstoque produto={produto} />
             </button>
             <div className="produto-corpo">
                 <span className="produto-categoria">
@@ -45,8 +53,9 @@ export function ProdutoCard({ produto }) {
                         type="button"
                         className={noCarrinho ? "cartao-carrinho ativo" : "cartao-carrinho"}
                         onClick={() => adicionarAoCarrinho(produto)}
-                        aria-label={noCarrinho ? `${produto.nome} já está no carrinho` : `Adicionar ${produto.nome} ao carrinho`}
-                        data-dica={noCarrinho ? "No carrinho" : "Adicionar"}
+                        disabled={produto.esgotado}
+                        aria-label={produto.esgotado ? `${produto.nome} esgotado` : noCarrinho ? `${produto.nome} já está no carrinho` : `Adicionar ${produto.nome} ao carrinho`}
+                        data-dica={produto.esgotado ? "Esgotado" : noCarrinho ? "No carrinho" : "Adicionar"}
                     >
                         {noCarrinho ? <IconeCheck tamanho={15} /> : <IconeCarrinho tamanho={15} />}
                     </button>

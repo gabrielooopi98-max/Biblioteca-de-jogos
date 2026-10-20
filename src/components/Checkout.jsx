@@ -3,6 +3,7 @@ import { navegar, usePresenca, useTeclaEsc } from "../hooks.js";
 import { calcularParcelas, calcularPrecoFinal, DESCONTO_PIX, ehAcessorio, formatarPreco, gerarCodigo, imagensDoJogo, resumirCarrinho } from "../utils.js";
 import { IconeBoleto, IconeCadeado, IconeCartao, IconeCheck, IconeFechar, IconeLoja, IconePix, IconeRecibo } from "./Icones.jsx";
 import { InfoRetirada } from "./Retirada.jsx";
+import { catalogoNoServidor } from "../catalogo.js";
 
 const ETAPAS = ["Dados", "Pagamento", "Reservado"];
 
@@ -22,12 +23,13 @@ function formatarTelefone(valor) {
     return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
 }
 
-function Checkout({ aberto, fechar, itens, cupom, perfil, concluir }) {
+function Checkout({ aberto, fechar, itens, cupom, perfil, logado, concluir }) {
     const { montado, saindo } = usePresenca(aberto);
     const [etapa, setEtapa] = useState(0);
     const [dados, setDados] = useState(perfil);
     const [metodo, setMetodo] = useState("pix");
     const [processando, setProcessando] = useState(false);
+    const [erro, setErro] = useState("");
     const [pedido, setPedido] = useState(null);
     const [estavaAberto, setEstavaAberto] = useState(false);
 
@@ -37,7 +39,7 @@ function Checkout({ aberto, fechar, itens, cupom, perfil, concluir }) {
         if (aberto) {
             setEtapa(0);
             setPedido(null);
-            setDados({ nome: "", email: "", telefone: "", ...perfil });
+            setDados({ nome: "", email: "", ...perfil, telefone: perfil?.telefone ? formatarTelefone(perfil.telefone) : "" });
         }
     }
 
@@ -48,30 +50,63 @@ function Checkout({ aberto, fechar, itens, cupom, perfil, concluir }) {
     const resumo = pedido ? pedido.resumo : resumirCarrinho(itens, cupom, etapa === 1 ? metodo : null);
     const parcelas = calcularParcelas(resumirCarrinho(itens, cupom).total);
 
-    function pagar() {
+    // o que fica guardado de cada item para mostrar a imagem em Minhas reservas
+    const lembrete = (item) => (ehAcessorio(item) ? { tipo: "acessorio", ilustracao: item.ilustracao } : { appId: item.appId, imagens: item.imagens });
+
+    async function pagar() {
         setProcessando(true);
-        setTimeout(() => {
-            const novo = {
-                numero: `UG-${gerarCodigo(8)}`,
-                data: new Date().toISOString(),
-                status: "reservado",
-                metodo,
-                cupom,
-                comprador: { nome: dados.nome.trim(), email: dados.email.trim(), telefone: dados.telefone.trim() },
-                // código que a pessoa mostra no balcão para retirar
-                retirada: { codigo: gerarCodigo(6) },
-                itens: itens.map((item) =>
-                    ehAcessorio(item)
-                        ? { id: item.id, tipo: "acessorio", ilustracao: item.ilustracao, nome: item.nome, pago: calcularPrecoFinal(item) }
-                        : { id: item.id, appId: item.appId, nome: item.nome, pago: calcularPrecoFinal(item) },
-                ),
-                resumo: resumirCarrinho(itens, cupom, metodo),
-            };
+        setErro("");
+        try {
+            const novo = catalogoNoServidor ? await reservarNoServidor() : await reservarDemonstracao();
             setPedido(novo);
-            setProcessando(false);
             setEtapa(2);
             concluir(novo);
-        }, 1600);
+        } catch (e) {
+            setErro(e.message);
+        } finally {
+            setProcessando(false);
+        }
+    }
+
+    // Com o banco: a reserva é criada lá, com preço, cupom, desconto Pix e estoque validados no servidor.
+    async function reservarNoServidor() {
+        const { mensagemDeErro } = await import("../supabase.js");
+        // cliente logado: a reserva fica ligada à conta (o banco usa o token, não um campo do formulário)
+        const { clientes: supabase } = await import("../conta.js");
+        const comprador = { nome: dados.nome.trim(), email: dados.email.trim(), telefone: dados.telefone.trim() };
+        const { data, error } = await supabase.rpc("criar_reserva", { p_itens: itens.map((i) => i.id), p_metodo: metodo, p_cupom: cupom, p_cliente: comprador });
+        if (error) throw new Error(mensagemDeErro(error));
+        const r = data.resumo;
+        return {
+            numero: data.numero,
+            data: data.data,
+            status: "reservado",
+            remoto: true,
+            situacaoLoja: { status: data.status, pagamento: data.pagamento },
+            metodo,
+            cupom: data.cupom,
+            comprador,
+            retirada: { codigo: data.codigo },
+            itens: data.itens.map((i) => ({ id: i.id, nome: i.nome, pago: Number(i.pago), ...lembrete(itens.find((x) => x.id === i.id) || {}) })),
+            resumo: { subtotal: Number(r.subtotal), descontos: Number(r.descontos), valorCupom: Number(r.valorCupom), valorPix: Number(r.valorPix), total: Number(r.total) },
+        };
+    }
+
+    // Sem servidor (demonstração): a reserva fica só neste navegador.
+    async function reservarDemonstracao() {
+        await new Promise((ok) => setTimeout(ok, 1600));
+        return {
+            numero: `UG-${gerarCodigo(8)}`,
+            data: new Date().toISOString(),
+            status: "reservado",
+            metodo,
+            cupom,
+            comprador: { nome: dados.nome.trim(), email: dados.email.trim(), telefone: dados.telefone.trim() },
+            // código que a pessoa mostra no balcão para retirar
+            retirada: { codigo: gerarCodigo(6) },
+            itens: itens.map((item) => ({ id: item.id, nome: item.nome, pago: calcularPrecoFinal(item), ...lembrete(item) })),
+            resumo: resumirCarrinho(itens, cupom, metodo),
+        };
     }
 
     return (
@@ -109,13 +144,26 @@ function Checkout({ aberto, fechar, itens, cupom, perfil, concluir }) {
                             >
                                 <fieldset>
                                     <legend>Seus dados</legend>
+                                    {logado ? (
+                                        <p className="checkout-conta">
+                                            <IconeCadeado tamanho={14} /> Reserva ligada à sua conta: acompanhe em qualquer aparelho.
+                                        </p>
+                                    ) : (
+                                        <p className="checkout-conta">
+                                            Tem conta?{" "}
+                                            <a href="#/conta" onClick={fechar}>
+                                                Entre
+                                            </a>{" "}
+                                            para acompanhar a reserva em qualquer aparelho.
+                                        </p>
+                                    )}
                                     <label className="rotulo-campo">
                                         Nome completo
                                         <input className="campo" required minLength={3} value={dados.nome} onChange={(e) => setDados({ ...dados, nome: e.target.value })} autoComplete="name" />
                                     </label>
                                     <label className="rotulo-campo">
                                         E-mail
-                                        <input className="campo" required type="email" value={dados.email} onChange={(e) => setDados({ ...dados, email: e.target.value })} autoComplete="email" />
+                                        <input className="campo" required type="email" value={dados.email} onChange={(e) => setDados({ ...dados, email: e.target.value })} autoComplete="email" readOnly={logado} />
                                     </label>
                                     <label className="rotulo-campo">
                                         Celular (WhatsApp)
@@ -165,7 +213,16 @@ function Checkout({ aberto, fechar, itens, cupom, perfil, concluir }) {
                                         ? "Os itens ficam reservados para você. A loja separa o pedido e avisa quando estiver pronto; você paga na hora de retirar."
                                         : "Os itens ficam reservados para você. Depois que a loja confirmar o pagamento, o pedido fica pronto para retirada."}
                                 </p>
-                                <p className="aviso-demo">Ambiente de demonstração: nenhum pagamento real é feito e nenhum dado financeiro é solicitado.</p>
+                                {erro && (
+                                    <p className="erro-campo" role="alert">
+                                        {erro}
+                                    </p>
+                                )}
+                                <p className="aviso-demo">
+                                    {catalogoNoServidor
+                                        ? "Nenhum dado financeiro é pedido aqui: a loja confere o pagamento e confirma a sua reserva."
+                                        : "Ambiente de demonstração: nenhum pagamento real é feito e nenhum dado financeiro é solicitado."}
+                                </p>
                                 <div className="formulario-acoes">
                                     <button type="button" className="botao botao-secundario" onClick={() => setEtapa(0)} disabled={processando}>
                                         Voltar

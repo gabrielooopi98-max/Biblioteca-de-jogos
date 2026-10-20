@@ -1,7 +1,8 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import jogos from "./dadosJogos.js";
-import acessorios from "./acessorios.js";
-import { navegar, useArmazenamento, useAtalho, useEfeitosPonteiro, useRota, useTravarRolagem } from "./hooks.js";
+import jogosLocais from "./dadosJogos.js";
+import acessoriosLocais, { definirCategorias } from "./acessorios.js";
+import { carregarCatalogo, catalogoGuardado } from "./catalogo.js";
+import { navegar, useArmazenamento, useAtalho, useConta, useEfeitosPonteiro, useRota, useTravarRolagem } from "./hooks.js";
 import { LojaContext } from "./LojaContext.js";
 import { calcularPrecoFinal, ehAcessorio, FILTROS_INICIAIS, imagensDoJogo, LIMITE_COMPARAR, recomendar, situacaoReserva } from "./utils.js";
 import Abas from "./components/Abas.jsx";
@@ -11,7 +12,8 @@ import BannerDistribuidora from "./components/BannerDistribuidora.jsx";
 import Destaques from "./components/Destaques.jsx";
 import { GavetaCarrinho } from "./components/Gavetas.jsx";
 import Header from "./components/Header.jsx";
-import { IconeBussola, IconeCarrinho, IconeCasa, IconeComparar, IconeCoracao, IconeEtiqueta, IconeFone, IconeRecibo } from "./components/Icones.jsx";
+import ConviteConta from "./components/ConviteConta.jsx";
+import { IconeBussola, IconeCadeado, IconeCarrinho, IconeCasa, IconeComparar, IconeCoracao, IconeEtiqueta, IconeFone, IconeRecibo } from "./components/Icones.jsx";
 import NaoEncontrada from "./components/NaoEncontrada.jsx";
 import Notificacoes from "./components/Notificacoes.jsx";
 import PaletaComandos from "./components/PaletaComandos.jsx";
@@ -28,6 +30,9 @@ const Pedidos = lazy(() => import("./components/Pedidos.jsx"));
 const Desejos = lazy(() => import("./components/Desejos.jsx"));
 const Comparar = lazy(() => import("./components/Comparar.jsx"));
 const Checkout = lazy(() => import("./components/Checkout.jsx"));
+const Conta = lazy(() => import("./components/Conta.jsx"));
+// painel administrativo: carregado só por quem abre #/admin (a loja não baixa nada dele)
+const Admin = lazy(() => import("./admin/Admin.jsx"));
 
 const TITULOS = {
     loja: "Universal Games: jogos e acessórios com retirada na loja",
@@ -36,19 +41,21 @@ const TITULOS = {
     reservas: "Minhas reservas · Universal Games",
     desejos: "Lista de desejos · Universal Games",
     comparar: "Comparar · Universal Games",
+    conta: "Minha conta · Universal Games",
     404: "Página não encontrada · Universal Games",
 };
 
 // Descrição de cada página para buscadores e para o preview de links compartilhados.
-const DESCRICOES = {
-    loja: `Universal Games: ${jogos.length} jogos para PlayStation e Xbox, além de acessórios para console, PC e celular. Reserve pelo site e retire na loja.`,
-    explorar: `Explore os ${jogos.length} jogos do catálogo com filtros por gênero, plataforma, preço e avaliação.`,
+const descricoes = (totalJogos) => ({
+    loja: `Universal Games: ${totalJogos} jogos para PlayStation e Xbox, além de acessórios para console, PC e celular. Reserve pelo site e retire na loja.`,
+    explorar: `Explore os ${totalJogos} jogos do catálogo com filtros por gênero, plataforma, preço e avaliação.`,
     acessorios: `Celulares, tablets, video games, caixas de som, TV, patinete elétrico, acessórios e mais. Reserve pelo site e retire na loja, com garantia de 12 meses.`,
     reservas: "Suas reservas: situação do pagamento, código de retirada e prazo para retirar na loja.",
     desejos: "Sua lista de desejos com alertas de preço para cada jogo.",
     comparar: "Compare jogos lado a lado: preço, avaliação, plataformas e gêneros.",
+    conta: "Entre ou crie sua conta na Universal Games para acompanhar suas reservas de qualquer aparelho.",
     404: "Página não encontrada na Universal Games.",
-};
+});
 
 function resumir(texto, limite = 155) {
     if (texto.length <= limite) return texto;
@@ -58,9 +65,6 @@ function resumir(texto, limite = 155) {
 function definirMeta(seletor, valor) {
     document.querySelector(seletor)?.setAttribute("content", valor);
 }
-
-const porId = new Map([...jogos, ...acessorios].map((item) => [item.id, item]));
-const buscarJogos = (ids) => ids.map((id) => porId.get(id)).filter(Boolean);
 
 const CATEGORIAS = [
     ["RPG", 2],
@@ -73,29 +77,6 @@ const CATEGORIAS = [
     ["Ficção Científica", 3],
 ];
 
-const vitrine = {
-    destaques: jogos.filter((jogo) => jogo.destaque),
-    ofertas: [...jogos].filter((jogo) => jogo.desconto > 0).sort((a, b) => b.desconto - a.desconto || b.nota - a.nota),
-    melhores: [...jogos].sort((a, b) => b.nota - a.nota),
-    lancamentos: [...jogos].filter((jogo) => jogo.lancamento >= 2021).sort((a, b) => b.lancamento - a.lancamento),
-    categorias: CATEGORIAS.map(([nome, idJogo]) => ({ nome, jogo: porId.get(idJogo), quantidade: jogos.filter((j) => j.generos.includes(nome)).length })),
-    residentEvil: jogos.filter((jogo) => jogo.nome.startsWith("Resident Evil")),
-    soulslike: jogos.filter((jogo) => jogo.generos.includes("Soulslike")).sort((a, b) => b.nota - a.nota),
-    // Jogos publicados pela Warner Bros. Games presentes no catálogo.
-    warner: [38, 92, 4, 93, 28, 27, 94, 95].map((id) => porId.get(id)),
-};
-
-const ABAS = [
-    { titulo: "Novidades", jogos: vitrine.lancamentos.slice(0, 8), filtros: { ordenar: "mais-recentes" } },
-    { titulo: "Mais bem avaliados", jogos: vitrine.melhores.slice(0, 8), filtros: { ordenar: "melhor-avaliados" } },
-    { titulo: "Em promoção", jogos: vitrine.ofertas.slice(0, 8), filtros: { somentePromocao: true, ordenar: "maior-desconto" } },
-    {
-        titulo: "Até R$ 30",
-        jogos: [...jogos].filter((j) => calcularPrecoFinal(j) <= 30).sort((a, b) => b.nota - a.nota).slice(0, 8),
-        filtros: { precoMax: 30, ordenar: "melhor-avaliados" },
-    },
-];
-
 // Até 10 clássicos de cada console vendido pela loja (por appId da Steam).
 const CLASSICOS = [
     ["PS5", [1245620, 2322010, 2651280, 1086940, 2358720, 1903340, 1895880, 1649240, 2515020, 1659420]],
@@ -105,12 +86,40 @@ const CLASSICOS = [
     ["Xbox Series X/S", [1551360, 1240440, 976730, 1097840, 1716740, 1172620, 1057090, 2677660, 1817230, 1091500]],
     ["Xbox 360", [3240220, 489830, 2668510, 12210, 108710, 550, 288470, 22380, 8870, 620]],
 ];
-const porAppId = new Map(jogos.map((jogo) => [jogo.appId, jogo]));
-const ABAS_CLASSICOS = CLASSICOS.map(([plataforma, appIds]) => ({
-    titulo: plataforma,
-    jogos: appIds.map((appId) => porAppId.get(appId)).filter((jogo) => jogo?.plataformas.includes(plataforma)),
-    filtros: { plataformas: [plataforma], ordenar: "melhor-avaliados" },
-}));
+// Listas da página inicial montadas a partir do catálogo (arquivo local ou banco).
+function montarLoja(jogos, acessorios) {
+    const porId = new Map([...jogos, ...acessorios].map((item) => [item.id, item]));
+    const buscarJogos = (ids) => ids.map((id) => porId.get(id)).filter(Boolean);
+    const vitrine = {
+        destaques: jogos.filter((jogo) => jogo.destaque),
+        ofertas: [...jogos].filter((jogo) => jogo.desconto > 0).sort((a, b) => b.desconto - a.desconto || b.nota - a.nota),
+        melhores: [...jogos].sort((a, b) => b.nota - a.nota),
+        lancamentos: [...jogos].filter((jogo) => jogo.lancamento >= 2021).sort((a, b) => b.lancamento - a.lancamento),
+        categorias: CATEGORIAS.map(([nome, idJogo]) => ({ nome, jogo: porId.get(idJogo), quantidade: jogos.filter((j) => j.generos.includes(nome)).length })).filter((c) => c.jogo),
+        residentEvil: jogos.filter((jogo) => jogo.nome.startsWith("Resident Evil")),
+        soulslike: jogos.filter((jogo) => jogo.generos.includes("Soulslike")).sort((a, b) => b.nota - a.nota),
+        // Jogos publicados pela Warner Bros. Games presentes no catálogo.
+        warner: [38, 92, 4, 93, 28, 27, 94, 95].map((id) => porId.get(id)).filter(Boolean),
+    };
+
+    const ABAS = [
+        { titulo: "Novidades", jogos: vitrine.lancamentos.slice(0, 8), filtros: { ordenar: "mais-recentes" } },
+        { titulo: "Mais bem avaliados", jogos: vitrine.melhores.slice(0, 8), filtros: { ordenar: "melhor-avaliados" } },
+        { titulo: "Em promoção", jogos: vitrine.ofertas.slice(0, 8), filtros: { somentePromocao: true, ordenar: "maior-desconto" } },
+        {
+            titulo: "Até R$ 30",
+            jogos: [...jogos].filter((j) => calcularPrecoFinal(j) <= 30).sort((a, b) => b.nota - a.nota).slice(0, 8),
+            filtros: { precoMax: 30, ordenar: "melhor-avaliados" },
+        },
+    ];
+    const porAppId = new Map(jogos.map((jogo) => [jogo.appId, jogo]));
+    const ABAS_CLASSICOS = CLASSICOS.map(([plataforma, appIds]) => ({
+        titulo: plataforma,
+        jogos: appIds.map((appId) => porAppId.get(appId)).filter((jogo) => jogo?.plataformas.includes(plataforma)),
+        filtros: { plataformas: [plataforma], ordenar: "melhor-avaliados" },
+    }));
+    return { porId, buscarJogos, vitrine, ABAS, ABAS_CLASSICOS };
+}
 
 function Carregando() {
     return (
@@ -121,6 +130,31 @@ function Carregando() {
 }
 
 function App() {
+    // Catálogo: começa com o último recebido do banco (ou com os arquivos locais) e se atualiza com o banco.
+    const [catalogo, setCatalogo] = useState(() => {
+        const guardado = catalogoGuardado();
+        if (guardado) definirCategorias(guardado.categorias);
+        return guardado || { jogos: jogosLocais, acessorios: acessoriosLocais };
+    });
+    const { jogos, acessorios } = catalogo;
+    const { porId, buscarJogos, vitrine, ABAS, ABAS_CLASSICOS } = useMemo(() => montarLoja(jogos, acessorios), [jogos, acessorios]);
+    const totalJogos = jogos.length;
+    const recarregarCatalogo = useCallback(
+        () =>
+            carregarCatalogo()
+                .then((dados) => {
+                    if (!dados) return;
+                    definirCategorias(dados.categorias);
+                    setCatalogo(dados);
+                })
+                .catch(() => {
+                    // banco fora do ar: a loja segue com o catálogo que já tem
+                }),
+        [],
+    );
+    useEffect(() => {
+        recarregarCatalogo();
+    }, [recarregarCatalogo]);
     const [idsCarrinho, setIdsCarrinho] = useArmazenamento("bj:carrinho", []);
     const [idsDesejos, setIdsDesejos] = useArmazenamento("bj:desejos", []);
     const [idsVistos, setIdsVistos] = useArmazenamento("bj:vistos", []);
@@ -139,6 +173,8 @@ function App() {
     const proximoId = useRef(0);
 
     const rota = useRota();
+    const [conta, setConta] = useConta();
+    const usuario = conta.usuario;
     // saiu da página Produtos: na próxima visita ela abre em "Todos"
     const paginaAnterior = useRef(rota.pagina);
     useEffect(() => {
@@ -150,10 +186,10 @@ function App() {
     const jogoAberto = rota.pagina === "jogo" && aberto && !ehAcessorio(aberto) ? aberto : null;
     const produtoAberto = rota.pagina === "produto" && ehAcessorio(aberto) ? aberto : null;
 
-    const carrinho = useMemo(() => buscarJogos(idsCarrinho), [idsCarrinho]);
-    const desejos = useMemo(() => buscarJogos(idsDesejos), [idsDesejos]);
-    const vistos = useMemo(() => buscarJogos(idsVistos), [idsVistos]);
-    const comparando = useMemo(() => buscarJogos(idsComparar), [idsComparar]);
+    const carrinho = useMemo(() => buscarJogos(idsCarrinho), [idsCarrinho, buscarJogos]);
+    const desejos = useMemo(() => buscarJogos(idsDesejos), [idsDesejos, buscarJogos]);
+    const vistos = useMemo(() => buscarJogos(idsVistos), [idsVistos, buscarJogos]);
+    const comparando = useMemo(() => buscarJogos(idsComparar), [idsComparar, buscarJogos]);
 
     // Reservas que ainda vão ser retiradas (aguardando confirmação ou prontas).
     // A situação depende da hora: setTique redesenha a tela quando a loja confirma um pagamento.
@@ -164,20 +200,25 @@ function App() {
 
     useTravarRolagem(carrinhoAberto || paletaAberta || checkout.aberto);
 
+    // nova página: volta ao topo (só quando a página muda, não quando o catálogo do banco chega)
     useEffect(() => {
         window.scrollTo({ top: 0 });
+    }, [rota.pagina, rota.id]);
+
+    useEffect(() => {
         // jogo inexistente também é 404
         const pagina = (rota.pagina === "jogo" && !jogoAberto) || (rota.pagina === "produto" && !produtoAberto) ? "404" : rota.pagina;
         const item = jogoAberto || produtoAberto;
         const titulo = item ? `${item.nome} · Universal Games` : TITULOS[pagina] || TITULOS.loja;
-        const descricao = item ? resumir(`${item.nome}: ${item.descricao}`) : DESCRICOES[pagina] || DESCRICOES.loja;
+        const textos = descricoes(totalJogos);
+        const descricao = item ? resumir(`${item.nome}: ${item.descricao}`) : textos[pagina] || textos.loja;
         document.title = titulo;
         definirMeta('meta[name="description"]', descricao);
         definirMeta('meta[property="og:title"]', titulo);
         definirMeta('meta[property="og:description"]', descricao);
         definirMeta('meta[name="robots"]', pagina === "404" ? "noindex" : "index, follow");
         if (jogoAberto) setIdsVistos((ids) => [jogoAberto.id, ...ids.filter((id) => id !== jogoAberto.id)].slice(0, 12));
-    }, [rota.pagina, jogoAberto, produtoAberto, setIdsVistos]);
+    }, [rota.pagina, jogoAberto, produtoAberto, setIdsVistos, totalJogos]);
 
     // Com a loja aberta e o navegador ocioso, já baixa as páginas mais visitadas: a navegação fica instantânea.
     useEffect(() => {
@@ -212,7 +253,7 @@ function App() {
     const abrirJogo = useCallback((id) => {
         setCarrinhoAberto(false);
         navegar(ehAcessorio(porId.get(id)) ? `/produto/${id}` : `/jogo/${id}`);
-    }, []);
+    }, [porId]);
 
     const estaNoCarrinho = useCallback((id) => idsCarrinho.includes(id), [idsCarrinho]);
     const estaNosDesejos = useCallback((id) => idsDesejos.includes(id), [idsDesejos]);
@@ -220,6 +261,14 @@ function App() {
 
     const adicionarAoCarrinho = useCallback(
         (jogo) => {
+            if (jogo.esgotado) {
+                notificar(
+                    <>
+                        <strong>{jogo.nome}</strong> está esgotado no momento.
+                    </>,
+                );
+                return;
+            }
             if (idsCarrinho.includes(jogo.id)) {
                 setCarrinhoAberto(true);
                 return;
@@ -266,18 +315,68 @@ function App() {
         [idsComparar, setIdsComparar, notificar],
     );
 
+    // Cancelar: no banco (devolve o estoque lá) ou, na demonstração, só neste navegador.
     const cancelarReserva = useCallback(
-        (numero) => {
-            setPedidos((lista) => lista.map((p) => (p.numero === numero ? { ...p, status: "cancelado", canceladoEm: new Date().toISOString() } : p)));
+        async (numero) => {
             const pedido = pedidos.find((p) => p.numero === numero);
-            notificar(pedido?.metodo === "loja" ? `Reserva ${numero} cancelada.` : `Reserva ${numero} cancelada. O valor volta pelo mesmo meio de pagamento.`);
+            if (!pedido) return;
+            if (pedido.remoto) {
+                const { mensagemDeErro } = await import("./supabase.js");
+                const { clientes } = await import("./conta.js");
+                const { error } = await clientes.rpc("cancelar_reserva", { p_numero: numero, p_codigo: pedido.retirada.codigo });
+                if (error) {
+                    notificar(mensagemDeErro(error));
+                    return;
+                }
+                setPedidos((lista) => lista.map((p) => (p.numero === numero ? { ...p, situacaoLoja: { ...p.situacaoLoja, status: "cancelado", cancelado_em: new Date().toISOString() } } : p)));
+            } else {
+                setPedidos((lista) => lista.map((p) => (p.numero === numero ? { ...p, status: "cancelado", canceladoEm: new Date().toISOString() } : p)));
+            }
+            const pago = pedido.metodo !== "loja" && (!pedido.remoto || pedido.situacaoLoja?.pagamento === "confirmado");
+            notificar(pago ? `Reserva ${numero} cancelada. O valor volta pelo mesmo meio de pagamento.` : `Reserva ${numero} cancelada.`);
         },
         [pedidos, setPedidos, notificar],
     );
 
-    // Demonstração: quando a "loja confirma o pagamento", avisa que o pedido está pronto para retirada.
+    // Com o banco: confere a situação das reservas em aberto (a loja confirma pelo painel) e avisa quando ficam prontas.
+    useEffect(() => {
+        const abertas = pedidos.filter((p) => p.remoto && ["aguardando", "pronto"].includes(situacaoReserva(p).id));
+        if (!abertas.length) return;
+        let ativo = true;
+        async function atualizar() {
+            const { clientes } = await import("./conta.js");
+            const { data, error } = await clientes.rpc("consultar_reservas", { p_reservas: abertas.map((p) => ({ numero: p.numero, codigo: p.retirada.codigo })) });
+            if (!ativo || error || !data) return;
+            const novas = new Map(data.filter((d) => {
+                const antes = abertas.find((p) => p.numero === d.numero)?.situacaoLoja || {};
+                return antes.status !== d.status || antes.pagamento !== d.pagamento;
+            }).map((d) => [d.numero, d]));
+            if (!novas.size) return;
+            for (const d of novas.values()) {
+                const antes = abertas.find((p) => p.numero === d.numero)?.situacaoLoja || {};
+                if (d.status === "confirmado" && antes.status !== "confirmado") {
+                    notificar(
+                        <>
+                            Pedido <strong>{d.numero}</strong> pronto para retirada na loja
+                        </>,
+                        { acao: { rotulo: "Ver reserva", aoClicar: () => navegar("/reservas") } },
+                    );
+                }
+            }
+            setPedidos((lista) => lista.map((p) => (novas.has(p.numero) ? { ...p, situacaoLoja: novas.get(p.numero) } : p)));
+        }
+        atualizar();
+        const intervalo = setInterval(atualizar, 30000);
+        return () => {
+            ativo = false;
+            clearInterval(intervalo);
+        };
+    }, [pedidos, setPedidos, notificar]);
+
+    // Demonstração (sem banco): quando a "loja confirma o pagamento", avisa que o pedido está pronto para retirada.
     useEffect(() => {
         const tempos = pedidos
+            .filter((pedido) => !pedido.remoto)
             .map((pedido) => ({ pedido, situacao: situacaoReserva(pedido) }))
             .filter(({ situacao }) => situacao.id === "aguardando")
             .map(({ pedido, situacao }) =>
@@ -356,6 +455,7 @@ function App() {
         { id: "reservas", rotulo: "Minhas reservas", dica: `${reservasAtivas} ativas · código de retirada`, Icone: IconeRecibo, executar: () => navegar("/reservas") },
         { id: "desejos", rotulo: "Lista de desejos", dica: "alertas de preço", Icone: IconeCoracao, executar: () => navegar("/desejos") },
         { id: "comparar", rotulo: "Comparar jogos", dica: `${comparando.length} selecionados`, Icone: IconeComparar, executar: () => navegar("/comparar") },
+        { id: "conta", rotulo: usuario ? "Minha conta" : "Entrar ou criar conta", dica: usuario?.email || "acompanhe suas reservas", Icone: IconeCadeado, executar: () => navegar("/conta") },
         { id: "carrinho", rotulo: "Abrir carrinho", dica: `${carrinho.length} itens`, Icone: IconeCarrinho, executar: () => setCarrinhoAberto(true) },
     ];
 
@@ -383,6 +483,8 @@ function App() {
                 return <Desejos itens={desejos} alertas={alertas} definirAlerta={definirAlerta} />;
             case "comparar":
                 return <Comparar jogos={comparando} />;
+            case "conta":
+                return <Conta estado={conta} setConta={setConta} jogos={jogos} />;
             default:
                 return (
                     <>
@@ -438,6 +540,14 @@ function App() {
         }
     }
 
+    if (rota.pagina === "admin") {
+        return (
+            <Suspense fallback={<Carregando />}>
+                <Admin secao={rota.secao} parametro={rota.parametro} aoAlterarCatalogo={recarregarCatalogo} />
+            </Suspense>
+        );
+    }
+
     return (
         <LojaContext.Provider value={loja}>
             <a
@@ -458,6 +568,8 @@ function App() {
                 alertas={alertasAtingidos}
                 abrirCarrinho={() => setCarrinhoAberto(true)}
                 abrirPaleta={abrirPaleta}
+                usuario={usuario}
+                contaPronta={conta.pronta}
             />
 
             <main id="conteudo" className="conteudo" tabIndex={-1}>
@@ -484,12 +596,18 @@ function App() {
                         fechar={() => setCheckout((c) => ({ ...c, aberto: false }))}
                         itens={carrinho}
                         cupom={cupom}
-                        perfil={perfil}
+                        perfil={
+                            usuario
+                                ? { ...perfil, nome: usuario.user_metadata?.nome || perfil.nome, email: usuario.email, telefone: usuario.user_metadata?.telefone || perfil.telefone || "" }
+                                : perfil
+                        }
+                        logado={Boolean(usuario)}
                         concluir={concluirPedido}
                     />
                 </Suspense>
             )}
             <Notificacoes itens={notificacoes} remover={removerNotificacao} />
+            <ConviteConta mostrar={conta.pronta && !usuario && rota.pagina !== "conta" && !checkout.aberto} />
         </LojaContext.Provider>
     );
 }
