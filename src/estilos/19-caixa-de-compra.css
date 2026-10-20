@@ -1,0 +1,326 @@
+/* ==========================================================================
+   Páginas de jogo e produto: caixa de compra única, ficha técnica e relacionados
+   ========================================================================== */
+
+/* botão de ação principal (Reservar agora): dourado cheio, sem depender do hover */
+.botao-cheio {
+  border: 1px solid var(--ouro-hover);
+  background: var(--ouro);
+  color: var(--ouro-texto);
+  font-weight: 650;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset, 0 6px 18px rgba(236, 182, 33, 0.28);
+}
+
+.botao-cheio:hover:not(:disabled) {
+  background: var(--ouro-vivo);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset, 0 10px 26px rgba(236, 182, 33, 0.38);
+}
+
+.botao-cheio:active:not(:disabled) {
+  scale: 0.98;
+}
+
+.botao-cheio:disabled {
+  border-color: var(--borda-2);
+  background: var(--sup-3);
+  color: var(--texto-3);
+  box-shadow: none;
+}
+
+.caixa-compra {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.caixa-situacao {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 8px;
+  color: var(--ok);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.caixa-situacao::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.caixa-situacao.poucos {
+  color: #c2410c;
+}
+
+.caixa-situacao.esgotado {
+  color: var(--perigo);
+}
+
+.caixa-preco {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.caixa-de {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--texto-3);
+  font-size: 14.5px;
+}
+
+.caixa-valor {
+  font-family: var(--fonte-titulo);
+  font-size: clamp(28px, 2.6vw, 34px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.caixa-parcelas {
+  color: var(--texto-2);
+  font-size: 14px;
+}
+
+.caixa-pix {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border: 1px solid color-mix(in srgb, var(--ok) 30%, transparent);
+  border-radius: var(--raio);
+  background: color-mix(in srgb, var(--ok) 7%, var(--sup-1));
+  color: var(--ok);
+}
+
+.caixa-pix span {
+  display: flex;
+  flex-direction: column;
+  color: var(--texto-2);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.caixa-pix span span {
+  display: block;
+  color: var(--texto-2);
+}
+
+.caixa-pix strong {
+  color: var(--texto);
+  font-size: 16.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.caixa-pix small {
+  color: var(--ok);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.caixa-economia {
+  margin-top: -6px;
+  color: var(--ouro-escuro);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.caixa-plataformas {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.caixa-plataformas > span {
+  color: var(--texto-3);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.caixa-plataformas > div,
+.jogo-meta-plataformas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.caixa-plataforma {
+  padding: 3px 9px;
+  border: 1px solid var(--borda-2);
+  border-radius: 6px;
+  background: var(--sup-1);
+  color: var(--texto);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.caixa-botoes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.caixa-secundarias {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.caixa-garantias {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--borda);
+}
+
+.caixa-garantias li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--texto-2);
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+.caixa-garantias svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--ouro-escuro);
+}
+
+.caixa-garantias strong {
+  color: var(--texto);
+  font-weight: 600;
+}
+
+.caixa-garantias small {
+  display: block;
+  color: var(--texto-3);
+  font-size: 12.5px;
+}
+
+/* página do jogo */
+.compra {
+  padding: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.jogo-nota {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--texto-2);
+}
+
+.jogo-nota strong {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--inverso);
+  color: var(--inverso-texto);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.jogo-informacoes {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 32px;
+  margin-top: 8px;
+}
+
+.jogo-informacoes .jogo-bloco {
+  margin-top: 24px;
+}
+
+.ficha-lista {
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+  overflow: hidden;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-g);
+  background: var(--sup-1);
+}
+
+.ficha-lista div {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
+.ficha-lista div + div {
+  border-top: 1px solid var(--borda);
+}
+
+.ficha-lista dt {
+  color: var(--texto-3);
+}
+
+.ficha-lista dd {
+  color: var(--texto);
+}
+
+.ficha-lista + .produto-specs {
+  margin-top: 12px;
+}
+
+/* página do produto */
+.produto-compra {
+  align-items: stretch;
+  padding: 22px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-g);
+  background: var(--sup-1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.produto-compra .avaliacao,
+.produto-compra .produto-nota {
+  align-self: flex-start;
+}
+
+/* relacionados: uma fileira cheia no computador */
+.grade-relacionados {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+@media (max-width: 1180px) {
+  .grade-relacionados {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .grade-relacionados > :nth-child(5) {
+    display: none;
+  }
+
+  .jogo-informacoes {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}
+
+@media (max-width: 860px) {
+  .grade-relacionados {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .grade-relacionados > :nth-child(5) {
+    display: none;
+  }
+
+  .produto-compra {
+    padding: 16px;
+  }
+}

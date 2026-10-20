@@ -1,0 +1,612 @@
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scrollbar-gutter: stable;
+  scroll-padding-top: calc(var(--altura-barra) + 16px);
+  -webkit-text-size-adjust: 100%;
+}
+
+html.rolagem-travada {
+  overflow: hidden;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 16px;
+  line-height: 1.55;
+  font-optical-sizing: auto;
+  /* l com cauda e dígitos mais legíveis */
+  font-feature-settings: "cv05", "cv08";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: inherit;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+h1,
+h2,
+h3,
+.slide-nome,
+.logo-texto,
+.preco-grande .preco-final,
+.estatisticas strong,
+.oferta-grande .oferta-nome,
+.categoria-texto strong {
+  font-family: var(--fonte-titulo);
+  font-feature-settings: normal;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+fieldset {
+  border: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--foco);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--ouro-vivo);
+  color: var(--ouro-texto);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--sup-3);
+  border: 2px solid var(--fundo);
+  border-radius: 99px;
+}
+
+kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: 1px solid var(--borda-2);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--sup-2);
+  color: var(--texto-2);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  line-height: 1;
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums;
+}
+
+/* visível só para leitores de tela e buscadores */
+.so-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.pular-conteudo {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 1000;
+  padding: 10px 14px;
+  border-radius: var(--raio);
+  background: var(--inverso);
+  color: var(--inverso-texto);
+  font-weight: 500;
+  transform: translateY(-160%);
+}
+
+.pular-conteudo:focus {
+  transform: none;
+}
+
+.conteudo:focus {
+  outline: none;
+}
+
+.imagem {
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.imagem.carregada {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   Peças comuns
+   ========================================================================== */
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: var(--raio);
+  font-size: 15.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color 0.25s var(--curva),
+    border-color 0.25s var(--curva),
+    color 0.35s var(--curva),
+    box-shadow 0.45s var(--curva),
+    translate 0.35s var(--curva),
+    scale 0.45s var(--mola);
+}
+
+.botao:active:not(:disabled) {
+  scale: 0.96;
+  transition-duration: 0.08s;
+}
+
+.botao:disabled {
+  opacity: 0.45;
+}
+
+/* Botões de contorno: fundo transparente e borda clara. No hover a cor da borda
+   se espalha a partir do ponto onde o cursor entrou (--bx/--by, ver useEfeitosPonteiro)
+   e recolhe na direção em que ele sai. */
+.botao-primario,
+.botao-secundario,
+.botao-vidro,
+.carrinho-botao {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid var(--inverso);
+  background: none;
+  color: var(--texto);
+}
+
+.botao-secundario {
+  border-color: color-mix(in srgb, var(--inverso) 55%, transparent);
+}
+
+.botao-primario::before,
+.botao-secundario::before,
+.botao-vidro::before,
+.carrinho-botao::before {
+  content: "";
+  position: absolute;
+  top: var(--by, 50%);
+  left: var(--bx, 50%);
+  z-index: -1;
+  width: 260%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--inverso);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.65s var(--curva);
+  pointer-events: none;
+}
+
+.botao-primario:hover:not(:disabled),
+.botao-secundario:hover:not(:disabled),
+.botao-vidro:hover:not(:disabled),
+.botao-secundario.ativo,
+.carrinho-botao:hover {
+  border-color: var(--inverso);
+  color: var(--inverso-texto);
+}
+
+.botao-primario:hover:not(:disabled)::before,
+.botao-secundario:hover:not(:disabled)::before,
+.botao-vidro:hover:not(:disabled)::before,
+.botao-secundario.ativo::before,
+.carrinho-botao:hover::before {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* botão principal: contorno dourado que se enche de dourado no hover */
+/* contorno no tom mais fundo do dourado: o claro some sobre o branco */
+.botao-primario {
+  border-color: var(--ouro);
+}
+
+.botao-primario::before {
+  background: var(--ouro);
+}
+
+.botao-primario:hover:not(:disabled) {
+  border-color: var(--ouro);
+  color: var(--ouro-texto);
+}
+
+.botao-fantasma {
+  height: 34px;
+  padding: 0 10px;
+  color: var(--texto-2);
+}
+
+.botao-fantasma:hover:not(:disabled),
+.botao-fantasma.ativo {
+  background: var(--sup-2);
+  color: var(--texto);
+}
+
+.botao-perigo {
+  background: var(--perigo);
+  color: #fff;
+}
+
+.botao-perigo:hover {
+  filter: brightness(1.1);
+}
+
+.botao-largo {
+  width: 100%;
+}
+
+.botao-grande {
+  height: 46px;
+  font-size: 16.5px;
+}
+
+.icone-botao {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: var(--raio);
+  color: var(--texto-2);
+  transition: background-color 0.2s var(--curva), color 0.2s ease, border-color 0.2s ease, scale 0.45s var(--mola);
+}
+
+.icone-botao:active {
+  scale: 0.9;
+  transition-duration: 0.08s;
+}
+
+.icone-botao:hover,
+.icone-botao.ativo {
+  background: var(--sup-2);
+  color: var(--texto);
+}
+
+.icone-botao.borda {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--borda);
+}
+
+.icone-botao.borda:hover {
+  border-color: var(--borda-2);
+}
+
+.link-mais {
+  min-height: 32px;
+  padding-block: 6px;
+  color: var(--texto-2);
+  font-size: 14.5px;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+
+.link-mais:hover {
+  color: var(--texto);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.rotulo {
+  color: var(--texto-3);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.campo {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--borda-2);
+  border-radius: var(--raio);
+  background: var(--sup-1);
+  color: var(--texto);
+  font-size: 15.5px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+textarea.campo {
+  height: auto;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.campo::placeholder {
+  color: var(--texto-3);
+}
+
+.campo:focus {
+  border-color: var(--texto-2);
+  box-shadow: 0 0 0 3px var(--sup-3);
+}
+
+.campo:user-invalid,
+.campo[aria-invalid="true"] {
+  border-color: var(--perigo);
+}
+
+.campo::-webkit-search-cancel-button {
+  filter: grayscale(1);
+}
+
+.erro-campo {
+  width: 100%;
+  color: var(--perigo);
+  font-size: 13.5px;
+}
+
+.texto-apagado,
+.nota-rodape {
+  color: var(--texto-3);
+  font-size: 13.5px;
+}
+
+.nota-rodape {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.girador {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--borda-2);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: girar 0.7s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes subir {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 9px;
+  border: 1px solid var(--borda-2);
+  border-radius: 99px;
+  color: var(--texto-2);
+  font-size: 13.5px;
+  white-space: nowrap;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease, translate 0.35s var(--curva);
+}
+
+button.tag:hover {
+  border-color: var(--texto-2);
+  background: var(--sup-2);
+  color: var(--texto);
+  translate: 0 -1px;
+}
+
+button.tag:active {
+  translate: 0 0;
+}
+
+.plataformas {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.plataforma {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--sup-2);
+  color: var(--texto-2);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+
+/* Preço */
+
+.preco {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.preco-desconto {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--ouro);
+  color: var(--ouro-texto);
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.preco s {
+  color: var(--texto-3);
+  font-size: 13.5px;
+}
+
+.preco-final {
+  font-weight: 700;
+}
+
+.preco-pequeno .preco-final {
+  font-size: 14.5px;
+}
+
+.preco-medio .preco-final {
+  font-size: 15.5px;
+}
+
+.preco-grande .preco-final {
+  font-size: 30px;
+  letter-spacing: -0.015em;
+}
+
+.preco-grande .preco-desconto {
+  font-size: 15.5px;
+  padding: 3px 8px;
+}
+
+.preco-grande s {
+  font-size: 15.5px;
+}
+
+/* Avaliação: barra monocromática + nota */
+
+.avaliacao {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--texto-2);
+  font-size: 14.5px;
+  white-space: nowrap;
+}
+
+.avaliacao-barra {
+  position: relative;
+  width: 44px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: var(--sup-3);
+}
+
+.avaliacao-barra span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: var(--texto);
+}
+
+.avaliacao-nota {
+  color: var(--texto);
+  font-variant-numeric: tabular-nums;
+  font-size: 13.5px;
+}
+
+.na-biblioteca {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--texto-2);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.selo {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--ouro);
+  color: var(--ouro-texto);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}

@@ -1,0 +1,496 @@
+/* ==========================================================================
+   Biblioteca, pedidos e desejos
+   ========================================================================== */
+
+.lista-biblioteca,
+.lista-pedidos,
+.lista-desejos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.lista-biblioteca {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr));
+}
+
+.item-biblioteca,
+.desejo {
+  display: flex;
+  gap: 16px;
+  padding: 12px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-g);
+  background: var(--sup-1);
+  transition: border-color 0.2s;
+}
+
+.item-biblioteca:hover,
+.desejo:hover {
+  border-color: var(--borda-2);
+}
+
+.item-biblioteca-imagem,
+.desejo-imagem {
+  width: 184px;
+  aspect-ratio: 460 / 215;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: var(--raio);
+  background: var(--sup-2);
+}
+
+.item-biblioteca-imagem img,
+.desejo-imagem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.item-biblioteca-corpo,
+.desejo-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.item-biblioteca-nome,
+.desejo-nome {
+  font-size: 16.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.item-biblioteca-nome:hover,
+.desejo-nome:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.item-biblioteca-meta {
+  color: var(--texto-3);
+  font-size: 14px;
+}
+
+.item-biblioteca-meta a {
+  font-variant-numeric: tabular-nums;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.chave {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: auto;
+  padding: 3px 3px 3px 12px;
+  border: 1px solid var(--borda-2);
+  border-radius: var(--raio);
+  background: var(--fundo-2);
+}
+
+.chave code {
+  min-width: 190px;
+  font-variant-numeric: tabular-nums;
+  font-size: 14.5px;
+  letter-spacing: 0.06em;
+}
+
+.chave .icone-botao {
+  width: 30px;
+  height: 30px;
+}
+
+.pedido {
+  padding: 16px 18px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-g);
+  background: var(--sup-1);
+}
+
+.pedido.reembolsado {
+  opacity: 0.65;
+}
+
+.pedido-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pedido-topo div {
+  display: flex;
+  flex-direction: column;
+}
+
+.pedido-topo div span {
+  color: var(--texto-3);
+  font-size: 14px;
+}
+
+.pedido-numero {
+  font-variant-numeric: tabular-nums;
+  font-size: 15.5px;
+  font-weight: 500;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--borda-2);
+  border-radius: 99px;
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ok);
+}
+
+.status-reembolsado::before {
+  background: var(--texto-3);
+}
+
+.pedido-presente {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  color: var(--texto-2);
+  font-size: 14.5px;
+}
+
+.pedido-presente em {
+  width: 100%;
+  color: var(--texto-3);
+}
+
+.pedido-itens {
+  display: flex;
+  flex-direction: column;
+  margin: 12px 0;
+  border-top: 1px solid var(--borda);
+}
+
+.pedido-itens li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--borda);
+}
+
+.pedido-itens img {
+  width: 72px;
+  aspect-ratio: 460 / 215;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.pedido-itens span:nth-of-type(1) {
+  flex: 1;
+}
+
+.pedido-rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pedido-total {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  color: var(--texto-3);
+}
+
+.pedido-total strong {
+  color: var(--texto);
+  font-size: 21px;
+  font-weight: 500;
+}
+
+.pedido-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.confirmacao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: var(--texto-2);
+  font-size: 14.5px;
+}
+
+.pedido-prazo {
+  margin-top: 8px;
+  color: var(--texto-3);
+  font-size: 13.5px;
+}
+
+/* --- Reserva com retirada na loja --- */
+
+.status-aguardando::before {
+  background: var(--ouro);
+  animation: ponto-aguardando 1.6s ease-in-out infinite;
+}
+
+@keyframes ponto-aguardando {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.status-pronto {
+  border-color: color-mix(in srgb, var(--ok) 45%, transparent);
+  color: var(--ok);
+}
+
+.status-vencido::before {
+  background: var(--perigo);
+}
+
+.status-cancelado::before {
+  background: var(--texto-3);
+}
+
+.pedido.reserva-cancelado {
+  opacity: 0.65;
+}
+
+/* passo atual da reserva: aguardando a loja, pronta para retirar ou prazo encerrado */
+.reserva-etapa {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 14px 0 4px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--ouro) 45%, transparent);
+  border-radius: var(--raio);
+  background: var(--ouro-suave);
+  font-size: 14.5px;
+}
+
+.reserva-etapa svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--ouro-escuro);
+}
+
+.reserva-etapa div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reserva-etapa span {
+  color: var(--texto-2);
+}
+
+.reserva-etapa.pronta {
+  border-color: color-mix(in srgb, var(--ok) 40%, transparent);
+  background: color-mix(in srgb, var(--ok) 9%, transparent);
+}
+
+.reserva-etapa.pronta svg {
+  color: var(--ok);
+}
+
+.reserva-etapa.vencida {
+  border-color: color-mix(in srgb, var(--perigo) 40%, transparent);
+  background: color-mix(in srgb, var(--perigo) 7%, transparent);
+}
+
+.reserva-etapa.vencida svg {
+  color: var(--perigo);
+}
+
+.reserva-codigo {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--sup-3);
+  color: var(--texto);
+  letter-spacing: 0.08em;
+}
+
+/* onde retirar: checkout, confirmação e Minhas reservas */
+.retirada-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-g);
+  background: var(--sup-1);
+  font-size: 14.5px;
+  text-align: left;
+}
+
+.retirada-info > svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--ouro-escuro);
+}
+
+.retirada-info div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.retirada-info span {
+  color: var(--texto-2);
+}
+
+.retirada-info small {
+  margin-top: 6px;
+  color: var(--texto-3);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.lista-pedidos {
+  margin-top: 14px;
+}
+
+.pagina .retirada-info.compacta {
+  margin-top: 20px;
+}
+
+.sucesso .retirada-info {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* código de retirada em destaque na confirmação */
+.retirada-codigo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  max-width: 420px;
+  padding: 16px;
+  border: 1px dashed var(--ouro);
+  border-radius: var(--raio-g);
+  background: var(--ouro-suave);
+}
+
+.retirada-codigo span,
+.retirada-codigo small {
+  color: var(--texto-2);
+  font-size: 13.5px;
+}
+
+.retirada-codigo strong {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+}
+
+/* carrinho: lembrete de que a compra é retirada na loja */
+.retirada-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--sup-1);
+  color: var(--texto-2);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.retirada-aviso svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--ouro-escuro);
+}
+
+.retirada-aviso strong {
+  color: var(--texto);
+}
+
+.desejo-acoes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.alerta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin-top: auto;
+  color: var(--texto-3);
+  font-size: 14px;
+}
+
+.alerta button {
+  color: var(--texto-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.alerta button:hover {
+  color: var(--texto);
+}
+
+.alerta.atingido {
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: var(--inverso);
+  color: var(--inverso-texto);
+}
+
+.alerta.atingido button {
+  color: inherit;
+}
+
+.alerta-form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.alerta-prefixo {
+  color: var(--texto-3);
+  font-variant-numeric: tabular-nums;
+  font-size: 13.5px;
+}
+
+.alerta-form .campo {
+  width: 110px;
+  height: 32px;
+  font-variant-numeric: tabular-nums;
+}
+
+.alerta-form .botao {
+  height: 32px;
+}

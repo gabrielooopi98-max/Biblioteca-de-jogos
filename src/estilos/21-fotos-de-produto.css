@@ -1,0 +1,13 @@
+/* fotos de produto (marcadas com #produto em src/utilidades/funcoes.js): sempre inteiras, sobre branco, em qualquer tela */
+img[src$="#produto"] {
+  box-sizing: border-box;
+  padding: 7%;
+  background: #fff;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+.produto-imagem:has(img[src$="#produto"]),
+.produto-vitrine:has(img[src$="#produto"]) {
+  background: #fff;
+}

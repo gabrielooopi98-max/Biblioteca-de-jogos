@@ -1,4 +1,4 @@
-// Gera supabase/seed.sql com o catálogo atual (src/dadosJogos.js e src/acessorios.js).
+// Gera supabase/seed.sql com o catálogo atual (src/dados/jogos.js e src/dados/produtos.js).
 // Preserva os ids e as imagens de cada item. Usa "on conflict do nothing": rodar de novo não
 // sobrescreve o que já foi editado pelo painel.
 // Uso: node scripts/gerar-seed.mjs
@@ -6,8 +6,8 @@ import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const raiz = fileURLToPath(new URL("..", import.meta.url));
-const { default: jogos } = await import(new URL("../src/dadosJogos.js", import.meta.url));
-const { default: acessorios, CATEGORIAS_ACESSORIOS, MARCA_ACESSORIOS } = await import(new URL("../src/acessorios.js", import.meta.url));
+const { default: jogos } = await import(new URL("../src/dados/jogos.js", import.meta.url));
+const { default: acessorios, CATEGORIAS_ACESSORIOS, MARCA_ACESSORIOS } = await import(new URL("../src/dados/produtos.js", import.meta.url));
 
 const texto = (v) => (v == null ? "null" : `'${String(v).replace(/'/g, "''")}'`);
 const numero = (v) => (v == null ? "null" : String(v));

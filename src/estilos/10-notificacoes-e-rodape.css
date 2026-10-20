@@ -1,0 +1,198 @@
+/* ==========================================================================
+   Notificações
+   ========================================================================== */
+
+.notificacoes {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(380px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.notificacao {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  overflow: hidden;
+  border: 1px solid var(--borda-2);
+  border-radius: var(--raio-g);
+  background: var(--sup-1);
+  box-shadow: var(--sombra);
+  pointer-events: auto;
+  animation: notificacao-entrar 0.5s var(--mola);
+}
+
+/* tempo restante até a notificação sumir */
+.notificacao::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--texto-3);
+  opacity: 0.5;
+  transform-origin: left;
+  animation: esvaziar var(--duracao, 4.2s) linear forwards;
+}
+
+.notificacao.saindo {
+  animation: notificacao-sair 0.24s ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes notificacao-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.94);
+  }
+}
+
+@keyframes notificacao-sair {
+  to {
+    opacity: 0;
+    transform: translateX(24px) scale(0.97);
+  }
+}
+
+@keyframes esvaziar {
+  to {
+    transform: scaleX(0);
+  }
+}
+
+.notificacao img {
+  width: 64px;
+  aspect-ratio: 460 / 215;
+  flex-shrink: 0;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.notificacao-icone {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--sup-3);
+}
+
+.notificacao p {
+  flex: 1;
+  color: var(--texto-2);
+  font-size: 14.5px;
+}
+
+.notificacao p strong {
+  color: var(--texto);
+  font-weight: 500;
+}
+
+.notificacao-acao {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--raio-p);
+  background: var(--inverso);
+  color: var(--inverso-texto);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.notificacao-acao:hover {
+  background: var(--inverso-hover);
+}
+
+.notificacao-fechar {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  color: var(--texto-3);
+}
+
+.notificacao-fechar:hover {
+  background: var(--sup-2);
+  color: var(--texto);
+}
+
+/* ==========================================================================
+   Rodapé
+   ========================================================================== */
+
+.rodape {
+  border-top: 1px solid var(--borda);
+  background: var(--fundo-2);
+}
+
+.rodape-conteudo {
+  display: grid;
+  grid-template-columns: 2fr repeat(3, 1fr);
+  gap: 32px;
+  max-width: var(--largura);
+  margin: 0 auto;
+  padding: 48px var(--margem) 32px;
+}
+
+.rodape-marca p {
+  max-width: 320px;
+  margin-top: 12px;
+  color: var(--texto-3);
+}
+
+.rodape-coluna {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--texto-2);
+}
+
+.rodape-coluna a {
+  align-self: flex-start;
+  padding-block: 5px;
+}
+
+.rodape-coluna h3 {
+  margin-bottom: 4px;
+  color: var(--texto-3);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rodape-coluna a:hover {
+  color: var(--texto);
+}
+
+.rodape-coluna span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.rodape-base {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  max-width: var(--largura);
+  margin: 0 auto;
+  padding: 18px var(--margem) 28px;
+  border-top: 1px solid var(--borda);
+  color: var(--texto-3);
+  font-size: 13.5px;
+}

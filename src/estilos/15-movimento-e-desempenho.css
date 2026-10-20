@@ -1,0 +1,167 @@
+/* ==========================================================================
+   Movimento: entradas, carregamento e respostas táteis
+   Usa as propriedades individuais translate/scale para não brigar com os
+   transform que cada componente já define.
+   ========================================================================== */
+
+/* Esqueleto: placeholder suave enquanto a arte carrega. Estático de propósito: o brilho
+   animado repintava cada card carregando a cada quadro e travava a rolagem no celular. */
+:where(.cartao-imagem, .oferta-imagem, .linha-imagem, .hero-capa, .evento-jogo, .slide-capturas button, .galeria-tira button, .previa-captura, .categoria):has(> img.imagem:not(.carregada)) {
+  background-image: linear-gradient(100deg, transparent 15%, var(--sup-3) 50%, transparent 85%);
+}
+
+/* A arte chega desfocada e assenta no lugar */
+.imagem.carregada {
+  animation: imagem-revelar 0.7s var(--curva);
+}
+
+/* arte que já tem filtro próprio só faz fade + escala */
+.categoria .imagem.carregada {
+  animation-name: imagem-assentar;
+}
+
+@keyframes imagem-revelar {
+  from {
+    opacity: 0;
+    scale: 1.04;
+  }
+}
+
+@keyframes imagem-assentar {
+  from {
+    opacity: 0;
+    scale: 1.04;
+  }
+}
+
+/* Resultados do catálogo entram em cascata a cada filtro */
+.grade > .cartao,
+.resultados > .linha {
+  animation: subir-suave 0.55s var(--curva) backwards;
+}
+
+.grade > .cartao:nth-child(4n + 2),
+.resultados > .linha:nth-child(2) {
+  animation-delay: 45ms;
+}
+
+.grade > .cartao:nth-child(4n + 3),
+.resultados > .linha:nth-child(3) {
+  animation-delay: 90ms;
+}
+
+.grade > .cartao:nth-child(4n + 4),
+.resultados > .linha:nth-child(4) {
+  animation-delay: 135ms;
+}
+
+.resultados > .linha:nth-child(n + 5) {
+  animation-delay: 180ms;
+}
+
+@keyframes subir-suave {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+}
+
+/* Estalo ao favoritar, comparar ou pôr no carrinho */
+.acao-rapida.ativa svg,
+.cartao-carrinho.ativo svg {
+  animation: estalo 0.5s ease-out;
+}
+
+@keyframes estalo {
+  0% {
+    scale: 0.55;
+  }
+  55% {
+    scale: 1.28;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+/* Contadores pulam quando o número muda */
+.contagem {
+  animation: contagem-pulo 0.45s var(--mola);
+}
+
+@keyframes contagem-pulo {
+  from {
+    opacity: 0;
+    scale: 0.4;
+  }
+}
+
+/* Anel de foco que se fecha sobre o elemento */
+a:focus-visible,
+button:focus-visible {
+  animation: foco 0.3s var(--curva);
+}
+
+@keyframes foco {
+  from {
+    outline-color: transparent;
+    outline-offset: 7px;
+  }
+}
+
+/* Barra superior ganha sombra conforme a página rola */
+@supports (animation-timeline: scroll()) {
+  .barra {
+    animation: barra-rolada linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 160px;
+  }
+}
+
+@keyframes barra-rolada {
+  to {
+    box-shadow: 0 12px 32px -18px rgba(0, 0, 0, 0.55);
+  }
+}
+
+/* Troca de tema: o novo tema se espalha em círculo a partir do botão */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* ==========================================================================
+   Desempenho: seções fora da tela não são desenhadas
+   A loja tem ~2.000 elementos e ~100 imagens; o navegador só calcula e pinta o que
+   está perto da tela. O banner e os destaques (no topo, e que vazam até a borda da
+   janela) ficam de fora. overflow-clip-margin evita que setas e sombras sejam cortadas.
+   ========================================================================== */
+
+.conteudo > section:not(.hero, .destaques),
+.rodape {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 640px;
+  overflow-clip-margin: 48px;
+}
+
+.grade > .cartao {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 270px;
+  overflow-clip-margin: 32px;
+}
+
+/* troca de tema: as centenas de transições de cor ficam pausadas por um instante */
+.sem-transicao *,
+.sem-transicao *::before,
+.sem-transicao *::after {
+  transition: none !important;
+}
+
+/* Monoespaçada apenas onde o texto é um código. */
+kbd,
+.chave code,
+.chaves code,
+.pedido-numero {
+  font-family: var(--fonte-mono);
+}

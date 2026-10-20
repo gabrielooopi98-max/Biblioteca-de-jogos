@@ -1,0 +1,146 @@
+/* ==========================================================================
+   Modo suave: o sistema pediu menos animação (no Windows, "Efeitos de animação"
+   desligado; no celular, "Reduzir movimento"). Em vez de desligar tudo, sai só o
+   que pode causar desconforto: deslocamentos grandes, paralaxe, inclinações que
+   seguem o cursor, zoom lento, tremidas e piscadas. Fades, hover dos botões,
+   brilhos, barras de progresso e transições curtas continuam.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  /* entradas: o elemento aparece sem se deslocar (redefinidas só neste modo) */
+  @keyframes subir-suave {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes subir {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes pagina-entrar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes linha-subir {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes carta-entrar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes imagem-revelar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes imagem-assentar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes universo-fundo {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes dossie-pousar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes carimbar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes paleta-entrar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes notificacao-entrar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes notificacao-sair {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes gaveta-entrar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes gaveta-sair {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes contagem-pulo {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* o título do Resident Evil acende com um fade, sem piscar */
+  @keyframes lampada-ligar {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* nada de movimento contínuo, tremida ou piscada */
+  .hero-grao,
+  .hero-carta.ativa .hero-carta-corpo,
+  .hero-chao,
+  .nf-codigo,
+  .re,
+  .re::before,
+  .re-escuro::after,
+  .re-varredura::after,
+  .re-titulo::before,
+  .re-titulo::after {
+    animation: none !important;
+  }
+
+  /* paralaxe e inclinações que seguem o cursor */
+  .hero-fundo,
+  .hero-cena,
+  .hero-carta.ativa .hero-capa,
+  .cartao:hover .cartao-imagem,
+  .slide-midia:hover .arte,
+  .galeria-palco:hover img {
+    transform: none !important;
+  }
+
+  .sanfona-painel .sanfona-arte.imagem {
+    translate: -50% 0 !important;
+  }
+
+  /* zoom lento das artes de fundo */
+  .hero-fundo .imagem.carregada {
+    transform: none !important;
+  }
+}

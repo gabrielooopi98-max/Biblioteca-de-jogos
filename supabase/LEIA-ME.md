@@ -1,6 +1,6 @@
 # Painel da loja: como ligar o Supabase
 
-O painel administrativo (`#/admin`) e a loja usam o mesmo banco no Supabase. Sem ele, a loja continua funcionando com os arquivos locais (`src/dadosJogos.js` e `src/acessorios.js`), mas o painel mostra "Painel não configurado" e as reservas ficam só no navegador do cliente.
+O painel administrativo (`#/admin`) e a loja usam o mesmo banco no Supabase. Sem ele, a loja continua funcionando com os arquivos locais (`src/dados/jogos.js` e `src/dados/produtos.js`), mas o painel mostra "Painel não configurado" e as reservas ficam só no navegador do cliente.
 
 ## 1. Criar o projeto
 

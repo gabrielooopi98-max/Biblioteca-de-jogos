@@ -1,36 +1,39 @@
+// A loja inteira: lê a URL para escolher a página, guarda o estado global (carrinho, desejos,
+// reservas, filtros) e entrega as ações da loja aos componentes pelo LojaContext.
+// O painel (#/admin) e as páginas secundárias são carregados só quando abertos (lazy).
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import jogosLocais from "./dadosJogos.js";
-import acessoriosLocais, { definirCategorias } from "./acessorios.js";
-import { carregarCatalogo, catalogoGuardado } from "./catalogo.js";
-import { navegar, useArmazenamento, useAtalho, useConta, useEfeitosPonteiro, useRota, useTravarRolagem } from "./hooks.js";
-import { LojaContext } from "./LojaContext.js";
-import { calcularPrecoFinal, ehAcessorio, FILTROS_INICIAIS, imagensDoJogo, LIMITE_COMPARAR, recomendar, situacaoReserva } from "./utils.js";
-import Abas from "./components/Abas.jsx";
-import { Departamentos, VitrineAcessorios } from "./components/Acessorios.jsx";
-import BandejaComparar from "./components/BandejaComparar.jsx";
-import BannerDistribuidora from "./components/BannerDistribuidora.jsx";
-import Destaques from "./components/Destaques.jsx";
-import { GavetaCarrinho } from "./components/Gavetas.jsx";
-import Header from "./components/Header.jsx";
-import ConviteConta from "./components/ConviteConta.jsx";
-import { IconeBussola, IconeCadeado, IconeCarrinho, IconeCasa, IconeComparar, IconeCoracao, IconeEtiqueta, IconeFone, IconeRecibo } from "./components/Icones.jsx";
-import NaoEncontrada from "./components/NaoEncontrada.jsx";
-import Notificacoes from "./components/Notificacoes.jsx";
-import PaletaComandos from "./components/PaletaComandos.jsx";
-import { BannerPromocao, Categorias, ChamadaCatalogo, Garantias, Ofertas, Prateleira, Rodape } from "./components/Secoes.jsx";
-import { UniversoResidentEvil, UniversoSouls } from "./components/Universos.jsx";
-import "./App.css";
+import jogosLocais from "./dados/jogos.js";
+import acessoriosLocais, { definirCategorias } from "./dados/produtos.js";
+import { carregarCatalogo, catalogoGuardado } from "./servicos/catalogo.js";
+import { navegar, useArmazenamento, useAtalho, useConta, useEfeitosPonteiro, useRota, useTravarRolagem } from "./utilidades/hooks.js";
+import { LojaContext } from "./utilidades/LojaContext.js";
+import { calcularPrecoFinal, ehAcessorio, FILTROS_INICIAIS, imagensDoJogo, LIMITE_COMPARAR, recomendar, situacaoReserva } from "./utilidades/funcoes.js";
+import Abas from "./componentes/inicio/Abas.jsx";
+import { Departamentos, VitrineAcessorios } from "./componentes/produtos/Acessorios.jsx";
+import BandejaComparar from "./componentes/jogos/BandejaComparar.jsx";
+import BannerDistribuidora from "./componentes/inicio/BannerDistribuidora.jsx";
+import Destaques from "./componentes/inicio/Destaques.jsx";
+import { GavetaCarrinho } from "./componentes/compra/Gavetas.jsx";
+import Header from "./componentes/layout/Header.jsx";
+import ConviteConta from "./componentes/conta/ConviteConta.jsx";
+import { IconeBussola, IconeCadeado, IconeCarrinho, IconeCasa, IconeComparar, IconeCoracao, IconeEtiqueta, IconeFone, IconeRecibo } from "./componentes/comum/Icones.jsx";
+import NaoEncontrada from "./componentes/layout/NaoEncontrada.jsx";
+import Notificacoes from "./componentes/layout/Notificacoes.jsx";
+import PaletaComandos from "./componentes/layout/PaletaComandos.jsx";
+import { BannerPromocao, Categorias, ChamadaCatalogo, Garantias, Ofertas, Prateleira, Rodape } from "./componentes/inicio/Secoes.jsx";
+import { UniversoResidentEvil, UniversoSouls } from "./componentes/inicio/Universos.jsx";
+import "./estilos/index.css";
 
 // Páginas secundárias carregadas sob demanda: a loja abre mais rápido.
-const Catalogo = lazy(() => import("./components/Catalogo.jsx"));
-const PaginaJogo = lazy(() => import("./components/PaginaJogo.jsx"));
-const PaginaAcessorios = lazy(() => import("./components/Acessorios.jsx"));
-const PaginaProduto = lazy(() => import("./components/PaginaProduto.jsx"));
-const Pedidos = lazy(() => import("./components/Pedidos.jsx"));
-const Desejos = lazy(() => import("./components/Desejos.jsx"));
-const Comparar = lazy(() => import("./components/Comparar.jsx"));
-const Checkout = lazy(() => import("./components/Checkout.jsx"));
-const Conta = lazy(() => import("./components/Conta.jsx"));
+const Catalogo = lazy(() => import("./componentes/jogos/Catalogo.jsx"));
+const PaginaJogo = lazy(() => import("./componentes/jogos/PaginaJogo.jsx"));
+const PaginaAcessorios = lazy(() => import("./componentes/produtos/Acessorios.jsx"));
+const PaginaProduto = lazy(() => import("./componentes/produtos/PaginaProduto.jsx"));
+const Pedidos = lazy(() => import("./componentes/compra/Pedidos.jsx"));
+const Desejos = lazy(() => import("./componentes/compra/Desejos.jsx"));
+const Comparar = lazy(() => import("./componentes/jogos/Comparar.jsx"));
+const Checkout = lazy(() => import("./componentes/compra/Checkout.jsx"));
+const Conta = lazy(() => import("./componentes/conta/Conta.jsx"));
 // painel administrativo: carregado só por quem abre #/admin (a loja não baixa nada dele)
 const Admin = lazy(() => import("./admin/Admin.jsx"));
 
@@ -223,8 +226,8 @@ function App() {
     // Com a loja aberta e o navegador ocioso, já baixa as páginas mais visitadas: a navegação fica instantânea.
     useEffect(() => {
         const preCarregar = () => {
-            import("./components/Catalogo.jsx");
-            import("./components/PaginaJogo.jsx");
+            import("./componentes/jogos/Catalogo.jsx");
+            import("./componentes/jogos/PaginaJogo.jsx");
         };
         if ("requestIdleCallback" in window) {
             const id = requestIdleCallback(preCarregar, { timeout: 4000 });
@@ -321,8 +324,8 @@ function App() {
             const pedido = pedidos.find((p) => p.numero === numero);
             if (!pedido) return;
             if (pedido.remoto) {
-                const { mensagemDeErro } = await import("./supabase.js");
-                const { clientes } = await import("./conta.js");
+                const { mensagemDeErro } = await import("./servicos/supabase.js");
+                const { clientes } = await import("./servicos/conta.js");
                 const { error } = await clientes.rpc("cancelar_reserva", { p_numero: numero, p_codigo: pedido.retirada.codigo });
                 if (error) {
                     notificar(mensagemDeErro(error));
@@ -344,7 +347,7 @@ function App() {
         if (!abertas.length) return;
         let ativo = true;
         async function atualizar() {
-            const { clientes } = await import("./conta.js");
+            const { clientes } = await import("./servicos/conta.js");
             const { data, error } = await clientes.rpc("consultar_reservas", { p_reservas: abertas.map((p) => ({ numero: p.numero, codigo: p.retirada.codigo })) });
             if (!ativo || error || !data) return;
             const novas = new Map(data.filter((d) => {
@@ -495,7 +498,15 @@ function App() {
                             personagem={porId.get(4)}
                             jogos={vitrine.warner}
                         />
-                        <Departamentos acessorios={acessorios} imagemJogos={imagensDoJogo(porId.get(25)).capa} totalJogos={jogos.length} aoEscolher={abrirDepartamento} />
+                        <Departamentos
+                            acessorios={acessorios}
+                            capasJogos={[64, 65, 5]
+                                .map((id) => porId.get(id))
+                                .filter(Boolean)
+                                .map((j) => imagensDoJogo(j).capaPequena)}
+                            totalJogos={jogos.length}
+                            aoEscolher={abrirDepartamento}
+                        />
                         <VitrineAcessorios
                             id="mais-vendidos"
                             titulo="Mais procurados da loja"

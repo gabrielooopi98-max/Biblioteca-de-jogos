@@ -1,0 +1,700 @@
+/* ==========================================================================
+   Hover: efeitos que reagem ao cursor
+   ========================================================================== */
+
+:root {
+  --luz: rgba(10, 10, 10, 0.5);
+  --luz-suave: rgba(10, 10, 10, 0.045);
+  --halo: rgba(10, 10, 10, 0.12);
+  --brilho-botao: rgba(10, 10, 10, 0.35);
+  --sombra-elevada: 0 22px 40px -22px rgba(0, 0, 0, 0.35);
+}
+
+/* Blocos com arte escura de fundo usam sempre luz clara. */
+.evento,
+.franquia,
+.categoria {
+  --luz: rgba(255, 255, 255, 0.7);
+  --luz-suave: rgba(255, 255, 255, 0.08);
+}
+
+/* Dica (tooltip) dos botões de ícone */
+[data-dica] {
+  position: relative;
+}
+
+/* Desliza: menu e abas */
+.nav,
+.segmentos {
+  position: relative;
+}
+
+.nav > *,
+.segmentos > * {
+  position: relative;
+  z-index: 1;
+}
+
+.nav::before,
+.segmentos::before {
+  content: "";
+  position: absolute;
+  top: var(--ind-y, 0);
+  left: 0;
+  width: var(--ind-w, 0);
+  height: var(--ind-h, 0);
+  border-radius: var(--raio);
+  background: var(--sup-2);
+  opacity: var(--ind-o, 0);
+  transform: translateX(var(--ind-x, 0));
+  transition: transform 0.38s var(--curva), width 0.38s var(--curva), opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.segmentos::before {
+  border-radius: 7px;
+}
+
+.nav[data-instante]::before,
+.segmentos[data-instante]::before {
+  transition: opacity 0.2s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* --- Luz que segue o cursor (borda + reflexo interno) --- */
+  .cartao-imagem,
+  .oferta,
+  .categoria,
+  .chamada,
+  .item-biblioteca,
+  .desejo,
+  .pedido,
+  .compra,
+  .garantia,
+  .abas-lista,
+  .resultados,
+  .previa,
+  .estatisticas,
+  .slide-info,
+  .metodo,
+  .evento,
+  .franquia,
+  .comparacao-rolagem {
+    --mx: -999px;
+    --my: -999px;
+  }
+
+  .oferta,
+  .chamada,
+  .item-biblioteca,
+  .desejo,
+  .pedido,
+  .garantia,
+  .abas-lista,
+  .resultados,
+  .previa,
+  .estatisticas,
+  .slide-info,
+  .metodo,
+  .comparacao-rolagem {
+    position: relative;
+  }
+
+  .cartao-imagem::before,
+  .oferta::before,
+  .categoria::before,
+  .chamada::before,
+  .item-biblioteca::before,
+  .desejo::before,
+  .pedido::before,
+  .compra::before,
+  .abas-lista::before,
+  .resultados::before,
+  .previa::before,
+  .estatisticas::before,
+  .metodo::before,
+  .evento::before,
+  .franquia::before,
+  .comparacao-rolagem::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    padding: 1px;
+    border-radius: inherit;
+    background: radial-gradient(240px circle at var(--mx) var(--my), var(--luz), transparent 72%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  .cartao-imagem:hover::before,
+  .oferta:hover::before,
+  .categoria:hover::before,
+  .chamada:hover::before,
+  .item-biblioteca:hover::before,
+  .desejo:hover::before,
+  .pedido:hover::before,
+  .compra:hover::before,
+  .abas-lista:hover::before,
+  .resultados:hover::before,
+  .previa:hover::before,
+  .estatisticas:hover::before,
+  .metodo:hover::before,
+  .evento:hover::before,
+  .franquia:hover::before,
+  .comparacao-rolagem:hover::before {
+    opacity: 1;
+  }
+
+  /* reflexo interno suave */
+  .oferta:hover,
+  .chamada:hover,
+  .item-biblioteca:hover,
+  .desejo:hover,
+  .pedido:hover,
+  .compra:hover,
+  .garantia:hover,
+  .previa:hover,
+  .estatisticas:hover,
+  .slide-info:hover,
+  .metodo:hover {
+    background-image: radial-gradient(420px circle at var(--mx) var(--my), var(--luz-suave), transparent 65%);
+  }
+
+  .cartao-imagem::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: radial-gradient(320px circle at var(--mx) var(--my), rgba(255, 255, 255, 0.16), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  .cartao:hover .cartao-imagem::after {
+    opacity: 1;
+  }
+
+  .cartao:hover .cartao-imagem {
+    border-color: var(--borda-2);
+    box-shadow: var(--sombra-elevada);
+    translate: 0 -4px;
+    transform: perspective(800px) rotateX(calc(var(--ty, 0) * -8deg)) rotateY(calc(var(--tx, 0) * 10deg));
+  }
+
+  /* --- Blocos clicáveis sobem um pouco --- */
+  .oferta:hover,
+  .categoria:hover {
+    box-shadow: var(--sombra-elevada);
+    translate: 0 -3px;
+  }
+
+  /* --- Foco por contraste: vizinhos recuam --- */
+  .trilho > .cartao,
+  .ofertas > .oferta,
+  .evento-jogo,
+  .franquia-jogos button,
+  .categorias > .categoria {
+    transition:
+      opacity 0.45s ease,
+      filter 0.45s ease,
+      border-color 0.3s ease,
+      transform 0.5s var(--curva),
+      translate 0.5s var(--curva),
+      box-shadow 0.5s var(--curva);
+  }
+
+  .trilho:has(.cartao:hover) > .cartao:not(:hover),
+  .ofertas:has(.oferta:hover) > .oferta:not(:hover),
+  .evento-jogos:has(.evento-jogo:hover) .evento-jogo:not(:hover),
+  .franquia-jogos:has(button:hover) button:not(:hover),
+  .categorias:has(.categoria:hover) > .categoria:not(:hover) {
+    opacity: 0.5;
+    filter: saturate(0.6);
+  }
+
+  /* --- Paralaxe nas artes --- */
+  .slide-midia .arte,
+  .galeria-palco img {
+    transition: opacity 0.35s ease, transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .slide-midia:hover .arte,
+  .galeria-palco:hover img {
+    transform: scale(1.07) translate(calc(var(--px, 0) * -2.2%), calc(var(--py, 0) * -2.2%));
+  }
+
+  /* --- Sublinhado que se desenha --- */
+  .cartao-nome,
+  .item-biblioteca-nome,
+  .desejo-nome,
+  .comparacao-nome,
+  .rodape-coluna a,
+  .trilha a,
+  .trilha button {
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+    transition: background-size 0.4s var(--curva), color 0.2s;
+  }
+
+  .cartao-nome,
+  .item-biblioteca-nome,
+  .desejo-nome,
+  .comparacao-nome,
+  .rodape-coluna a {
+    align-self: flex-start;
+    max-width: 100%;
+  }
+
+  .cartao:hover .cartao-nome,
+  .item-biblioteca-nome:hover,
+  .desejo-nome:hover,
+  .comparacao-nome:hover,
+  .rodape-coluna a:hover,
+  .trilha a:hover,
+  .trilha button:hover {
+    background-size: 100% 1px;
+    text-decoration: none;
+  }
+
+  .slide-nome {
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 2px no-repeat;
+    transition: background-size 0.5s var(--curva);
+  }
+
+  .slide-nome:hover {
+    background-size: 100% 2px;
+    text-decoration: none;
+  }
+
+  /* --- Linhas de lista: barra lateral + arte aproxima --- */
+  .linha {
+    position: relative;
+  }
+
+  .linha::before {
+    content: "";
+    position: absolute;
+    top: 14px;
+    bottom: 14px;
+    left: 0;
+    width: 2px;
+    border-radius: 0 2px 2px 0;
+    background: var(--texto);
+    transform: scaleY(0);
+    transition: transform 0.35s var(--curva);
+  }
+
+  .linha:hover::before,
+  .linha.ativa::before {
+    transform: scaleY(1);
+  }
+
+  .linha-imagem img {
+    transition: opacity 0.35s ease, transform 1s var(--zoom);
+  }
+
+  .linha:hover .linha-imagem img {
+    transform: scale(1.08);
+  }
+
+  .linha-info {
+    transition: transform 0.35s var(--curva);
+  }
+
+  .linha:hover .linha-info {
+    transform: translateX(4px);
+  }
+
+  /* --- Categorias: texto sobe, seta entra --- */
+  .categoria-texto {
+    transition: transform 0.45s var(--curva);
+  }
+
+  .categoria:hover .categoria-texto {
+    transform: translateY(-3px);
+  }
+
+  /* --- Garantias: ícone ganha vida --- */
+  .garantia svg {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .garantia:hover svg {
+    transform: translateY(-2px) rotate(-10deg) scale(1.12);
+  }
+
+  .garantia strong,
+  .garantia span {
+    transition: color 0.2s;
+  }
+
+  .garantia:hover span {
+    color: var(--texto);
+  }
+
+  /* --- Botões: halo e resposta tátil --- */
+  .notificacao-acao {
+    transition: background-color 0.2s var(--curva), box-shadow 0.35s var(--curva);
+  }
+
+  .botao-primario:hover:not(:disabled),
+  .botao-secundario:hover:not(:disabled),
+  .botao-vidro:hover:not(:disabled),
+  .carrinho-botao:hover {
+    box-shadow: 0 0 0 4px var(--halo), 0 14px 32px -12px var(--brilho-botao);
+  }
+
+  .botao-primario:hover:not(:disabled),
+  .botao-secundario:hover:not(:disabled),
+  .botao-vidro:hover:not(:disabled),
+  .botao-perigo:hover:not(:disabled) {
+    translate: 0 -2px;
+  }
+
+  .botao:active:not(:disabled) {
+    translate: 0 0;
+  }
+
+  .botao svg,
+  .icone-botao svg,
+  .acao-rapida svg,
+  .cartao-carrinho svg,
+  .carrinho-botao svg {
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .botao:hover:not(:disabled) svg,
+  .icone-botao:hover svg,
+  .cartao-carrinho:hover svg,
+  .carrinho-botao:hover svg {
+    transform: scale(1.12);
+  }
+
+  .acao-rapida:hover svg {
+    transform: scale(1.18);
+  }
+
+  .acao-rapida[aria-pressed="false"]:hover {
+    background: rgba(10, 10, 10, 0.92);
+  }
+
+  /* --- "Ver tudo" ganha seta --- */
+  .secao-acoes .link-mais,
+  .secao-topo > .link-mais {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .secao-acoes .link-mais::after,
+  .secao-topo > .link-mais::after {
+    content: "→";
+    display: inline-block;
+    width: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: width 0.3s var(--curva), opacity 0.25s, transform 0.3s var(--curva);
+  }
+
+  .secao-acoes .link-mais:hover,
+  .secao-topo > .link-mais:hover {
+    text-decoration: none;
+  }
+
+  .secao-acoes .link-mais:hover::after,
+  .secao-topo > .link-mais:hover::after {
+    width: 1.1em;
+    opacity: 1;
+    transform: translateX(4px);
+  }
+
+  /* --- Miniaturas e capturas --- */
+  .galeria-tira button,
+  .slide-capturas button {
+    transition: opacity 0.25s, border-color 0.25s, transform 0.35s var(--curva);
+  }
+
+  .galeria-tira button:hover,
+  .slide-capturas button:hover {
+    transform: translateY(-2px);
+  }
+
+  .destaques-indicadores button:hover .indicador-trilha {
+    background: var(--borda-2);
+  }
+
+  /* --- Tooltip --- */
+  [data-dica]::after {
+    content: attr(data-dica);
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    z-index: 60;
+    padding: 5px 9px;
+    border-radius: 6px;
+    background: var(--inverso);
+    color: var(--inverso-texto);
+    font-family: var(--fonte);
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translate(-50%, -4px);
+    transition: opacity 0.15s ease, transform 0.2s var(--curva);
+    pointer-events: none;
+  }
+
+  [data-dica]:hover::after,
+  [data-dica]:focus-visible::after {
+    opacity: 1;
+    transform: translate(-50%, 0);
+    transition-delay: 0.25s;
+  }
+}
+
+/* ==========================================================================
+   Prateleiras: setas laterais, páginas e bordas que indicam "tem mais"
+   ========================================================================== */
+
+.prateleira-corpo {
+  position: relative;
+}
+
+/* espaço para o card subir e a sombra aparecer sem ser cortada pela rolagem */
+.prateleira-corpo .trilho {
+  margin: -10px 0 -30px;
+  padding: 10px 0 30px;
+  --fade-e: 0px;
+  --fade-d: 0px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--fade-e), #000 calc(100% - var(--fade-d)), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 var(--fade-e), #000 calc(100% - var(--fade-d)), transparent);
+}
+
+.prateleira-corpo:not(.no-inicio) .trilho {
+  --fade-e: 56px;
+}
+
+.prateleira-corpo:not(.no-fim) .trilho {
+  --fade-d: 56px;
+}
+
+.prateleira-seta {
+  --deslocamento: min(24px, calc(var(--margem) - 4px));
+  position: absolute;
+  top: calc(var(--altura-arte, 112px) / 2);
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-top: -24px;
+  border: 1px solid var(--borda-2);
+  border-radius: 50%;
+  background: var(--vidro);
+  color: var(--texto);
+  box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  opacity: 0;
+  scale: 0.8;
+  transition:
+    opacity 0.25s ease,
+    scale 0.45s var(--mola),
+    translate 0.35s var(--curva),
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.prateleira-seta.esquerda {
+  left: calc(var(--deslocamento) * -1);
+}
+
+.prateleira-seta.direita {
+  right: calc(var(--deslocamento) * -1);
+}
+
+.prateleira-corpo:hover .prateleira-seta:not(:disabled),
+.prateleira-seta:focus-visible {
+  opacity: 1;
+  scale: 1;
+}
+
+.prateleira-seta:hover:not(:disabled) {
+  border-color: var(--inverso);
+  background: var(--inverso);
+  color: var(--inverso-texto);
+}
+
+.prateleira-seta.esquerda:hover:not(:disabled) {
+  translate: -2px 0;
+}
+
+.prateleira-seta.direita:hover:not(:disabled) {
+  translate: 2px 0;
+}
+
+.prateleira-seta:active:not(:disabled) {
+  scale: 0.9;
+  transition-duration: 0.08s;
+}
+
+.prateleira-seta:disabled {
+  pointer-events: none;
+}
+
+@media (hover: none) {
+  .prateleira-seta {
+    display: none;
+  }
+}
+
+.prateleira-paginas {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-right: 10px;
+}
+
+.prateleira-paginas button {
+  width: 24px;
+  height: 24px;
+  padding: 10px 5px;
+  border-radius: 99px;
+  background: var(--borda-2);
+  background-clip: content-box;
+  transition: width 0.4s var(--curva), background-color 0.25s ease;
+}
+
+.prateleira-paginas button:hover {
+  background-color: var(--texto-3);
+}
+
+.prateleira-paginas button.ativa {
+  width: 38px;
+  background-color: var(--texto);
+}
+
+/* ==========================================================================
+   Trailers
+   ========================================================================== */
+
+.trailer {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+/* prévias: sobem por cima da arte quando o vídeo começa de fato */
+.cartao-trailer,
+.slide-trailer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+}
+
+.cartao-trailer.pronto,
+.slide-trailer.pronto {
+  opacity: 1;
+}
+
+.slide-selo-trailer {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid rgba(250, 250, 250, 0.18);
+  border-radius: 99px;
+  background: rgba(10, 10, 10, 0.6);
+  color: #fafafa;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.3s ease;
+}
+
+.slide-midia:has(.slide-trailer.pronto) .slide-selo-trailer {
+  opacity: 0;
+}
+
+.galeria-video {
+  object-fit: contain;
+}
+
+.galeria-palco:has(.galeria-video) .galeria-contagem {
+  top: 12px;
+  bottom: auto;
+}
+
+.galeria-palco:has(.galeria-video) .galeria-seta {
+  margin-top: -40px;
+}
+
+.galeria-mini-trailer {
+  position: relative;
+}
+
+.galeria-play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fafafa;
+  background: rgba(10, 10, 10, 0.35);
+}
+
+.galeria-play svg {
+  width: 26px;
+  height: 26px;
+  padding: 6px;
+  border-radius: 50%;
+  background: rgba(10, 10, 10, 0.7);
+}
+
+/* ==========================================================================
+   Artes inteiras: a imagem cabe sem cortar e uma cópia desfocada preenche o resto
+   ========================================================================== */
+
+.oferta-grande .oferta-imagem {
+  position: relative;
+}
+
+.slide-midia .arte-fundo,
+.oferta-grande .oferta-imagem .arte-fundo {
+  position: absolute;
+  inset: -32px;
+  width: calc(100% + 64px);
+  height: calc(100% + 64px);
+  object-fit: cover;
+  filter: blur(30px) brightness(0.55) saturate(1.25);
+  pointer-events: none;
+}
+
+.slide-midia .arte,
+.oferta-grande .oferta-imagem .arte {
+  position: relative;
+  z-index: 1;
+  object-fit: contain;
+}
+
+.slide-previa {
+  z-index: 2;
+}

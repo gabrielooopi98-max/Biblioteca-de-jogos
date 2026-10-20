@@ -1,0 +1,469 @@
+/* ==========================================================================
+   Explorar (catálogo)
+   ========================================================================== */
+
+.catalogo {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+}
+
+.filtros {
+  position: sticky;
+  top: calc(var(--altura-barra) + 20px);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - var(--altura-barra) - 40px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.filtros > * {
+  flex-shrink: 0;
+}
+
+.filtros-topo,
+.filtros-fundo,
+.filtros-rodape,
+.botao-filtros {
+  display: none;
+}
+
+.grupo-filtro {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--borda);
+}
+
+.grupo-filtro:first-of-type {
+  padding-top: 0;
+}
+
+.grupo-filtro h3 {
+  margin-bottom: 8px;
+  color: var(--texto-3);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.caixa {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 -8px;
+  padding: 6px 8px;
+  border-radius: var(--raio-p);
+  color: var(--texto-2);
+  cursor: pointer;
+  transition: background-color 0.12s, color 0.12s;
+}
+
+.caixa:hover {
+  background: var(--sup-2);
+  color: var(--texto);
+}
+
+.caixa input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.caixa-marca {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--borda-2);
+  border-radius: 4px;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.caixa-marca.redonda {
+  border-radius: 50%;
+}
+
+.caixa input:checked + .caixa-marca {
+  border-color: var(--inverso);
+  background: var(--inverso);
+}
+
+.caixa input:checked + .caixa-marca::after {
+  content: "";
+  position: absolute;
+  top: 1.5px;
+  left: 4.5px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--inverso-texto);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.caixa input:checked + .caixa-marca.redonda::after {
+  top: 3.5px;
+  left: 3.5px;
+  width: 6px;
+  height: 6px;
+  border: none;
+  border-radius: 50%;
+  background: var(--inverso-texto);
+  transform: none;
+}
+
+.caixa input:checked ~ .caixa-rotulo {
+  color: var(--texto);
+}
+
+.caixa input:focus-visible + .caixa-marca {
+  outline: 2px solid var(--texto);
+  outline-offset: 2px;
+}
+
+.caixa-rotulo {
+  flex: 1;
+}
+
+.caixa small {
+  color: var(--texto-3);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+}
+
+.faixa {
+  width: 100%;
+  height: 28px;
+  accent-color: var(--ouro);
+  cursor: pointer;
+}
+
+.faixa-valor {
+  color: var(--texto-2);
+  font-variant-numeric: tabular-nums;
+  font-size: 13.5px;
+}
+
+.catalogo-barra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.campo-busca {
+  flex: 1;
+}
+
+.seletor {
+  width: auto;
+  padding-right: 32px;
+  appearance: none;
+  background: var(--sup-1) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='m2 4 4 4 4-4'/%3E%3C/svg%3E") no-repeat right 10px center;
+  cursor: pointer;
+}
+
+.seletor option {
+  background: var(--sup-1);
+  color: var(--texto);
+}
+
+.catalogo-resumo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 14px 0 18px;
+  color: var(--texto-2);
+}
+
+.catalogo-resumo > span {
+  margin-right: 6px;
+}
+
+.catalogo-resumo strong {
+  color: var(--texto);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 8px 0 10px;
+  border: 1px solid var(--borda-2);
+  border-radius: 99px;
+  color: var(--texto);
+  font-size: 14px;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.chip:hover {
+  border-color: var(--texto-3);
+  background: var(--sup-2);
+}
+
+.carregar-mais {
+  margin-top: 24px;
+}
+
+/* ==========================================================================
+   Página do jogo
+   ========================================================================== */
+
+.pagina-jogo {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Arte do jogo desfocada e em tons de cinza, dissolvendo no fundo. */
+.pagina-jogo::before {
+  content: "";
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  z-index: -1;
+  width: 100vw;
+  height: 640px;
+  background: var(--fundo-jogo, none) center 20% / cover no-repeat;
+  filter: grayscale(1) blur(2px);
+  opacity: 0.14;
+  transform: translateX(-50%);
+  mask-image: linear-gradient(180deg, #000 20%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 20%, transparent 100%);
+  pointer-events: none;
+}
+
+.trilha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  color: var(--texto-3);
+  font-size: 14.5px;
+}
+
+.trilha a,
+.trilha button {
+  padding-block: 6px;
+}
+
+.trilha a:hover,
+.trilha button:hover {
+  color: var(--texto);
+}
+
+.trilha [aria-current] {
+  color: var(--texto-2);
+}
+
+.jogo-cabecalho {
+  margin: 14px 0 22px;
+}
+
+
+
+.jogo-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin-top: 10px;
+  color: var(--texto-2);
+}
+
+.jogo-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 32px;
+  align-items: start;
+}
+
+/* Impede que a fileira de miniaturas alargue a coluna além da tela. */
+.jogo-principal,
+.compra {
+  min-width: 0;
+}
+
+.galeria {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.galeria-palco {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-g);
+  background: var(--sup-2);
+}
+
+.galeria-palco img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: aparecer 0.35s ease;
+}
+
+.galeria-seta {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-top: -20px;
+  border-radius: 50%;
+  background: rgba(10, 10, 10, 0.6);
+  color: #fafafa;
+  opacity: 0;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.2s, background-color 0.15s;
+}
+
+.galeria-seta.esquerda {
+  left: 12px;
+}
+
+.galeria-seta.direita {
+  right: 12px;
+}
+
+.galeria-palco:hover .galeria-seta,
+.galeria-seta:focus-visible {
+  opacity: 1;
+}
+
+.galeria-seta:hover {
+  background: rgba(10, 10, 10, 0.85);
+}
+
+.galeria-contagem {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: rgba(10, 10, 10, 0.6);
+  color: #fafafa;
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+}
+
+.galeria-tira {
+  display: flex;
+  gap: 8px;
+  padding-bottom: 4px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.galeria-tira button {
+  width: 120px;
+  aspect-ratio: 16 / 9;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-p);
+  opacity: 0.5;
+  transition: opacity 0.2s, border-color 0.2s;
+}
+
+.galeria-tira button:hover {
+  opacity: 0.85;
+}
+
+.galeria-tira button.ativa {
+  border-color: var(--texto);
+  opacity: 1;
+}
+
+.galeria-tira img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.galeria-unica {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--raio-g);
+  object-fit: cover;
+}
+
+.jogo-bloco {
+  margin-top: 32px;
+}
+
+.jogo-bloco .titulo-secao {
+  margin-bottom: 12px;
+}
+
+.jogo-sobre {
+  max-width: 68ch;
+  margin-bottom: 14px;
+  color: var(--texto-2);
+  font-size: 16.5px;
+  line-height: 1.7;
+}
+
+.ficha {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-g);
+}
+
+.ficha div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--borda);
+}
+
+.ficha div:nth-child(odd) {
+  border-right: 1px solid var(--borda);
+}
+
+.ficha div:nth-last-child(-n + 2) {
+  border-bottom: none;
+}
+
+.ficha dt {
+  color: var(--texto-3);
+  font-size: 13.5px;
+}
+
+.ficha dd {
+  color: var(--texto);
+}
+
+.compra {
+  position: sticky;
+  top: calc(var(--altura-barra) + 20px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-g);
+  background: var(--sup-1);
+}
+
+.compra-capa {
+  width: 100%;
+  aspect-ratio: 460 / 215;
+  border-radius: var(--raio);
+  object-fit: cover;
+}

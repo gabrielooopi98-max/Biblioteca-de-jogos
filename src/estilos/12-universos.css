@@ -1,0 +1,1126 @@
+/* ==========================================================================
+   Universos: áreas temáticas das franquias favoritas
+   Cada uma usa a linguagem visual do próprio jogo e é sempre escura,
+   independente do tema da loja.
+   ========================================================================== */
+
+.universo-possui {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--texto-2);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------------------------------
+   Soulslike: galeria épica. Painéis verticais lado a lado; o que recebe o
+   mouse se abre e troca a capa pela arte larga do jogo.
+   Desempenho: as imagens têm tamanho fixo e centralizado. Ao abrir, o painel
+   só revela mais da imagem; nada é reescalado a cada quadro da animação.
+   --------------------------------------------------------------------------- */
+
+.sanfona {
+  --sanfona-curva: cubic-bezier(0.7, 0, 0.18, 1);
+  display: flex;
+  gap: 10px;
+  height: clamp(380px, 34vw, 500px);
+}
+
+.sanfona-painel {
+  /* texto sempre claro: o fundo é a arte do jogo, nos dois temas */
+  --texto: #fafafa;
+  --texto-2: rgba(250, 250, 250, 0.76);
+  --texto-3: rgba(250, 250, 250, 0.55);
+  --inverso: #fafafa;
+  --inverso-texto: #0a0a0a;
+  --halo: rgba(250, 250, 250, 0.16);
+  --brilho-botao: rgba(250, 250, 250, 0.3);
+  --px: 0;
+  --py: 0;
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-g);
+  background: #111;
+  color: var(--texto);
+  isolation: isolate;
+  contain: layout paint;
+  /* só flex-grow e borda mudam na abertura: sombra animada seria redesenhada a cada quadro */
+  transition: flex-grow 0.85s var(--sanfona-curva), border-color 0.4s ease;
+}
+
+.sanfona-painel.aberto {
+  flex-grow: 7;
+  border-color: var(--borda-2);
+}
+
+/* imagens com tamanho fixo, centralizadas: o painel apenas mostra mais ou menos delas */
+.sanfona-capa,
+.sanfona-arte {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: -2;
+  height: 100%;
+  object-fit: cover;
+  translate: -50% 0;
+  /* camada própria na GPU: ao abrir o painel, a imagem só é recortada, nunca repintada */
+  will-change: transform;
+}
+
+.sanfona-capa {
+  width: 340px;
+  min-width: 100%;
+  filter: saturate(0.8) brightness(0.7);
+  transition: opacity 0.35s ease, filter 0.5s ease;
+}
+
+.sanfona-painel:hover .sanfona-capa {
+  filter: saturate(1) brightness(0.9);
+}
+
+/* arte larga: aparece no painel aberto, assenta com um leve zoom e acompanha o cursor */
+.sanfona-painel .sanfona-arte.imagem {
+  width: 980px;
+  max-width: none;
+  object-position: 50% 30%;
+  opacity: 0;
+  scale: 1.12;
+  translate: calc(-50% + var(--px) * -26px) calc(var(--py) * -16px);
+  transition: opacity 0.7s ease, scale 1.6s var(--zoom), translate 0.8s var(--curva);
+}
+
+.sanfona-painel.aberto .sanfona-arte.imagem.carregada {
+  opacity: 1;
+  scale: 1.05;
+}
+
+/* escurece embaixo para o texto ler sobre qualquer arte */
+.sanfona-painel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.45) 42%, rgba(0, 0, 0, 0) 70%);
+  pointer-events: none;
+}
+
+/* reflexo de luz que atravessa o painel uma vez, quando ele abre */
+.sanfona-painel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.14) 50%, transparent 62%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sanfona-painel.aberto::before {
+  animation: sanfona-brilho 1.3s ease-out 0.35s;
+}
+
+@keyframes sanfona-brilho {
+  from {
+    opacity: 1;
+    translate: -100% 0;
+  }
+  to {
+    opacity: 1;
+    translate: 100% 0;
+  }
+}
+
+/* o painel inteiro é clicável; os botões da informação ficam por cima */
+.sanfona-gatilho {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+.sanfona-gatilho:focus-visible {
+  outline-offset: -3px;
+}
+
+.sanfona-vertical {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  z-index: 2;
+  max-height: 72%;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+  writing-mode: vertical-rl;
+  transform: translateX(-50%) rotate(180deg);
+  transition: opacity 0.3s ease, translate 0.45s var(--curva);
+  pointer-events: none;
+}
+
+.sanfona-painel:not(.aberto):hover .sanfona-vertical {
+  translate: 0 -8px;
+}
+
+.sanfona-painel.aberto .sanfona-vertical {
+  opacity: 0;
+}
+
+.sanfona-desconto {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: #fafafa;
+  color: #0a0a0a;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.sanfona-info {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 420px;
+  padding: 28px 28px 32px;
+  pointer-events: none;
+}
+
+.sanfona-info button {
+  pointer-events: auto;
+}
+
+.sanfona-meta {
+  color: var(--texto-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* título revelado por máscara */
+.sanfona-titulo {
+  overflow: hidden;
+  font-size: clamp(24px, 2.4vw, 34px);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+
+.sanfona-titulo span {
+  display: block;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+}
+
+.sanfona-detalhes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--texto-2);
+  font-size: 14.5px;
+}
+
+.sanfona-detalhes strong {
+  padding: 1px 7px;
+  border: 1px solid rgba(250, 250, 250, 0.35);
+  border-radius: 4px;
+  color: #fafafa;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.sanfona-compra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 20px;
+  margin-top: 6px;
+}
+
+.sanfona-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* tempo até a troca automática */
+.sanfona-tempo {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  height: 2px;
+  background: rgba(250, 250, 250, 0.85);
+  transform-origin: left;
+  animation: progresso linear forwards;
+  pointer-events: none;
+}
+
+.sanfona-tempo.parado {
+  animation-play-state: paused;
+}
+
+/* computador: a informação só existe no painel aberto e entra em cascata depois que ele cresceu */
+@media (min-width: 721px) {
+  /* fechado: o navegador nem calcula o conteúdo da informação (layout e pintura pulados),
+     o que deixa a abertura leve; a troca é adiada até a saída terminar */
+  .sanfona-painel:not(.aberto) .sanfona-info {
+    visibility: hidden;
+    content-visibility: hidden;
+    transition: visibility 0s linear 0.3s, content-visibility 0s linear 0.3s;
+    transition-behavior: allow-discrete;
+  }
+
+  .sanfona-info > * {
+    opacity: 0;
+    translate: 0 16px;
+    transition: opacity 0.2s ease, translate 0.3s ease;
+  }
+
+  .sanfona-titulo span {
+    translate: 0 110%;
+    transition: translate 0.3s ease;
+  }
+
+  .sanfona-painel.aberto .sanfona-info > * {
+    opacity: 1;
+    translate: 0 0;
+    transition: opacity 0.5s ease var(--atraso), translate 0.75s var(--curva) var(--atraso);
+  }
+
+  .sanfona-painel.aberto .sanfona-titulo span {
+    translate: 0 0;
+    transition: translate 0.9s var(--curva) 0.42s;
+  }
+
+  .sanfona-info > :nth-child(1) {
+    --atraso: 0.34s;
+  }
+
+  .sanfona-info > :nth-child(2) {
+    --atraso: 0.4s;
+  }
+
+  .sanfona-info > :nth-child(3) {
+    --atraso: 0.5s;
+  }
+
+  .sanfona-info > :nth-child(4) {
+    --atraso: 0.58s;
+  }
+}
+
+/* celular: fileira de cards grandes que se arrasta para o lado, tudo visível */
+@media (max-width: 720px) {
+  .sanfona {
+    height: auto;
+    margin-inline: calc(var(--margem) * -1);
+    padding-inline: var(--margem);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--margem);
+    scrollbar-width: none;
+  }
+
+  .sanfona::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sanfona-painel,
+  .sanfona-painel.aberto {
+    flex: 0 0 78%;
+    height: 440px;
+    scroll-snap-align: start;
+  }
+
+  .sanfona-capa {
+    left: 0;
+    width: 100%;
+    filter: none;
+    translate: none;
+  }
+
+  .sanfona-arte,
+  .sanfona-vertical,
+  .sanfona-tempo,
+  .sanfona-painel::before {
+    display: none;
+  }
+
+  .sanfona-info {
+    min-width: 0;
+    padding: 20px;
+  }
+}
+
+/* fundo que surge com um leve zoom (troca de arquivo no Resident Evil) */
+@keyframes universo-fundo {
+  from {
+    opacity: 0;
+    scale: 1.06;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Resident Evil: lanterna, linha do tempo do surto e dossiês datilografados
+   --------------------------------------------------------------------------- */
+
+/* posição da lanterna animável (a luz segue o cursor com inércia) */
+@property --lx {
+  syntax: "<length-percentage>";
+  inherits: true;
+  initial-value: 68%;
+}
+
+@property --ly {
+  syntax: "<length-percentage>";
+  inherits: true;
+  initial-value: 42%;
+}
+
+.re {
+  --sangue: #c8102e;
+  --texto: #e8e8e8;
+  --texto-2: rgba(232, 232, 232, 0.72);
+  --texto-3: rgba(232, 232, 232, 0.48);
+  --inverso: #ededed;
+  --inverso-texto: #0a0a0a;
+  --halo: rgba(200, 16, 46, 0.25);
+  --brilho-botao: rgba(200, 16, 46, 0.35);
+  --maquina: "Special Elite", "Courier New", monospace;
+  position: relative;
+  margin: 80px calc(50% - 50vw) 0;
+  overflow: hidden;
+  border-block: 1px solid rgba(255, 255, 255, 0.06);
+  background: #030303;
+  color: var(--texto);
+  isolation: isolate;
+  transition: --lx 0.35s ease-out, --ly 0.35s ease-out;
+  animation: lanterna-vagar 16s ease-in-out infinite alternate;
+}
+
+/* com mouse a lanterna é sua; sem ele (toque, teclado) ela vagueia sozinha */
+.re.com-mouse {
+  animation: none;
+}
+
+@keyframes lanterna-vagar {
+  0% {
+    --lx: 70%;
+    --ly: 40%;
+  }
+  33% {
+    --lx: 38%;
+    --ly: 62%;
+  }
+  66% {
+    --lx: 62%;
+    --ly: 28%;
+  }
+  100% {
+    --lx: 28%;
+    --ly: 48%;
+  }
+}
+
+/* luz de emergência vermelha pulsando no canto */
+.re::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(55% 45% at 0% 100%, rgba(200, 16, 46, 0.2), transparent 70%);
+  animation: emergencia 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes emergencia {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.re-fundo {
+  position: absolute;
+  inset: 0;
+  z-index: -4;
+}
+
+.re-fundo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 60% 30%;
+  filter: grayscale(0.3) contrast(1.15) brightness(0.9);
+  animation: universo-fundo 1.2s ease both;
+}
+
+/* escuridão com o círculo da lanterna */
+.re-escuro {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  background: radial-gradient(circle 320px at var(--lx) var(--ly), rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.45) 38%, rgba(3, 3, 3, 0.93) 70%, #030303 100%);
+  pointer-events: none;
+}
+
+/* lâmpada fluorescente falhando de vez em quando */
+.re-escuro::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  animation: lampada 8s steps(1) infinite;
+}
+
+@keyframes lampada {
+  0%,
+  61% {
+    opacity: 0;
+  }
+  62% {
+    opacity: 0.7;
+  }
+  63% {
+    opacity: 0.1;
+  }
+  64% {
+    opacity: 0.55;
+  }
+  65%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* linhas de varredura de monitor + uma faixa que desce */
+.re-varredura {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+}
+
+.re-varredura::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 140px;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.035), transparent);
+  animation: varredura-descer 7s linear infinite;
+}
+
+@keyframes varredura-descer {
+  from {
+    transform: translateY(-140px);
+  }
+  to {
+    transform: translateY(1400px);
+  }
+}
+
+.re-conteudo {
+  position: relative;
+  max-width: var(--largura);
+  margin: 0 auto;
+  padding: 76px var(--margem) 60px;
+}
+
+.re-cabecalho {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.re-alerta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--sangue);
+  font-family: var(--maquina);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.re-sirene {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sangue);
+  box-shadow: 0 0 12px var(--sangue);
+  animation: sirene 1.2s ease-in-out infinite;
+}
+
+@keyframes sirene {
+  50% {
+    opacity: 0.25;
+    box-shadow: 0 0 0 transparent;
+  }
+}
+
+/* título com interferência de monitor: cópias deslocadas aparecem em fatias por instantes */
+.re-titulo {
+  position: relative;
+  display: inline-block;
+  color: #f2f2f2;
+  font-size: clamp(38px, 8.4vw, 124px);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  text-wrap: nowrap;
+  text-shadow: 0 0 40px rgba(200, 16, 46, 0.35);
+}
+
+.re.acordado .re-titulo {
+  animation: lampada-ligar 1.6s steps(1) backwards 0.2s;
+}
+
+.re:not(.acordado) .re-titulo {
+  opacity: 0;
+}
+
+@keyframes lampada-ligar {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  18% {
+    opacity: 0.1;
+  }
+  30% {
+    opacity: 1;
+  }
+  36% {
+    opacity: 0.3;
+  }
+  48%,
+  100% {
+    opacity: 1;
+  }
+}
+
+.re-titulo::before,
+.re-titulo::after {
+  content: attr(data-texto);
+  position: absolute;
+  inset: 0;
+  clip-path: inset(100% 0 0 0);
+  pointer-events: none;
+}
+
+.re-titulo::before {
+  color: var(--sangue);
+  animation: glitch-a 5.5s steps(1) infinite;
+}
+
+.re-titulo::after {
+  color: #9ad7ff;
+  opacity: 0.6;
+  animation: glitch-b 5.5s steps(1) infinite;
+}
+
+@keyframes glitch-a {
+  0%,
+  89%,
+  100% {
+    clip-path: inset(100% 0 0 0);
+    transform: none;
+  }
+  90% {
+    clip-path: inset(18% 0 58% 0);
+    transform: translate(-6px, 0);
+  }
+  92% {
+    clip-path: inset(62% 0 12% 0);
+    transform: translate(5px, 0);
+  }
+  94% {
+    clip-path: inset(40% 0 40% 0);
+    transform: translate(-3px, 0);
+  }
+}
+
+@keyframes glitch-b {
+  0%,
+  90%,
+  100% {
+    clip-path: inset(100% 0 0 0);
+    transform: none;
+  }
+  91% {
+    clip-path: inset(70% 0 8% 0);
+    transform: translate(4px, 0);
+  }
+  93% {
+    clip-path: inset(10% 0 72% 0);
+    transform: translate(-5px, 0);
+  }
+}
+
+/* linha do tempo do surto */
+.re-linha {
+  margin: 44px calc(var(--margem) * -1) 0;
+  padding: 6px var(--margem) 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.re-linha::-webkit-scrollbar {
+  display: none;
+}
+
+.re-linha-faixa {
+  position: relative;
+  display: grid;
+  grid-auto-columns: minmax(88px, 1fr);
+  grid-auto-flow: column;
+  min-width: max-content;
+}
+
+@media (min-width: 1100px) {
+  .re-linha-faixa {
+    min-width: 0;
+  }
+}
+
+.re-linha-trilho {
+  position: absolute;
+  top: 31px;
+  right: calc(100% / var(--n) / 2);
+  left: calc(100% / var(--n) / 2);
+  height: 2px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.re-linha-trilho i {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #6a0816, var(--sangue));
+  box-shadow: 0 0 14px rgba(200, 16, 46, 0.7);
+  transform: scaleX(var(--progresso));
+  transform-origin: left;
+  transition: transform 0.9s var(--curva);
+}
+
+.re-marco {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 4px 6px;
+  color: var(--texto-3);
+  transition: color 0.3s ease;
+}
+
+.re-marco:hover {
+  color: var(--texto);
+}
+
+.re-marco-ano {
+  font-family: var(--maquina);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+
+.re-marco-ponto {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background: #060606;
+  transition: border-color 0.3s ease, background-color 0.3s ease, scale 0.45s var(--mola), box-shadow 0.4s ease;
+}
+
+.re-marco.passado .re-marco-ponto {
+  border-color: var(--sangue);
+  background: #3a0710;
+}
+
+.re-marco.ativo {
+  color: #fff;
+}
+
+.re-marco.ativo .re-marco-ponto {
+  border-color: #ff4d64;
+  background: var(--sangue);
+  box-shadow: 0 0 0 5px rgba(200, 16, 46, 0.2), 0 0 20px rgba(200, 16, 46, 0.8);
+  scale: 1.3;
+}
+
+.re-marco.ativo .re-marco-ponto::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border: 1px solid var(--sangue);
+  border-radius: 50%;
+  animation: marco-pulso 1.8s ease-out infinite;
+}
+
+@keyframes marco-pulso {
+  from {
+    opacity: 0.9;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+
+.re-marco-nome {
+  max-width: 110px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* dossiê: papel envelhecido datilografado, colocado sobre a mesa a cada troca */
+.re-dossie {
+  --texto: #15120d;
+  --texto-2: #2a241c;
+  --texto-3: #6b5f4f;
+  --inverso: #15120d;
+  --inverso-texto: #ece4d0;
+  --halo: rgba(21, 18, 13, 0.15);
+  --brilho-botao: rgba(21, 18, 13, 0.3);
+  --borda-2: rgba(21, 18, 13, 0.4);
+  position: relative;
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+  gap: 36px;
+  margin-top: 30px;
+  padding: 30px 32px 26px;
+  border-radius: 2px;
+  background-color: #d9d0ba;
+  background-image:
+    radial-gradient(circle at 88% 82%, transparent 38px, rgba(110, 72, 30, 0.12) 40px, transparent 46px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.28 0 0 0 0 0.2 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E"),
+    linear-gradient(135deg, #e4dcc8, #cfc4aa);
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.95), inset 0 0 60px rgba(90, 60, 25, 0.25);
+  color: var(--texto);
+  rotate: -0.6deg;
+  animation: dossie-pousar 0.75s var(--curva) both;
+}
+
+@keyframes dossie-pousar {
+  from {
+    opacity: 0;
+    translate: 0 26px;
+    rotate: -3.5deg;
+  }
+}
+
+/* foto presa com clipe */
+.re-foto {
+  position: relative;
+  align-self: start;
+  padding: 10px 10px 34px;
+  background: #f3efe6;
+  box-shadow: 0 14px 30px -12px rgba(0, 0, 0, 0.55);
+  rotate: 2.5deg;
+}
+
+.re-foto button {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  background: #222;
+}
+
+.re-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(0.85) contrast(1.1) sepia(0.2);
+  transition: opacity 0.35s ease, filter 0.6s ease, transform 1.2s var(--zoom);
+}
+
+.re-foto button:hover img {
+  filter: none;
+  transform: scale(1.04);
+}
+
+.re-clipe {
+  position: absolute;
+  top: -20px;
+  right: 26px;
+  z-index: 2;
+  width: 20px;
+  height: 58px;
+  border: 3px solid #8d949b;
+  border-radius: 12px;
+  rotate: 8deg;
+  box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.35);
+}
+
+.re-clipe::after {
+  content: "";
+  position: absolute;
+  inset: 8px 3px 14px;
+  border: 3px solid #8d949b;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+}
+
+.re-ficha {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.re-ficha-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: var(--maquina);
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.re-carimbo {
+  padding: 4px 12px;
+  border: 3px solid #a3121f;
+  border-radius: 4px;
+  color: #a3121f;
+  font-family: var(--fonte-titulo);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  mix-blend-mode: multiply;
+  opacity: 0.85;
+  rotate: -9deg;
+  animation: carimbar 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) 0.45s backwards;
+}
+
+@keyframes carimbar {
+  from {
+    opacity: 0;
+    scale: 2.4;
+    rotate: -20deg;
+  }
+}
+
+.re-ficha-nome {
+  color: #120f0a;
+  font-size: clamp(24px, 2.4vw, 32px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.re-campos {
+  display: grid;
+  gap: 0;
+}
+
+.re-campos div {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px dashed rgba(21, 18, 13, 0.25);
+}
+
+.re-campos dt {
+  color: #6b5f4f;
+  font-family: var(--maquina);
+  font-size: 12.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.re-campos dd {
+  font-family: var(--maquina);
+  font-size: 15.5px;
+}
+
+.re-ameaca {
+  color: #9c0f1d;
+  font-weight: 700;
+}
+
+.re-relatorio {
+  min-height: calc(1.6em * 5);
+  color: #2a241c;
+  font-family: var(--maquina);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.re-relatorio-rotulo {
+  color: #6b5f4f;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.re-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1.05em;
+  margin-left: 2px;
+  background: #2a241c;
+  vertical-align: text-bottom;
+  animation: cursor-piscar 1s steps(1) infinite;
+}
+
+@keyframes cursor-piscar {
+  50% {
+    opacity: 0;
+  }
+}
+
+.re-compra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px dashed rgba(21, 18, 13, 0.3);
+}
+
+.re-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* sala segura: a luz acolhedora que todo fã de RE conhece */
+.re-rodape {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.re-sala {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 30px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #f2f2f2;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease, translate 0.45s var(--curva);
+}
+
+.re-sala small {
+  color: var(--texto-3);
+  font-family: var(--maquina);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.re-sala-luz {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #ffe9b8, transparent);
+  box-shadow: 0 0 18px 4px rgba(255, 220, 160, 0.35);
+  translate: -50% 0;
+  opacity: 0.5;
+  transition: opacity 0.4s ease, width 0.5s var(--curva);
+}
+
+.re-sala:hover {
+  border-color: rgba(255, 233, 184, 0.6);
+  background: rgba(255, 233, 184, 0.06);
+  translate: 0 -2px;
+}
+
+.re-sala:hover .re-sala-luz {
+  width: 100%;
+  opacity: 1;
+}
+
+/* ---------------------------------------------------------------------------
+   Universos no celular
+   --------------------------------------------------------------------------- */
+
+@media (max-width: 1000px) {
+  .re-dossie {
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 24px;
+  }
+}
+
+@media (max-width: 720px) {
+  .re {
+    margin-top: 56px;
+  }
+
+  .re-conteudo {
+    padding-top: 56px;
+  }
+
+  .re-titulo {
+    font-size: clamp(38px, 10.6vw, 64px);
+    text-wrap: balance;
+  }
+
+  .re-dossie {
+    grid-template-columns: 1fr;
+    padding: 24px 20px 22px;
+  }
+
+  .re-ficha-topo {
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+
+  .re-carimbo {
+    font-size: 12.5px;
+    padding: 3px 9px;
+  }
+
+  .re-foto {
+    width: 150px;
+    justify-self: center;
+  }
+
+  .re-campos div {
+    grid-template-columns: 92px minmax(0, 1fr);
+  }
+}

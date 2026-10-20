@@ -1,0 +1,540 @@
+/* ==========================================================================
+   Responsivo
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+  .trilho {
+    grid-auto-columns: calc((100% - 3 * 14px) / 4);
+  }
+
+  .evento {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1000px) {
+  /* tablet: o menu continua no topo (as abas de baixo só existem no celular); a busca vira ícone */
+  .busca-gatilho {
+    display: none;
+  }
+
+  .busca-movel {
+    display: inline-grid;
+  }
+
+  .barra-acoes {
+    margin-left: auto;
+  }
+
+  .slide {
+    grid-template-columns: 1fr;
+  }
+
+  .slide-midia {
+    aspect-ratio: 616 / 353;
+  }
+
+  .slide-info {
+    border-left: none;
+    border-top: 1px solid var(--borda);
+  }
+
+  .slide-capturas {
+    display: none;
+  }
+
+  .indicador-nome {
+    display: none;
+  }
+
+  .garantias {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .garantia:nth-child(3) {
+    border-left: none;
+  }
+
+  .garantia:nth-child(n + 3) {
+    border-top: 1px solid var(--borda);
+  }
+
+  .trilho {
+    grid-auto-columns: calc((100% - 2 * 14px) / 3);
+  }
+
+  .ofertas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .oferta-grande {
+    grid-column: span 2;
+    grid-row: auto;
+  }
+
+  .oferta-grande .oferta-imagem img {
+    aspect-ratio: 16 / 9;
+  }
+
+  .abas-corpo {
+    grid-template-columns: 1fr;
+  }
+
+  .previa {
+    display: none;
+  }
+
+  .categorias {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .franquia {
+    grid-template-columns: 1fr;
+  }
+
+  .catalogo {
+    grid-template-columns: 1fr;
+  }
+
+  .botao-filtros {
+    display: inline-flex;
+  }
+
+  .filtros {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 260;
+    width: min(320px, 86vw);
+    max-height: none;
+    padding: 0 20px 20px;
+    border-right: 1px solid var(--borda-2);
+    background: var(--sup-1);
+    box-shadow: var(--sombra);
+    transform: translateX(-105%);
+    transition: transform 0.3s var(--curva);
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filtros.aberto {
+    transform: none;
+  }
+
+  .filtros-topo {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 -20px 12px;
+    padding: 14px 12px 14px 20px;
+    border-bottom: 1px solid var(--borda);
+    background: var(--sup-1);
+  }
+
+  .filtros-topo h2 {
+    font-size: 17.5px;
+  }
+
+  .filtros-fundo {
+    position: fixed;
+    inset: 0;
+    z-index: 255;
+    display: block;
+    background: var(--veu);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .filtros-fundo.ativo {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .filtros-rodape {
+    position: sticky;
+    bottom: -20px;
+    display: flex;
+    gap: 8px;
+    margin: auto -20px -20px;
+    padding: 14px 20px 20px;
+    border-top: 1px solid var(--borda);
+    background: var(--sup-1);
+  }
+
+  .filtros-rodape .botao-primario {
+    flex: 1;
+  }
+
+  .jogo-layout {
+    grid-template-columns: 1fr;
+  }
+
+  /* no celular: imagens, depois preço e botões, depois a descrição */
+  .jogo-principal {
+    display: contents;
+  }
+
+  .jogo-principal > * {
+    min-width: 0;
+  }
+
+  .jogo-principal > :first-child {
+    order: 1;
+  }
+
+  .compra {
+    position: static;
+    order: 2;
+  }
+
+  .jogo-informacoes {
+    order: 3;
+  }
+
+  .compra-capa {
+    display: none;
+  }
+
+  .checkout-corpo {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-resumo {
+    order: -1;
+    border-left: none;
+    border-bottom: 1px solid var(--borda);
+  }
+
+  .checkout-resumo ul {
+    display: none;
+  }
+
+  .rodape-conteudo {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .rodape-marca {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Celular: barra de abas inferior, como um app */
+/* celulares bem estreitos (320px): sem os pontinhos das prateleiras (lá se arrasta) */
+@media (max-width: 360px) {
+  .prateleira-paginas {
+    display: none;
+  }
+}
+
+/* 320px: o título do banner ("Melhores / descontos") encolhe um pouco para caber */
+@media (max-width: 345px) {
+  .hero-marca {
+    font-size: 40px;
+  }
+
+  .hero-linha {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 430px) {
+  .barra-acoes {
+    gap: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  :root {
+    --altura-barra: 56px;
+  }
+
+  body {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+
+  .barra-conteudo {
+    gap: 8px;
+  }
+
+  .nav,
+  .busca-gatilho,
+  .carrinho-rotulo {
+    display: none;
+  }
+
+  .busca-movel {
+    display: inline-grid;
+  }
+
+  .barra-acoes {
+    margin-left: auto;
+  }
+
+  .carrinho-botao {
+    padding: 0 6px 0 10px;
+  }
+
+  /* telas estreitas: a marca encolhe para as ações caberem */
+  .logo {
+    min-width: 0;
+  }
+
+  .logo-texto {
+    font-size: 16px;
+  }
+
+  .abas-moveis {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 120;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--borda);
+    background: var(--vidro);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .abas-moveis a,
+  .abas-moveis button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 0;
+    color: var(--texto-3);
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .abas-moveis .ativo {
+    color: var(--texto);
+  }
+
+  .aba-icone {
+    position: relative;
+  }
+
+  .aba-icone .contagem {
+    top: -6px;
+    right: -10px;
+  }
+
+  .conteudo {
+    padding-top: 16px;
+  }
+
+  .slide-info {
+    padding: 18px;
+  }
+
+  .destaques-indicadores button {
+    padding-top: 6px;
+  }
+
+  .indicador-numero {
+    display: none;
+  }
+
+  .garantia {
+    padding: 14px 10px;
+  }
+
+  .garantia span {
+    display: none;
+  }
+
+  .trilho {
+    grid-auto-columns: calc((100% - 12px) / 1.6);
+    gap: 12px;
+  }
+
+  .grade {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 12px;
+  }
+
+  .acoes-rapidas {
+    opacity: 1;
+    transform: none;
+  }
+
+  .ofertas {
+    grid-template-columns: 1fr;
+  }
+
+  .oferta-grande {
+    grid-column: auto;
+  }
+
+  .categoria {
+    height: 96px;
+    padding: 12px;
+  }
+
+  .categoria-texto strong {
+    font-size: 16.5px;
+  }
+
+  .evento-jogos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .evento-jogo:nth-child(n + 4) {
+    display: none;
+  }
+
+  .franquia-jogos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .linha {
+    gap: 10px;
+    padding-right: 10px;
+  }
+
+  .linha-imagem {
+    width: 88px;
+  }
+
+  .linha-generos,
+  .linha-ano,
+  .linha-avaliacao {
+    display: none;
+  }
+
+  .linha .preco s {
+    display: none;
+  }
+
+  .catalogo-barra {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .campo-busca {
+    grid-column: 1 / -1;
+  }
+
+  .seletor {
+    width: 100%;
+  }
+
+  .pagina-cabecalho {
+    margin: 16px 0 24px;
+    padding-bottom: 20px;
+  }
+
+  .pagina-cabecalho p {
+    font-size: 15.5px;
+  }
+
+  .estatisticas strong {
+    font-size: 18.5px;
+  }
+
+  .estatisticas div {
+    padding: 12px;
+  }
+
+  .item-biblioteca,
+  .desejo {
+    flex-direction: column;
+  }
+
+  .item-biblioteca-imagem,
+  .desejo-imagem {
+    width: 100%;
+  }
+
+  .chave {
+    width: 100%;
+  }
+
+  .chave code {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .desejo-acoes {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .ficha {
+    grid-template-columns: 1fr;
+  }
+
+  .ficha div:nth-child(odd) {
+    border-right: none;
+  }
+
+  .ficha div:nth-last-child(2) {
+    border-bottom: 1px solid var(--borda);
+  }
+
+  .bandeja {
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    gap: 6px;
+    padding-left: 10px;
+  }
+
+  .bandeja-icone {
+    display: none;
+  }
+
+  .bandeja-jogo,
+  .bandeja-vaga {
+    width: 48px;
+  }
+
+  .notificacoes {
+    right: 16px;
+    bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+
+  .notificacao img {
+    display: none;
+  }
+
+  .modal-fundo {
+    align-items: end;
+    padding: 0;
+  }
+
+  .modal {
+    max-height: 92vh;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .etapas li {
+    font-size: 0;
+    gap: 6px;
+  }
+
+  .etapas li.atual {
+    font-size: 13.5px;
+  }
+
+  .paleta-fundo {
+    padding-top: 8px;
+  }
+
+  .paleta-rodape {
+    display: none;
+  }
+
+  .rodape-conteudo {
+    grid-template-columns: 1fr 1fr;
+  }
+}

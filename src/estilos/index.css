@@ -1,0 +1,27 @@
+/* ==========================================================================
+   Estilos da loja, na ordem em que o navegador aplica.
+   A ordem importa: regras que vêm depois (ex.: responsivo, modo suave) ajustam as de antes.
+   O painel administrativo tem o próprio arquivo: src/admin/admin.css
+   ========================================================================== */
+
+@import "./01-tema.css";
+@import "./02-base.css";
+@import "./03-topo-e-layout.css";
+@import "./04-banner-de-abertura.css";
+@import "./05-vitrines-da-inicio.css";
+@import "./06-catalogo-e-pagina-do-jogo.css";
+@import "./07-reservas-e-desejos.css";
+@import "./08-comparar-e-busca.css";
+@import "./09-carrinho-e-checkout.css";
+@import "./10-notificacoes-e-rodape.css";
+@import "./11-efeitos-e-prateleiras.css";
+@import "./12-universos.css";
+@import "./13-produtos.css";
+@import "./14-pagina-404.css";
+@import "./15-movimento-e-desempenho.css";
+@import "./16-responsivo.css";
+@import "./17-modo-suave.css";
+@import "./18-estoque-e-retirada.css";
+@import "./19-caixa-de-compra.css";
+@import "./20-conta-do-cliente.css";
+@import "./21-fotos-de-produto.css";

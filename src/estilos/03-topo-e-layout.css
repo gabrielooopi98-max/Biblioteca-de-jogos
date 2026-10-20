@@ -1,0 +1,411 @@
+/* ==========================================================================
+   Barra superior
+   ========================================================================== */
+
+.barra {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--borda);
+  background: var(--vidro);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+}
+
+.barra-conteudo {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  max-width: var(--largura);
+  height: var(--altura-barra);
+  margin: 0 auto;
+  padding: 0 var(--margem);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  color: var(--texto);
+}
+
+/* selo redondo da loja */
+.logo-marca {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgba(236, 182, 33, 0.45);
+}
+
+.logo-texto {
+  font-size: 18.5px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+
+.logo-texto small {
+  color: var(--texto-3);
+  font-variant-numeric: tabular-nums;
+  font-size: 14.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.nav {
+  display: flex;
+  gap: 2px;
+}
+
+.nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: var(--raio);
+  color: var(--texto-2);
+  font-weight: 500;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.nav a:hover {
+  color: var(--texto);
+}
+
+.nav a.ativo {
+  background: var(--ouro-suave);
+  color: var(--texto);
+}
+
+.nav-contagem {
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 99px;
+  background: var(--sup-3);
+  color: var(--texto-2);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  line-height: 18px;
+  text-align: center;
+}
+
+.busca-gatilho {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  max-width: 420px;
+  height: 38px;
+  margin-left: auto;
+  padding: 0 8px 0 12px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: var(--sup-1);
+  color: var(--texto-3);
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.busca-gatilho span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.busca-gatilho:hover {
+  border-color: var(--borda-2);
+  color: var(--texto-2);
+}
+
+.barra-acoes {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* telas médias: menos texto no topo para tudo caber */
+@media (max-width: 1180px) {
+  .busca-gatilho kbd {
+    display: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .barra-conteudo {
+    gap: 16px;
+  }
+
+  .carrinho-rotulo {
+    display: none;
+  }
+}
+
+/* tablet estreito: menu compacto para caber junto com as ações */
+@media (max-width: 860px) {
+  .barra-conteudo {
+    gap: 10px;
+  }
+
+  /* marca empilhada: "Universal" em cima e "Games" menor embaixo, ocupa pouca largura */
+  .logo-texto {
+    display: flex;
+    flex-direction: column;
+    font-size: 16.5px;
+    line-height: 1.05;
+  }
+
+  .logo-texto small {
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .nav a {
+    padding: 0 7px;
+    font-size: 14.5px;
+  }
+}
+
+/* tablet em pé: "Pedidos" sai do topo (continua no rodapé, na busca e na confirmação de compra) */
+@media (max-width: 780px) {
+  .nav a[href="#/pedidos"] {
+    display: none;
+  }
+}
+
+.busca-movel {
+  display: none;
+}
+
+.contagem {
+  position: absolute;
+  top: 2px;
+  right: 1px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 99px;
+  background: var(--inverso);
+  color: var(--inverso-texto);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  line-height: 17px;
+  text-align: center;
+}
+
+.ponto-alerta {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--fundo);
+  border-radius: 50%;
+  background: var(--texto);
+  animation: pulsar 1.6s ease-in-out infinite;
+}
+
+@keyframes pulsar {
+  50% {
+    transform: scale(1.35);
+  }
+}
+
+.carrinho-botao {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  margin-left: 6px;
+  padding: 0 6px 0 12px;
+  border-radius: var(--raio);
+  font-weight: 500;
+  transition: color 0.35s var(--curva), box-shadow 0.45s var(--curva), translate 0.35s var(--curva), scale 0.45s var(--mola);
+}
+
+.carrinho-botao:active {
+  scale: 0.96;
+  transition-duration: 0.08s;
+}
+
+.carrinho-contagem {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--ouro);
+  color: var(--ouro-texto);
+  font-variant-numeric: tabular-nums;
+  font-size: 13.5px;
+  line-height: 24px;
+  text-align: center;
+  animation: contagem-pulo 0.45s var(--mola);
+}
+
+.abas-moveis {
+  display: none;
+}
+
+/* ==========================================================================
+   Layout de página
+   ========================================================================== */
+
+.conteudo {
+  max-width: var(--largura);
+  min-height: 70vh;
+  margin: 0 auto;
+  padding: 24px var(--margem) 64px;
+}
+
+/* "backwards", não "both": segurar o fim deixava translate: 0px na página, e qualquer translate
+   faz dela a referência de position: fixed (o painel de filtros do celular ficava com a altura
+   da página inteira e não rolava) */
+.pagina {
+  animation: pagina-entrar 0.55s var(--curva) backwards;
+}
+
+@keyframes pagina-entrar {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+}
+
+.pagina-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 24px;
+  margin: 28px 0 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--borda);
+}
+
+.pagina-cabecalho h1,
+.jogo-cabecalho h1,
+.nao-encontrada h1 {
+  font-size: clamp(32px, 4.4vw, 52px);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.pagina-cabecalho p {
+  max-width: 60ch;
+  margin-top: 10px;
+  color: var(--texto-2);
+  font-size: 16.5px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.carregando {
+  display: grid;
+  place-items: center;
+  min-height: 40vh;
+  color: var(--texto-3);
+}
+
+.secao {
+  margin-top: 56px;
+}
+
+.secao-topo {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.secao-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.secao-acoes .link-mais {
+  margin-right: 6px;
+}
+
+.titulo-secao {
+  font-size: 21px;
+  letter-spacing: -0.01em;
+}
+
+.descricao-secao {
+  margin-top: 2px;
+  color: var(--texto-3);
+  font-size: 14.5px;
+}
+
+.vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 64px 20px;
+  border: 1px dashed var(--borda-2);
+  border-radius: var(--raio-g);
+  color: var(--texto-3);
+  text-align: center;
+}
+
+.vazio h3 {
+  margin-top: 6px;
+  color: var(--texto);
+  font-size: 18.5px;
+}
+
+.vazio p {
+  max-width: 360px;
+  margin-bottom: 8px;
+  color: var(--texto-2);
+}
+
+.vazio.compacto {
+  padding: 36px 12px;
+  border: none;
+}
+
+.estatisticas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 20px;
+  overflow: hidden;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-g);
+  background: var(--sup-1);
+}
+
+.estatisticas div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px 18px;
+}
+
+.estatisticas div + div {
+  border-left: 1px solid var(--borda);
+}
+
+.estatisticas span {
+  color: var(--texto-3);
+  font-size: 13.5px;
+}
+
+.estatisticas strong {
+  font-variant-numeric: tabular-nums;
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}

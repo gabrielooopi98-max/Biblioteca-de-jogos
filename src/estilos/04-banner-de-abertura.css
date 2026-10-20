@@ -1,0 +1,1140 @@
+/* ==========================================================================
+   Vitrine de abertura: promoção da distribuidora
+   Sempre escura: a arte e o trailer do jogo em foco são o fundo.
+   --cx/--cy (-0.5…0.5) vêm do cursor e inclinam o baralho e o fundo.
+   ========================================================================== */
+
+/* não herdáveis: o JS escreve direto no fundo e no palco, e as cartas dentro não recalculam */
+@property --cx {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --cy {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+.hero {
+  --texto: #fafafa;
+  --texto-2: rgba(250, 250, 250, 0.78);
+  --texto-3: rgba(250, 250, 250, 0.52);
+  --inverso: #fafafa;
+  --inverso-texto: #0a0a0a;
+  --inverso-hover: #e5e5e5;
+  --halo: rgba(250, 250, 250, 0.18);
+  --brilho-botao: rgba(250, 250, 250, 0.35);
+  --foco: var(--ouro-vivo);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: clamp(580px, 46vw, 720px);
+  margin: -24px calc(50% - 50vw) 0;
+  overflow: hidden;
+  border-bottom: 1px solid var(--borda);
+  background: #050505;
+  color: #fafafa;
+  isolation: isolate;
+}
+
+/* --- Fundo: artes empilhadas que se cruzam + trailer --- */
+
+.hero-fundo {
+  position: absolute;
+  inset: -3%;
+  z-index: -2;
+  transform: translate(calc(var(--cx) * -22px), calc(var(--cy) * -14px));
+  transition: transform 1.4s var(--curva);
+  /* camada própria: a paralaxe só move a camada, sem redesenhar arte, trailer e degradês */
+  will-change: transform;
+  animation: aparecer 1.4s ease backwards;
+}
+
+.hero-fundo .imagem,
+.hero-trailer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 70% 28%;
+}
+
+.hero-fundo .imagem.carregada {
+  opacity: 0;
+  transform: scale(1.14);
+  transition: opacity 1.3s ease, transform 12s cubic-bezier(0.1, 0.6, 0.2, 1);
+}
+
+.hero-fundo .imagem.carregada.ativa {
+  opacity: 1;
+  transform: scale(1.03);
+}
+
+.hero-trailer {
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+
+.hero-trailer.pronto {
+  opacity: 1;
+}
+
+/* escurece onde fica o texto, abre luz atrás do baralho e funde na página embaixo */
+.hero-fundo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(110% 95% at 72% 42%, transparent 25%, rgba(5, 5, 5, 0.5) 70%, rgba(5, 5, 5, 0.92) 100%),
+    linear-gradient(90deg, rgba(5, 5, 5, 0.96) 0%, rgba(5, 5, 5, 0.78) 32%, rgba(5, 5, 5, 0.12) 66%, rgba(5, 5, 5, 0.4) 100%),
+    linear-gradient(0deg, #050505 0%, rgba(5, 5, 5, 0) 36%);
+}
+
+/* granulação de filme, quase imperceptível */
+/* só 8% de sobra: o grão se move até ~6% e a camada fica 3x menor que a de antes */
+.hero-grao {
+  position: absolute;
+  inset: -8%;
+  z-index: -1;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  animation: grao 0.9s steps(5) infinite;
+  will-change: transform;
+}
+
+@keyframes grao {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(-4%, 3%);
+  }
+  40% {
+    transform: translate(3%, -5%);
+  }
+  60% {
+    transform: translate(-2%, 4%);
+  }
+  80% {
+    transform: translate(5%, 1%);
+  }
+}
+
+/* --- Conteúdo --- */
+
+.hero-conteudo {
+  position: relative;
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 40px;
+  width: 100%;
+  max-width: var(--largura);
+  margin: 0 auto;
+  padding: 56px var(--margem) 12px;
+}
+
+.hero-texto {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  min-width: 0;
+}
+
+.hero-selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+  padding: 4px 14px 4px 12px;
+  border: 1px solid rgba(250, 250, 250, 0.16);
+  border-radius: 99px;
+  background: rgba(10, 10, 10, 0.45);
+  font-size: 13.5px;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: subir-suave 0.8s var(--curva) 0.05s backwards;
+}
+
+.hero-ponto {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  position: relative;
+  background: #fafafa;
+}
+
+.hero-ponto::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(250, 250, 250, 0.5);
+  animation: ponto-vivo 2s ease-out infinite;
+}
+
+@keyframes ponto-vivo {
+  0% {
+    opacity: 1;
+    scale: 1;
+  }
+  70%,
+  100% {
+    opacity: 0;
+    scale: 3.3;
+  }
+}
+
+.hero-tempo {
+  padding-left: 10px;
+  border-left: 1px solid rgba(250, 250, 250, 0.2);
+  color: var(--texto-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Marca: linha sólida + linha só no contorno, reveladas por máscara */
+.hero-marca {
+  display: flex;
+  flex-direction: column;
+  font-size: clamp(46px, 5.8vw, 88px);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  text-wrap: nowrap;
+}
+
+.hero-linha {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  padding-bottom: 0.08em;
+  overflow: hidden;
+}
+
+.hero-linha > span {
+  display: block;
+  animation: linha-subir 1.15s var(--curva) 0.1s backwards;
+}
+
+.hero-linha:nth-child(2) > span {
+  animation-delay: 0.22s;
+}
+
+@keyframes linha-subir {
+  from {
+    translate: 0 108%;
+  }
+}
+
+.hero-contorno {
+  /* traço pintado por baixo de um preenchimento escuro: esconde as sobreposições
+     internas da fonte variável e deixa só o contorno externo */
+  color: #060606;
+  -webkit-text-stroke: 3px rgba(250, 250, 250, 0.85);
+  paint-order: stroke fill;
+}
+
+.hero-marca small {
+  padding-bottom: 0.35em;
+  color: var(--texto-3);
+  font-family: var(--fonte);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: 0;
+  animation: subir-suave 0.8s var(--curva) 0.55s backwards;
+}
+
+.hero-marca small strong {
+  color: var(--ouro-vivo);
+  font-family: var(--fonte-titulo);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+/* Jogo em foco: troca com uma linha que se desenha e o texto subindo em cascata */
+.hero-jogo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: min(100%, 480px);
+  padding-top: 22px;
+  border-top: 1px solid rgba(250, 250, 250, 0.12);
+}
+
+.hero-jogo::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 88px;
+  height: 1px;
+  background: #fafafa;
+  transform-origin: left;
+  animation: linha-desenhar 0.9s var(--curva) backwards;
+}
+
+@keyframes linha-desenhar {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.hero-jogo > * {
+  animation: subir-suave 0.75s var(--curva) backwards;
+}
+
+.hero-jogo > :nth-child(2) {
+  animation-delay: 0.06s;
+}
+
+.hero-jogo > :nth-child(3) {
+  animation-delay: 0.12s;
+}
+
+.hero-jogo > :nth-child(4) {
+  animation-delay: 0.18s;
+}
+
+.hero-rotulo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--texto-3);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-nome {
+  font-size: clamp(26px, 2.5vw, 36px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+/* --- Baralho 3D de capas --- */
+
+.hero-baralho {
+  position: relative;
+  height: clamp(380px, 33vw, 480px);
+  perspective: 1600px;
+}
+
+.hero-cena {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(calc(var(--cx) * 16deg)) rotateX(calc(var(--cy) * -10deg));
+  transform-style: preserve-3d;
+  transition: transform 0.9s var(--curva);
+}
+
+/* Posição ao vivo: não herdáveis. O arraste escreve --arrasto direto em cada carta e só ela
+   recalcula; com herança, cada movimento do dedo recalculava todo o conteúdo das 8 cartas. */
+@property --arrasto {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --dv {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --absv {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+/* Posição de cada carta: --d (lado, inteiro) menos --arrasto (fração ao vivo enquanto se arrasta)
+   dá --dv; --absv é a distância. --distancia (só --d, herdável) serve ao conteúdo da carta.
+   A ativa parada fica em 1:1, nítida.
+   A mesma lista de funções em todas as cartas faz o navegador interpolar função a função,
+   sem atalhos por matriz que entortariam o caminho. As mais distantes andam um pouco depois (onda). */
+.hero-carta {
+  --largura-carta: clamp(184px, 16.5vw, 256px);
+  --dv: calc(var(--d) - var(--arrasto, 0));
+  --absv: max(var(--dv), calc(var(--dv) * -1));
+  --distancia: max(var(--d), calc(var(--d) * -1));
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--largura-carta);
+  aspect-ratio: 2 / 3;
+  margin: calc(var(--largura-carta) * -0.75) 0 0 calc(var(--largura-carta) * -0.5);
+  /* some suavemente a partir da terceira carta, também no meio de um arraste */
+  opacity: clamp(0, min(calc(1 - var(--absv) * 0.24), calc((2.75 - var(--absv)) * 2.2)), 1);
+  transform:
+    translateX(calc(var(--dv) * 54%))
+    translateZ(calc(var(--absv) * -200px))
+    rotateY(calc(var(--dv) * -24deg));
+  transition:
+    transform 1.15s cubic-bezier(0.22, 1, 0.3, 1) calc(var(--absv) * 40ms),
+    opacity 0.8s ease calc(var(--absv) * 40ms),
+    filter 0.8s ease;
+  animation: carta-entrar 1.3s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: calc(0.3s + var(--ordem) * 0.07s);
+}
+
+.hero-carta[aria-hidden="true"] {
+  pointer-events: none;
+}
+
+/* O palco 3D não recebe ponteiro: o plano dele empataria em profundidade com a capa da frente
+   e roubaria o hover. Só as cartas visíveis recebem; o arraste é tratado no .hero-baralho (2D). */
+.hero-cena {
+  pointer-events: none;
+}
+
+.hero-carta {
+  pointer-events: auto;
+}
+
+.hero-baralho {
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* arrastando: as cartas seguem o dedo sem atraso */
+.hero-baralho.arrastando {
+  cursor: grabbing;
+}
+
+.hero-baralho.arrastando .hero-carta {
+  transition: none;
+}
+
+/* escurecimento só nas de trás: filtro na capa da frente baixaria a resolução dela */
+.hero-carta:not(.ativa) {
+  filter: brightness(calc(1 - var(--absv) * 0.3));
+}
+
+.hero-carta:not(.ativa):hover {
+  filter: brightness(calc(1.25 - var(--absv) * 0.3));
+}
+
+@keyframes carta-entrar {
+  from {
+    opacity: 0;
+    translate: 220px 40px;
+    rotate: y -40deg;
+  }
+}
+
+/* corpo: recebe a coreografia da troca (transform via Web Animations) e o hover (translate) */
+.hero-carta-corpo {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transition: translate 0.6s var(--curva);
+}
+
+.hero-carta:not(.ativa):hover .hero-carta-corpo {
+  translate: 0 -10px;
+}
+
+.hero-carta.ativa .hero-carta-corpo {
+  animation: carta-flutuar 6s ease-in-out 1.2s infinite;
+}
+
+.hero-capa {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(250, 250, 250, 0.16);
+  border-radius: 14px;
+  background: #151515;
+  box-shadow: 0 44px 80px -30px rgba(0, 0, 0, 0.95);
+  transition: border-color 0.6s ease, box-shadow 0.8s var(--curva);
+  -webkit-box-reflect: below 12px linear-gradient(transparent 72%, rgba(255, 255, 255, 0.16));
+}
+
+.hero-capa img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* capa holográfica: inclina seguindo o cursor (--tx/--ty, -0.5…0.5) e a sombra vai para o lado oposto */
+.hero-carta.ativa .hero-capa {
+  border-color: rgba(250, 250, 250, 0.6);
+  box-shadow:
+    0 50px 90px -30px rgba(0, 0, 0, 1),
+    0 0 70px -12px rgba(250, 250, 250, 0.22);
+  transform: perspective(900px) rotateX(calc(var(--ty, 0) * -16deg)) rotateY(calc(var(--tx, 0) * 20deg));
+  transition: transform 0.7s var(--curva), border-color 0.6s ease, box-shadow 0.7s var(--curva);
+}
+
+.hero-carta.ativa .hero-capa:hover {
+  transition: transform 0.16s ease-out, border-color 0.6s ease, box-shadow 0.6s ease;
+}
+
+@keyframes carta-flutuar {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -9px;
+  }
+}
+
+/* luz holográfica que acompanha o cursor */
+.hero-capa::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(circle at calc(50% + var(--tx, 0) * 120%) calc(45% + var(--ty, 0) * 120%), rgba(255, 255, 255, 0.34), transparent 55%);
+  opacity: 0;
+  mix-blend-mode: overlay;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+
+.hero-carta.ativa .hero-capa::before {
+  opacity: 0.7;
+}
+
+.hero-carta.ativa .hero-capa:hover::before {
+  opacity: 1;
+}
+
+/* reflexo que atravessa a capa em foco de tempos em tempos */
+.hero-carta.ativa .hero-capa::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.26) 50%, transparent 62%);
+  translate: -120% 0;
+  animation: carta-brilho 6s ease-in-out 1.4s infinite;
+  pointer-events: none;
+}
+
+@keyframes carta-brilho {
+  0% {
+    translate: -120% 0;
+  }
+  28%,
+  100% {
+    translate: 120% 0;
+  }
+}
+
+.hero-carta-desconto {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 3;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--ouro);
+  color: var(--ouro-texto);
+  font-size: 12.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  opacity: calc(1 - var(--distancia) * 0.5);
+  transition: opacity 0.6s ease;
+}
+
+/* ações rápidas na capa da frente: sobem no hover (no toque ficam sempre visíveis) */
+.hero-carta-acoes {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  left: 10px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid rgba(250, 250, 250, 0.16);
+  border-radius: 12px;
+  background: rgba(10, 10, 10, 0.58);
+  box-shadow: 0 14px 30px -12px rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  translate: 0 14px;
+  scale: 0.96;
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  transition: opacity 0.35s ease, translate 0.55s var(--curva), scale 0.55s var(--curva);
+}
+
+/* teclado mantém a barra aberta; clique de mouse não a deixa presa */
+.hero-carta.ativa:hover .hero-carta-acoes,
+.hero-carta-acoes:has(:focus-visible) {
+  opacity: 1;
+  translate: 0 0;
+  scale: 1;
+}
+
+@media (hover: none) {
+  .hero-carta-acoes {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+.hero-carta-acoes button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(250, 250, 250, 0.08);
+  color: #fafafa;
+  transition: background-color 0.25s ease, color 0.25s ease, scale 0.45s var(--mola);
+}
+
+.hero-carta-acoes button:hover,
+.hero-carta-acoes button.ativa {
+  background: #fafafa;
+  color: #0a0a0a;
+}
+
+.hero-carta-acoes button:active {
+  scale: 0.88;
+  transition-duration: 0.08s;
+}
+
+.hero-carta-acoes button.ativa svg {
+  animation: estalo 0.5s ease-out;
+}
+
+.hero-carta-ver {
+  flex: 1;
+  min-width: 0;
+  padding: 0 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+/* tablet (capa de 168px): "Ver" sem a seta para caber ao lado do coração e do carrinho */
+@media (max-width: 1000px) {
+  .hero-carta-ver {
+    padding: 0 8px;
+  }
+
+  .hero-carta-acoes .hero-carta-ver svg {
+    display: none;
+  }
+}
+
+/* celular (capa de 128px): só coração e carrinho, maiores para o dedo; tocar na capa abre o jogo */
+@media (max-width: 720px) {
+  .hero-carta-acoes {
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    gap: 6px;
+    padding: 5px;
+    border-radius: 11px;
+  }
+
+  .hero-carta-acoes .hero-carta-ver {
+    display: none;
+  }
+
+  .hero-carta-acoes button {
+    flex: 1;
+    height: 38px;
+  }
+
+  /* "Na biblioteca" vira só o ícone */
+  .hero-carta-possui {
+    flex: 1;
+    justify-content: center;
+    height: 38px;
+    gap: 0;
+    font-size: 0;
+  }
+}
+
+.hero-carta-possui {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
+  color: var(--texto-2);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+/* nome flutuando sobre as capas laterais no hover */
+.hero-carta-nome {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  z-index: 4;
+  max-width: 150%;
+  padding: 5px 11px;
+  overflow: hidden;
+  border: 1px solid rgba(250, 250, 250, 0.18);
+  border-radius: 99px;
+  background: rgba(10, 10, 10, 0.78);
+  color: #fafafa;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  opacity: 0;
+  translate: -50% 6px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.3s ease, translate 0.45s var(--curva);
+  pointer-events: none;
+}
+
+.hero-carta:not(.ativa):hover .hero-carta-nome {
+  opacity: 1;
+  translate: -50% -100%;
+}
+
+/* faixa de luz que varre o baralho quando se usa as setas (animada em disparar()) */
+.hero-varredura {
+  position: absolute;
+  inset: -10% 10%;
+  z-index: 2;
+  background: linear-gradient(90deg, transparent 30%, rgba(255, 255, 255, 0.16) 48%, rgba(255, 255, 255, 0.28) 50%, rgba(255, 255, 255, 0.16) 52%, transparent 70%);
+  opacity: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* brilho no "chão" sob a capa em foco, respirando junto com a flutuação */
+.hero-chao {
+  position: absolute;
+  bottom: 4%;
+  left: 50%;
+  width: min(70%, 420px);
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.16), transparent);
+  filter: blur(10px);
+  translate: -50% 0;
+  animation: chao-respirar 6s ease-in-out 1.2s infinite;
+  pointer-events: none;
+}
+
+@keyframes chao-respirar {
+  0%,
+  100% {
+    opacity: 0.9;
+    scale: 1;
+  }
+  50% {
+    opacity: 0.55;
+    scale: 0.86;
+  }
+}
+
+/* --- Rodapé: progresso estilo stories + controles --- */
+
+.hero-rodape {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  max-width: var(--largura);
+  margin: 0 auto;
+  padding: 8px var(--margem) 30px;
+  animation: subir-suave 0.8s var(--curva) 0.7s backwards;
+}
+
+.hero-progresso {
+  display: flex;
+  flex: 1;
+  gap: 6px;
+  max-width: 520px;
+}
+
+.hero-progresso button {
+  position: relative;
+  flex: 1;
+  height: 18px;
+  padding: 8px 0;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(250, 250, 250, 0.18);
+  background-clip: content-box;
+  transition: background-color 0.3s ease;
+}
+
+.hero-progresso button:hover {
+  background-color: rgba(250, 250, 250, 0.4);
+}
+
+.hero-progresso button.visto {
+  background-color: rgba(250, 250, 250, 0.5);
+}
+
+.hero-progresso span {
+  position: absolute;
+  inset: 8px 0;
+  border-radius: 99px;
+  background: var(--ouro-vivo);
+  transform-origin: left;
+  animation: progresso linear forwards;
+}
+
+.hero-progresso span.parado {
+  animation-play-state: paused;
+}
+
+/* Cápsula de vidro: [som] | [‹] 03: 08 [›] */
+.hero-navegacao {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  padding: 5px;
+  border: 1px solid rgba(250, 250, 250, 0.14);
+  border-radius: 99px;
+  background: rgba(10, 10, 10, 0.42);
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+}
+
+.hero-seta {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: #fafafa;
+  isolation: isolate;
+  transition: color 0.35s var(--curva), scale 0.45s var(--mola);
+}
+
+/* preenchimento branco que cresce do centro */
+.hero-seta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: #fafafa;
+  transform: scale(0);
+  transition: transform 0.55s var(--curva);
+}
+
+.hero-seta:hover,
+.hero-seta[aria-pressed="true"] {
+  color: #0a0a0a;
+}
+
+.hero-seta:hover::before,
+.hero-seta[aria-pressed="true"]::before {
+  transform: scale(1);
+}
+
+.hero-seta:active {
+  scale: 0.88;
+  transition-duration: 0.08s;
+}
+
+/* onda que se expande no clique (animada em disparar()) */
+.hero-seta-onda {
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid #fafafa;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* seta que "troca": a atual sai por um lado e a nova entra pelo outro */
+.hero-seta-icones {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 18px;
+  overflow: hidden;
+}
+
+.hero-seta-icones svg {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.55s var(--curva);
+}
+
+.hero-seta[data-sentido="proximo"] .hero-seta-icones svg:last-child {
+  transform: translateX(-150%);
+}
+
+.hero-seta[data-sentido="proximo"]:hover .hero-seta-icones svg:first-child {
+  transform: translateX(150%);
+}
+
+.hero-seta[data-sentido="anterior"] .hero-seta-icones svg:last-child {
+  transform: translateX(150%);
+}
+
+.hero-seta[data-sentido="anterior"]:hover .hero-seta-icones svg:first-child {
+  transform: translateX(-150%);
+}
+
+.hero-seta:hover .hero-seta-icones svg:last-child {
+  transform: translateX(0);
+}
+
+/* anel de tempo até a próxima troca */
+.hero-anel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  rotate: -90deg;
+  pointer-events: none;
+}
+
+.hero-anel circle {
+  fill: none;
+  stroke-width: 1.5;
+}
+
+.hero-anel-trilho {
+  stroke: rgba(250, 250, 250, 0.14);
+}
+
+.hero-anel-tempo {
+  stroke: var(--ouro-vivo);
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: anel-tempo steps(100) forwards;
+  transition: stroke 0.35s ease;
+}
+
+.hero-anel-tempo.parado {
+  animation-play-state: paused;
+}
+
+.hero-seta:hover .hero-anel-tempo {
+  stroke: #0a0a0a;
+}
+
+@keyframes anel-tempo {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.hero-divisor {
+  width: 1px;
+  height: 22px;
+  margin: 0 4px;
+  background: rgba(250, 250, 250, 0.16);
+}
+
+/* contador: o número rola na direção da troca */
+.hero-contador {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  color: var(--texto-3);
+  font-family: var(--fonte-mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-contador i {
+  width: 16px;
+  height: 1px;
+  background: rgba(250, 250, 250, 0.3);
+}
+
+.hero-contador-janela {
+  display: block;
+  height: 1.3em;
+  overflow: hidden;
+  color: #fafafa;
+  line-height: 1.3;
+}
+
+.hero-contador-atual {
+  display: block;
+  animation: contador-frente 0.6s var(--curva);
+}
+
+.hero-contador-atual[data-sentido="tras"] {
+  animation-name: contador-tras;
+}
+
+@keyframes contador-frente {
+  from {
+    translate: 0 110%;
+    opacity: 0;
+  }
+}
+
+@keyframes contador-tras {
+  from {
+    translate: 0 -110%;
+    opacity: 0;
+  }
+}
+
+@media (max-width: 1000px) {
+  .hero-conteudo {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding-top: 28px;
+  }
+
+  .hero-baralho {
+    order: -1;
+    height: 340px;
+  }
+
+  .hero-carta {
+    --largura-carta: 168px;
+  }
+
+  .hero-fundo::after {
+    background: linear-gradient(0deg, #050505 30%, rgba(5, 5, 5, 0.55) 70%, rgba(5, 5, 5, 0.45));
+  }
+}
+
+@media (max-width: 720px) {
+  .hero {
+    margin-top: -16px;
+  }
+
+  .hero-baralho {
+    height: 270px;
+  }
+
+  .hero-carta {
+    --largura-carta: 128px;
+  }
+
+  .hero-tempo {
+    display: none;
+  }
+
+  .hero-texto {
+    gap: 18px;
+  }
+
+  .hero-linha {
+    gap: 14px;
+  }
+
+  .hero-marca small strong {
+    font-size: 19px;
+  }
+
+  /* no celular o contador e o anel já mostram posição e tempo */
+  .hero-progresso {
+    display: none;
+  }
+
+  .hero-seta {
+    width: 40px;
+    height: 40px;
+  }
+
+  .hero-contador {
+    padding: 0 4px;
+  }
+
+  /* fundo = capa em pé: centralizada e mais escura, como luz ambiente atrás do baralho */
+  .hero-fundo .imagem {
+    object-position: 50% 22%;
+  }
+
+  .hero-fundo .imagem.carregada.ativa {
+    opacity: 0.62;
+  }
+
+  /* Celular leve: tela pequena não mostra grão, reflexo nem vidro, mas a GPU paga por eles.
+     Fica o que se vê: baralho 3D, coreografia da troca, arraste ao vivo e sombra da capa. */
+  .hero-grao,
+  .hero-capa::after {
+    display: none;
+  }
+
+  .hero-capa {
+    -webkit-box-reflect: initial;
+    box-shadow: 0 26px 40px -24px rgba(0, 0, 0, 0.95);
+  }
+
+  .hero-carta.ativa .hero-capa {
+    box-shadow: 0 30px 44px -22px rgba(0, 0, 0, 1);
+  }
+
+  .hero-carta.ativa .hero-carta-corpo,
+  .hero-chao {
+    animation: none;
+  }
+
+  /* laterais escurecem com um véu (opacidade) em vez de filtro, que obriga a redesenhar a capa */
+  .hero-carta:not(.ativa),
+  .hero-carta:not(.ativa):hover {
+    filter: none;
+  }
+
+  .hero-carta-corpo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    border-radius: 14px;
+    background: #000;
+    opacity: calc(var(--distancia) * 0.3);
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+  }
+
+  .hero-carta-acoes,
+  .hero-selo,
+  .hero-navegacao {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .hero-carta-acoes {
+    background: rgba(10, 10, 10, 0.82);
+  }
+
+  .hero-selo {
+    background: rgba(10, 10, 10, 0.7);
+  }
+
+  .hero-navegacao {
+    background: rgba(10, 10, 10, 0.72);
+  }
+}

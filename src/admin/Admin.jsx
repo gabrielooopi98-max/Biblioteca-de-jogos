@@ -1,8 +1,8 @@
 // Painel administrativo (#/admin): login, checagem de administrador no banco, menu lateral e seções.
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { navegar, useArmazenamento } from "../hooks.js";
-import { esperaRestante, limparErros, registrarErro } from "../senha.js";
-import { supabase } from "../supabase.js";
+import { navegar, useArmazenamento } from "../utilidades/hooks.js";
+import { esperaRestante, limparErros, registrarErro } from "../utilidades/senha.js";
+import { supabase } from "../servicos/supabase.js";
 import {
     IconeCadeado,
     IconeCaixa,
@@ -23,21 +23,21 @@ import {
     IconeSair,
     IconeSol,
     LogoMarca,
-} from "../components/Icones.jsx";
-import * as api from "./api.js";
-import { Avisos, Campo, Carregando } from "./ui.jsx";
-import { ContextoAdmin, useAvisos } from "./util.js";
+} from "../componentes/comum/Icones.jsx";
+import * as api from "./servicos/api.js";
+import { Avisos, Campo, Carregando } from "./componentes/ui.jsx";
+import { ContextoAdmin, useAvisos } from "./servicos/util.js";
 import "./admin.css";
 
-const Painel = lazy(() => import("./Painel.jsx"));
-const Produtos = lazy(() => import("./Produtos.jsx"));
-const ProdutoForm = lazy(() => import("./ProdutoForm.jsx"));
-const Promocoes = lazy(() => import("./Promocoes.jsx"));
-const Categorias = lazy(() => import("./Categorias.jsx"));
-const Estoque = lazy(() => import("./Estoque.jsx"));
-const Reservas = lazy(() => import("./Reservas.jsx"));
-const Historico = lazy(() => import("./Historico.jsx"));
-const Vendas = lazy(() => import("./Vendas.jsx"));
+const Painel = lazy(() => import("./telas/Painel.jsx"));
+const Produtos = lazy(() => import("./telas/Produtos.jsx"));
+const ProdutoForm = lazy(() => import("./telas/ProdutoForm.jsx"));
+const Promocoes = lazy(() => import("./telas/Promocoes.jsx"));
+const Categorias = lazy(() => import("./telas/Categorias.jsx"));
+const Estoque = lazy(() => import("./telas/Estoque.jsx"));
+const Reservas = lazy(() => import("./telas/Reservas.jsx"));
+const Historico = lazy(() => import("./telas/Historico.jsx"));
+const Vendas = lazy(() => import("./telas/Vendas.jsx"));
 
 const SECOES = [
     { id: "painel", rotulo: "Visão geral", Icone: IconeGrade, grupo: "Loja" },
